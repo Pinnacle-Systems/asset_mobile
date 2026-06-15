@@ -1,0 +1,22 @@
+{
+  "name": "@repo/validation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": "./src/index.js",
+  "scripts": {
+    "build": "node -e \"console.log('Build step not required for JavaScript validation package yet')\"",
+    "lint": "eslint src test --ext .js --config ../../tooling/eslint/node.js",
+    "test": "vitest run",
+    "clean": "rimraf dist build .turbo coverage"
+  },
+  "dependencies": {
+    "@repo/errors": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "vitest": "^2.1.4"
+  }
+}

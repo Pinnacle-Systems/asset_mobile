@@ -1,0 +1,14 @@
+{
+  "name": "@repo/ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('Placeholder build script: implementation pending for ui')\"",
+    "lint": "eslint src --ext .js,.jsx --config ../../tooling/eslint/react-native.js",
+    "test": "node -e \"console.log('Placeholder test script: implementation pending for ui')\"",
+    "clean": "rimraf dist build .turbo coverage"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*"
+  }
+}
