@@ -13,8 +13,6 @@ import {
   Animated,
   StatusBar,
   TextInput,
-  PermissionsAndroid,
-  Platform,
 } from "react-native";
 import { Camera, useCameraDevice, useCameraPermission, useCodeScanner } from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -31,7 +29,7 @@ import {
 } from '../redux/service/commonMasters';
 import { useGetCompanycodeQuery } from '../redux/service/user';
 import { getCurrentLocation } from '../utils/CustomLocation';
-import { TOMTOM_API_KEY } from '../../constants/apiUrl';
+import { TOMTOM_API_KEY } from '../constants/apiUrl';
 
 const { width, height } = Dimensions.get('window');
 
@@ -416,25 +414,11 @@ export default function AssetAudit() {
   const { hasPermission: cameraPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back', { physicalDevices: ['wide-angle-camera'] });
 
-  // ── Camera permission: Android native request on mount (matches AGF_MOBILE CameraModal pattern)
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
-        title: 'Camera Permission',
-        message: 'Asset Audit needs camera access to scan barcodes and QR codes.',
-        buttonPositive: 'Allow',
-        buttonNegative: 'Deny',
-      });
-    }
-  }, []);
-
-  // ── Vision Camera permission hook sync
   useEffect(() => {
     (async () => {
       if (!cameraPermission) {
-        // requestPermission() returns boolean (true = granted)
-        const granted = await requestPermission();
-        setHasPermission(granted);
+        const status = await requestPermission();
+        setHasPermission(status === 'granted');
       } else {
         setHasPermission(true);
       }

@@ -4,56 +4,27 @@ import { useGetUserDetQuery, useGetUsersQuery } from '../../redux/service/user';
 import UserCreation from './UserCreation';
 import Form from './Form';
 
-
-
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import RoleOnPage_Master from './RoleOnPage_Master';
 
-
 export default function UserAndRoles() {
-    const [role, setRole] = useState(true);
-    const [others,setothers]=useState(false);
-
+    // activeTab: 0 = Role Master, 1 = Allocate Role, 2 = Create User
+    const [activeTab, setActiveTab] = useState(0);
 
     const { data: userDet } = useGetUserDetQuery();
-    const indicatorAnim = useRef(new Animated.Value(role === "others" ? 2 : role ? 0 : 1)).current;
+    const indicatorAnim = useRef(new Animated.Value(0)).current;
     const buttonScale = useRef(new Animated.Value(1)).current;
 
-    const handleCreateUserPress = () => {
+    const handleTabPress = (tabIndex) => {
         animateButton();
         Animated.timing(indicatorAnim, {
-            toValue: 0,
+            toValue: tabIndex,
             duration: 300,
             easing: Easing.out(Easing.ease),
             useNativeDriver: false,
         }).start();
-        setRole(true);
-        setothers(false);
-    };
-
-    const handleRolePress = () => {
-        animateButton();
-        Animated.timing(indicatorAnim, {
-            toValue: 1,
-            duration: 300,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: false,
-        }).start();
-        setRole(false);
-        setothers(false);
-    };
-
-    const handleOthersPress = () => {
-        animateButton();
-        Animated.timing(indicatorAnim, {
-            toValue: 2,
-            duration: 300,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: false,
-        }).start();
-        setRole("others");
-        setothers(true);
+        setActiveTab(tabIndex);
     };
 
     const animateButton = () => {
@@ -77,29 +48,61 @@ export default function UserAndRoles() {
         outputRange: ['0%', '33.33%', '66.66%']
     });
 
-    return (<>
-        <View style={styles.tabContainer}>
-                <Animated.View style={[styles.activeIndicator, { left: indicatorLeft }]} />
+    return (
+        <>
+            <View style={styles.tabContainer}>
+                <Animated.View style={[styles.activeIndicator, { left: indicatorLeft }]}>
+                    <LinearGradient 
+                        colors={['#4facfe', '#00f2fe']} 
+                        start={{x: 0, y: 0}} end={{x: 1, y: 1}} 
+                        style={StyleSheet.absoluteFill} 
+                    />
+                </Animated.View>
                 
                 <TouchableOpacity
-                    onPress={handleCreateUserPress}
+                    style={{ flex: 1 }}
+                    onPress={() => handleTabPress(0)}
                     activeOpacity={0.8}
                 >
                     <Animated.View 
                         style={[
                             styles.tabButton,
-                            role && role!="others" && styles.activeTab,
+                            { transform: [{ scale: buttonScale }] }
+                        ]}
+                    >
+                        <MaterialIcons 
+                            name="app-settings-alt" 
+                            size={20} 
+                            color={activeTab === 0 ? '#fff' : '#555'} 
+                        />
+                        <Text style={[
+                            styles.tabButtonText,
+                            activeTab === 0 && styles.activeTabText
+                        ]}>
+                            Role Master
+                        </Text>
+                    </Animated.View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={{ flex: 1 }}
+                    onPress={() => handleTabPress(1)}
+                    activeOpacity={0.8}
+                >
+                    <Animated.View 
+                        style={[
+                            styles.tabButton,
                             { transform: [{ scale: buttonScale }] }
                         ]}
                     >
                         <MaterialIcons 
                             name="display-settings" 
-                            size={24} 
-                            color={role  && role!="others" ? '#fff' : '#555'} 
+                            size={20} 
+                            color={activeTab === 1 ? '#fff' : '#555'} 
                         />
                         <Text style={[
                             styles.tabButtonText,
-                            role && role!="others" && styles.activeTabText
+                            activeTab === 1 && styles.activeTabText
                         ]}>
                             Allocate Role
                         </Text>
@@ -107,52 +110,26 @@ export default function UserAndRoles() {
                 </TouchableOpacity>
                 
                 <TouchableOpacity
-                    onPress={handleRolePress}
+                    style={{ flex: 1 }}
+                    onPress={() => handleTabPress(2)}
                     activeOpacity={0.8}
                 >
                     <Animated.View 
                         style={[
                             styles.tabButton,
-                            !role && role!="others" && styles.activeTab,
                             { transform: [{ scale: buttonScale }] }
                         ]}
                     >
                         <MaterialIcons 
-                            name="settings" 
-                            size={24} 
-                            color={!role && role!="others" ? '#fff' : '#555'} 
+                            name="person-add" 
+                            size={20} 
+                            color={activeTab === 2 ? '#fff' : '#555'} 
                         />
                         <Text style={[
                             styles.tabButtonText,
-                            !role && role!="others" && styles.activeTabText
+                            activeTab === 2 && styles.activeTabText
                         ]}>
                             Create User
-                        </Text>
-                    </Animated.View>
-                </TouchableOpacity>
-
-
-                <TouchableOpacity
-                    onPress={handleOthersPress}
-                    activeOpacity={0.8}
-                >
-                    <Animated.View 
-                        style={[
-                            styles.tabButton,
-                            others && styles.activeTab,
-                            { transform: [{ scale: buttonScale }] }
-                        ]}
-                    >
-                        <MaterialIcons 
-                            name="app-settings-alt" 
-                            size={24} 
-                            color={others ? '#fff' : '#555'} 
-                        />
-                        <Text style={[
-                            styles.tabButtonText,
-                            others && styles.activeTabText
-                        ]}>
-                           Role Master
                         </Text>
                     </Animated.View>
                 </TouchableOpacity>
@@ -160,19 +137,10 @@ export default function UserAndRoles() {
 
             {/* Content */}
             <View style={styles.contentContainer}>
-                {role  && role!="others" ? (
-                    <UserCreation userDet={userDet} />
-                ) :   role!="others" && (
-                    <Form userDet={userDet} />
-                )}
-
-
-                {
-
-                    others && <RoleOnPage_Master />
-                }
+                {activeTab === 0 && <RoleOnPage_Master />}
+                {activeTab === 1 && <UserCreation userDet={userDet} />}
+                {activeTab === 2 && <Form userDet={userDet} />}
             </View>
-     
         </>
     );
 }
@@ -185,47 +153,51 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         height: 60,
-        backgroundColor: '#fff',
-        borderRadius: 12,
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
         margin: 16,
         marginBottom: 0,
-        overflow: 'hidden',
-        elevation: 3,
+        elevation: 8,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 8,
         position: 'relative',
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
     },
     tabButton: {
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 16,
-    },
-    activeTab: {
-        backgroundColor: '#7999f2',
+        paddingHorizontal: 4,
     },
     activeTabText: {
         color: '#fff',
     },
     tabButtonText: {
-        fontSize: 16,
-        fontWeight: '500',
-        marginLeft: 8,
-        color: '#555',
+        fontSize: 12,
+        fontWeight: '600',
+        marginTop: 4,
+        color: '#777',
+        textAlign: 'center',
     },
     activeIndicator: {
         position: 'absolute',
-        top: 0,
-        bottom: 0,
-        width: '33.33%', // 1/3 of the container width
-        backgroundColor: '#7999f2',
-        borderRadius: 12,
+        top: 6,
+        bottom: 6,
+        width: '33.33%',
+        marginLeft: '0%',
+        borderRadius: 16,
+        overflow: 'hidden',
+        elevation: 4,
+        shadowColor: '#4facfe',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
     },
     contentContainer: {
         flex: 1,
-        padding: 16,
     },
 });

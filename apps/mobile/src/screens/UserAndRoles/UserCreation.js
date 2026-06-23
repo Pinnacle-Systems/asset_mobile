@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { View, Text, Alert, StyleSheet, ScrollView, TouchableOpacity, Animated, Easing, RefreshControl } from 'react-native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,7 +9,7 @@ import { Table, Row, Rows } from 'react-native-table-component';
 import { useCreateRoleOnPageMutation, useUpdateRoleOnPageMutation, useGetDesignationQuery, useGetRolesOnPageQuery, useGetCreatedRolesOnPageQuery } from '../../redux/service/user';
 
 import { Dropdown } from '../../components/inputs';
-import FloatingButton from '../../components/FloatingButton';
+
 
 
 
@@ -24,6 +24,7 @@ export default function UserCreation() {
     const [permissions, setPermissions] = useState({});
     const [selectedRole, setSelectedRole] = useState(null);
     const [roleName, setRoleName] = useState(null);
+    const [copyRole, setCopyRole] = useState(null);
     const [username, setUsername] = useState(null);
     const [edit, setEdit] = useState(false);
     const [ CurrentEditingId, setCurrentEditingId]=useState()
@@ -32,8 +33,8 @@ export default function UserCreation() {
     const slideAnim = useRef(new Animated.Value(20)).current;
     const UserDetailsdata = useSelector(state => state.UserDetails);
     
-    const {data:get_created_roles,refetch:userRefetch}=useGetCreatedRolesOnPageQuery()
-      const { data: all_Role_names, isError, error, refetch: refetchCreatedRoles } = useGet_all_roleQuery()
+    const {data:get_created_roles,refetch:userRefetch}=useGetCreatedRolesOnPageQuery({where:UserDetailsdata?.GCOMPCODE})
+    const { data: all_Role_names, isError, error, refetch: refetchCreatedRoles } = useGet_all_roleQuery({where:UserDetailsdata?.GCOMPCODE})
     const [createUserOnRole] = useCreateRoleOnPageMutation();
     const [delete_row] = useDelete_CommonMutation()
     const [updateUserOnRole] = useUpdateRoleOnPageMutation();
@@ -113,12 +114,21 @@ export default function UserCreation() {
     };
 
     const onNew = () =>{ 
-        
      setPermissions({})
+     setRoleName(null)
+     setCopyRole(null)
      setEdit(false)
-    setDisabled(false);   
-    
-}
+     setDisabled(false);   
+    }
+
+    const handleCopyRole = (selectedRoleName) => {
+        setCopyRole(selectedRoleName);
+        const item = get_created_roles?.data?.find(r => r.name === selectedRoleName);
+        if (item && item.RoleOnPage) {
+            setPermissions(transformPermissions(item.RoleOnPage));
+            Toast.show({ type: 'success', text1: `Permissions copied from ${selectedRoleName}` });
+        }
+    };
 
     const validateData = ({ roleName, permissions }) => roleName && Object.keys(permissions).length > 0;
 
@@ -139,7 +149,7 @@ export default function UserCreation() {
         }
     };
 
-   const handlePermissionChange = (page, permission) => {
+   const handlePermissionChange = useCallback((page, permission) => {
   setPermissions(prev => {
     const updated = { ...prev };
     
@@ -174,7 +184,7 @@ export default function UserCreation() {
 
     return updated;
   });
-};
+}, [edit]);
 
 const handleSubmit = async () => {
         if (!roleName || Object.keys(permissions).length === 0) {
@@ -186,10 +196,6 @@ const handleSubmit = async () => {
            
             
     const permission_data=!edit ?  {...permissions,HOME:{ read: true,
-        create: true,
-        edit: true,
-        delete: true,
-        isdefault: true,roleName},DashBoard:{ read: true,
         create: true,
         edit: true,
         delete: true,
@@ -278,32 +284,48 @@ setSelectedRole(undefined)
    
 
 
-    const tableHead = ['Pages', 'read', 'create', 'edit', 'delete', 'Admin'];
+    const tableHead = ['Pages', 'Read', 'Create', 'Edit', 'Delete', 'Admin'];
     const tabs = require('../../config/tabIndex').default;
-    const tableData = (tabs || []).map(item => {
-        if (!item.list) return null;
-      
-        
-        const p = permissions[item.name] || {};
-        return [
+
+    const PermissionCell = memo(({ perm, isActive, isDisabled, onPress }) => (
+        <TouchableOpacity 
+            disabled={isDisabled}
+            style={[
+                styles.permissionCell,
+                isActive && styles.permissionActiveCell
+            ]}
+            onPress={onPress}
+        >
+            <Text style={styles.tickText}>{isActive ? '✔' : ''}</Text>
+        </TouchableOpacity>
+    ));
+
+    const PermissionRow = memo(({ item, p, disabled, onPermissionChange }) => {
+        const rowData = [
             item.list_name,
             ...['read', 'create', 'edit', 'delete', 'isdefault'].map(perm => {
-                //  (item?.default) && handlePermissionChange(item.name, perm)
-                
-               return <TouchableOpacity 
-                    key={perm}
-                    disabled={item?.default || disabled}
-                    style={[
-                        styles.permissionCell,
-                        p[perm] && styles.permissionActiveCell
-                    ]}
-                    onPress={() => handlePermissionChange(item.name, perm)}
-                >
-                    <Text style={styles.tickText}>{item?.default || p[perm] ? '✔' : ''}</Text>
-                </TouchableOpacity>
-    })
+                const isActive = item?.default || p[perm];
+                const isDisabled = item?.default || disabled;
+                return (
+                    <PermissionCell 
+                        key={perm}
+                        perm={perm}
+                        isActive={isActive}
+                        isDisabled={isDisabled}
+                        onPress={() => onPermissionChange(item.name, perm)}
+                    />
+                );
+            })
         ];
-    }).filter(Boolean);
+        
+        return (
+            <Row 
+                data={rowData} 
+                style={styles.rows} 
+                textStyle={StyleSheet.flatten(styles.cellText)} 
+            />
+        );
+    });
 
 
 
@@ -313,7 +335,7 @@ setSelectedRole(undefined)
 
  const fields = [
     { 
-      key: 'name', 
+      key: 'displayName', 
       label: 'Name',
       titleProps: { numeric: false },
       cellProps: { numeric: false }
@@ -331,7 +353,7 @@ const { data: role, refetch: refetch_data} = useGetRolesOnPageQuery({RoleId: sel
 
 
 //const filterRole=all_Role_names?.data?.filter((data))
- const filterRole=all_Role_names?.data?.filter((data)=>data?.RoleOnPage?.length==0)
+ const filterRole=all_Role_names?.data?.filter((data)=>data?.RoleOnPage?.length==0)?.map(role => ({ ...role, displayName: role.name?.split('@')[0] || role.name }))
 
 
     return (
@@ -363,19 +385,36 @@ const { data: role, refetch: refetch_data} = useGetRolesOnPageQuery({RoleId: sel
                         </View>
 
                        
-                        <View style={styles.dropdownContainer}>
+                        <View style={[styles.dropdownContainer, { zIndex: 300 }]}>
                          
                             <Dropdown
-                                   selected={roleName}
+                                    selected={roleName}
                                     label={<Text>Select Role</Text>}
                                     setSelected={setRoleName}
                                     width={"100%"}
-                                    _label={"name"}
+                                    _label={"displayName"}
                                     _value={"name"}
-                                    options={{data:filterRole} || []}
-                                     zIndex={300}
-                                      />
+                                    options={{data: edit ? [{name: roleName, displayName: roleName?.split('@')[0]}] : filterRole} || []}
+                                    disabled={edit || disabled}
+                                    zIndex={300}
+                                />
                         </View>
+
+                        {!edit && (
+                            <View style={[styles.dropdownContainer, { zIndex: 200 }]}>
+                                <Dropdown
+                                    selected={copyRole}
+                                    label={<Text>Copy Permissions from Existing Role (Optional)</Text>}
+                                    setSelected={handleCopyRole}
+                                    width={"100%"}
+                                    _label={"displayName"}
+                                    _value={"name"}
+                                    options={{data: (get_created_roles?.data || []).map(r => ({...r, displayName: r.name?.split('@')[0]}))}}
+                                    disabled={disabled}
+                                    zIndex={200}
+                                />
+                            </View>
+                        )}
 
                         {/* {edit && (
                             <View style={styles.dropdownContainer}>
@@ -401,11 +440,15 @@ const { data: role, refetch: refetch_data} = useGetRolesOnPageQuery({RoleId: sel
                                 style={styles.head} 
                                 textStyle={StyleSheet.flatten(styles.headText)} 
                             />
-                            <Rows 
-                                data={tableData} 
-                                style={styles.rows} 
-                                textStyle={StyleSheet.flatten(styles.cellText)} 
-                            />
+                            {(tabs || []).filter(t => t.list).map(item => (
+                                <PermissionRow 
+                                    key={item.name}
+                                    item={item}
+                                    p={permissions[item.name] || {}}
+                                    disabled={disabled}
+                                    onPermissionChange={handlePermissionChange}
+                                />
+                            ))}
                         </Table>
                     </View>
                 </View>
@@ -415,7 +458,7 @@ const { data: role, refetch: refetch_data} = useGetRolesOnPageQuery({RoleId: sel
                     <View style={styles.tableContainer}>
                        <CustomDataTable
                                       title="Available Roles"
-                                      data={get_created_roles?.data || []}
+                                      data={(get_created_roles?.data || []).map(role => ({...role, displayName: role.name?.split('@')[0] || role.name}))}
                                       fields={fields}
                                       onEdit={editData}
                                       onDelete={onDelete}
@@ -425,13 +468,23 @@ const { data: role, refetch: refetch_data} = useGetRolesOnPageQuery({RoleId: sel
                 </View>
             </ScrollView>
 
-            <FloatingButton 
-                save={handleSubmit} 
-                edit={editData} 
-                editable={edit} 
-                New={onNew} 
-                Update={handleUpdate} 
-            />
+            <View style={styles.bottomButtonsContainer}>
+                <TouchableOpacity 
+                    style={[styles.actionButton, styles.newButton, { marginRight: 6 }]} 
+                    onPress={onNew}
+                >
+                    <MaterialIcons name="add" size={20} color="#fff" />
+                    <Text style={styles.actionButtonText}>New</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                    style={[styles.actionButton, edit ? styles.updateButton : styles.saveButton, { marginLeft: 6 }]} 
+                    onPress={edit ? handleUpdate : handleSubmit}
+                >
+                    <MaterialIcons name={edit ? "update" : "save"} size={20} color="#fff" />
+                    <Text style={styles.actionButtonText}>{edit ? 'Update' : 'Save'}</Text>
+                </TouchableOpacity>
+            </View>
         </Animated.View>
     </GestureHandlerRootView>
     );
@@ -441,7 +494,13 @@ const styles = StyleSheet.create({
     pageContainer: { flex: 1, position: 'relative' },
     scrollContainer: { paddingBottom: 8 ,width:"100%",padding:0},
     formContainer: { padding: 2 },
-    label: { fontSize: 19, marginBottom: 5 },
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#636e72',
+        marginBottom: 8,
+        letterSpacing: 0.3,
+    },
     input: {
         height: 40,
         width: "100%",
@@ -459,7 +518,50 @@ const styles = StyleSheet.create({
     rows: { height: "auto", width: "auto", borderBottomWidth: 4 },
     permissionCell: { justifyContent: 'center', alignItems: 'center' },
     tickText: { textAlign: 'center', fontSize: 18 },
-    cellText: { textAlign: 'center' },
+    cellText: {
+        textAlign: 'center',
+        fontSize: 14,
+    },
+    bottomButtonsContainer: {
+        flexDirection: 'row',
+        padding: 16,
+        backgroundColor: '#ffffff',
+        borderTopWidth: 1,
+        borderColor: '#e2e8f0',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+    },
+    actionButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 10,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    newButton: {
+        backgroundColor: '#94a3b8',
+    },
+    saveButton: {
+        backgroundColor: '#38c98d',
+    },
+    updateButton: {
+        backgroundColor: '#4facfe',
+    },
+    actionButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 8,
+    },
     pageContainer: { 
         flex: 1, 
         position: 'relative',
@@ -470,25 +572,25 @@ const styles = StyleSheet.create({
         paddingBottom: 100 
     },
     card: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 20,
+        marginHorizontal: 14,
+        elevation: 6,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
-        width:"100%"
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        borderWidth: 1,
+        borderColor: '#f4f5f7',
     },
     cardTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 16,
-        paddingBottom: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#2d3436',
+        marginBottom: 20,
+        letterSpacing: 0.5,
     },
     formContainer: { 
         padding: 2,
@@ -502,10 +604,12 @@ const styles = StyleSheet.create({
     usernameContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
+        backgroundColor: '#f8f9fa',
         padding: 12,
-        backgroundColor: '#f9f9f9',
-        borderRadius: 8,
+        borderRadius: 10,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
     },
     usernameText: {
         fontSize: 16,
@@ -531,7 +635,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     dropdownContainer: {
-        marginTop: 8,
+        marginBottom: 20,
     },
     dropdown: {
         marginTop: 2,

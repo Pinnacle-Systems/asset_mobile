@@ -10,19 +10,18 @@ import {
     Animated,
     StatusBar,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    BackHandler
 } from 'react-native';
 import { useLoginUserMutation, useUpdate_user_fcmMutation } from '../redux/service/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dropdown } from '../components/inputs';
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { RESET_STORE } from '../redux/store';
 import { screenWidth } from '../utils/Screens';
 import CustomText from '../components/Text';
-import ForgotPasswordScreen from './ForgotScreen';
-import CommonModal from '../components/CommonModal';
 
 import Custom_Notification from '../utils/Custom_Notification';
 import { LinearGradient } from 'react-native-linear-gradient';
@@ -34,7 +33,6 @@ function LoginScreen({ navigation }) {
     const [Global, setGlobal] = useState(false);
     const [Id, setId] = useState();
     const [Globaldata, setGlobalData] = useState([]);
-    const [forgotpassword_Modal, setforgotPassword_Modal] = useState(false);
     const [error, setError] = useState(null);
     const [loginUser, { isLoading }] = useLoginUserMutation();
     const [fadeAnim] = useState(new Animated.Value(0));
@@ -72,12 +70,33 @@ function LoginScreen({ navigation }) {
         }).start();
     }, []);
 
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => {
+                Alert.alert(
+                    'Exit App',
+                    'Are you sure you want to exit the application?',
+                    [
+                        { text: 'Cancel', onPress: () => null, style: 'cancel' },
+                        { text: 'YES', onPress: () => BackHandler.exitApp() }
+                    ]
+                );
+                return true;
+            };
+
+            BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            return () =>
+                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+        }, [])
+    );
+
     const handleLogin = async () => {
         setError(null);
         var MobileDevice = "AssetMobile";
         var MobileIP = "0.0.0.0";
         if (!username || !password) {
-            Alert.alert('Validation Error', 'Username and password are required');
+            setError('Username and password are required');
             return;
         }
         try {
@@ -114,7 +133,15 @@ function LoginScreen({ navigation }) {
                 setError('Login failed, please try again.');
             }
         } catch (error) {
-            setError(error.data ? error.data.message : error.message);
+            if (error?.data?.message) {
+                setError(error.data.message);
+            } else if (error?.error) {
+                setError(error.error);
+            } else if (error?.message) {
+                setError(error.message);
+            } else {
+                setError("An unexpected error occurred. Please try again.");
+            }
         }
     };
 
@@ -171,7 +198,10 @@ function LoginScreen({ navigation }) {
                                 placeholder="Username"
                                 placeholderTextColor="#a0aec0"
                                 value={username}
-                                onChangeText={setUsername}
+                                onChangeText={(text) => {
+                                    setUsername(text);
+                                    if (error) setError(null);
+                                }}
                                 autoCapitalize="none"
                             />
                         </View>
@@ -183,7 +213,10 @@ function LoginScreen({ navigation }) {
                                 placeholder="Password"
                                 placeholderTextColor="#a0aec0"
                                 value={password}
-                                onChangeText={setPassword}
+                                onChangeText={(text) => {
+                                    setPassword(text);
+                                    if (error) setError(null);
+                                }}
                                 secureTextEntry={!isPasswordVisible}
                             />
                             <TouchableOpacity 
@@ -197,13 +230,6 @@ function LoginScreen({ navigation }) {
                                 />
                             </TouchableOpacity>
                         </View>
-                        
-                        <TouchableOpacity 
-                            style={styles.forgotPassword} 
-                            onPress={() => setforgotPassword_Modal(true)}
-                        >
-                            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-                        </TouchableOpacity>
                         
                         <TouchableOpacity 
                             style={[styles.loginButton.ButtonOuter, { opacity: isLoading ? 0.7 : 1 }]}
@@ -222,19 +248,6 @@ function LoginScreen({ navigation }) {
                     </TouchableOpacity> */}
                 </View>
             </LinearGradient>
-
-            <CommonModal 
-                height={"60%"}  
-                isModalVisible={forgotpassword_Modal} 
-                Title='Forgot Password' 
-                BodyComponent={
-                    <ForgotPasswordScreen  
-                        navigation={navigation} 
-                        setforgotPassword_Modal={setforgotPassword_Modal}
-                    />
-                } 
-                setIsModalVisible={setforgotPassword_Modal}
-            />
         </KeyboardAvoidingView>
     );
 }
@@ -307,15 +320,6 @@ const styles = StyleSheet.create({
     },
     eyeIcon: {
         padding: 5,
-    },
-    forgotPassword: {
-        alignSelf: 'flex-end',
-        marginBottom: 25,
-    },
-    forgotPasswordText: {
-        color: '#4299e1',
-        fontSize: 14,
-        fontFamily: 'Roboto-Medium',
     },
     loginButton: {
         ButtonOuter: {

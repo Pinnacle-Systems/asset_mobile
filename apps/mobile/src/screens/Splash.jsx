@@ -1,16 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useState, useEffect, useMemo, useCallback, useRef} from 'react';
-import {View, Image, StyleSheet, Animated, Easing, Text, Platform, StatusBar, Alert} from 'react-native';
+import {View, Image, StyleSheet, Animated, Easing, Text, Platform, StatusBar} from 'react-native';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import LinearGradient from 'react-native-linear-gradient';
 import LottieView from 'lottie-react-native';
 import { useGet_Change_SettingsQuery } from '../redux/service/user';
 
 // Constants
-const GRADIENT_COLORS = ['#FFF','#FFF'];
+const GRADIENT_COLORS = ['#f4f6f8', '#e2e8f0'];
 const GRADIENT_CONFIG = {start: {x: 0, y: 0}, end: {x: 1, y: 1}};
-const LOADING_TIMEOUT = 10000; // 10 seconds max for all operations
-const ANIMATION_DURATION = 2500; // Total animation time
+const LOADING_TIMEOUT = 10000;
+const ANIMATION_DURATION = 3000; 
 
 const Splash = React.memo(({navigation}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,19 +21,16 @@ const Splash = React.memo(({navigation}) => {
   const fadeAnim = useMemo(() => new Animated.Value(1), []);
   const logoScale = useMemo(() => new Animated.Value(0.8), []);
   const textSlide = useMemo(() => new Animated.Value(30), []);
+  const scanLineAnim = useMemo(() => new Animated.Value(0), []);
   
   const lottieRef = useRef(null);
   const timeoutRef = useRef(null);
   const {data, isLoading: settings_loading} = useGet_Change_SettingsQuery({params: {Idcard: IDCARD}});
   
-  // Memoize settings data
   const settings_data = useMemo(() => data?.data || {}, [data]);
 
-  // Load user data
   useEffect(() => {
     let isMounted = true;
-  
-
     const loadUserData = async () => {
       try {
         const result = await Promise.race([
@@ -62,12 +59,11 @@ const Splash = React.memo(({navigation}) => {
     
     loadUserData();
 
-
-     const timeoutId = setTimeout(() => {
-       if (isMounted) {
-         navigation.reset({ routes: [{ name: 'LOGIN' }] });
-       }
-       }, LOADING_TIMEOUT);
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        navigation.reset({ routes: [{ name: 'LOGIN' }] });
+      }
+    }, LOADING_TIMEOUT);
 
     return () => {
       isMounted = false;
@@ -75,14 +71,13 @@ const Splash = React.memo(({navigation}) => {
     };
   }, [navigation]);
 
-  // Handle biometric verification
   const handleBiometricVerification = useCallback(async () => {
     try {
       const rnBiometrics = new ReactNativeBiometrics();
       const { available } = await rnBiometrics.isSensorAvailable();
 
       if (!available) {
-        navigation.reset({ routes: [{ name: 'DashBoard' }] });
+        navigation.reset({ routes: [{ name: 'HOME' }] });
         return;
       }
 
@@ -98,7 +93,7 @@ const Splash = React.memo(({navigation}) => {
       const { success } = await Promise.race([biometricPromise, timeoutPromise]);
 
       if (success) {
-        navigation.reset({ routes: [{ name: 'DashBoard' }] });
+        navigation.reset({ routes: [{ name: 'HOME' }] });
       } else {
         setVerificationFailed(true);
         timeoutRef.current = setTimeout(() => {
@@ -111,17 +106,31 @@ const Splash = React.memo(({navigation}) => {
     }
   }, [navigation]);
 
-  // Main animation and navigation logic
   useEffect(() => {
     if (settings_loading) return;
 
     let isMounted = true;
     const animate = async () => {
       try {
-        // Start animations
         lottieRef.current?.play();
         
-        // Run animations in parallel
+        // Start scanner loop animation
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(scanLineAnim, {
+              toValue: 1,
+              duration: 1500,
+              easing: Easing.linear,
+              useNativeDriver: true,
+            }),
+            Animated.timing(scanLineAnim, {
+              toValue: 0,
+              duration: 0, // Instantly snap back to top
+              useNativeDriver: true,
+            })
+          ])
+        ).start();
+
         await Promise.all([
           new Promise(resolve => {
             Animated.sequence([
@@ -151,7 +160,6 @@ const Splash = React.memo(({navigation}) => {
 
         if (!isMounted) return;
 
-        // Fade out and navigate
         Animated.timing(fadeAnim, {
           toValue: 0,
           duration: 500,
@@ -171,7 +179,7 @@ const Splash = React.memo(({navigation}) => {
           if (settings_data?.BioMatrics) {
             await handleBiometricVerification();
           } else {
-            navigation.reset({ routes: [{ name: 'DashBoard' }] });
+            navigation.reset({ routes: [{ name: 'HOME' }] });
           }
         });
       } catch (error) {
@@ -190,20 +198,21 @@ const Splash = React.memo(({navigation}) => {
       fadeAnim.stopAnimation();
       logoScale.stopAnimation();
       textSlide.stopAnimation();
+      scanLineAnim.stopAnimation();
       if (lottieRef.current) lottieRef.current.reset();
     };
-  }, [settings_loading, IDCARD, settings_data, navigation, fadeAnim, logoScale, textSlide, handleBiometricVerification]);
+  }, [settings_loading, IDCARD, settings_data, navigation, fadeAnim, logoScale, textSlide, scanLineAnim, handleBiometricVerification]);
 
   if (!isLoading && settings_loading) return null;
 
   if (verificationFailed) {
     return (
       <LinearGradient 
-        colors={GRADIENT_COLORS} 
+        colors={['#ef4444', '#b91c1c']} 
         style={styles.container}
         {...GRADIENT_CONFIG}
       >
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle="light-content" backgroundColor="#ef4444" />
         <LottieView
           ref={lottieRef}
           source={require('../utils/Loader/Error.json')}
@@ -218,27 +227,45 @@ const Splash = React.memo(({navigation}) => {
     );
   }
 
+  const logoSize = Platform.select({ ios: 180, android: 160 });
+
   return (
     <LinearGradient 
       colors={GRADIENT_COLORS} 
       style={styles.container}
       {...GRADIENT_CONFIG}
     >
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#f4f6f8" />
       <Animated.View style={[styles.content, {opacity: fadeAnim}]}>
-        <Animated.Image 
-          source={require('../assets/logo_splash1.png')} 
-          style={[styles.logo, { transform: [{ scale: logoScale }] }]}
-          resizeMode="contain"
-        />
+        
+        <View style={[styles.logoContainer, { width: logoSize, height: logoSize }]}>
+          <Animated.Image 
+            source={require('../assets/logo_splash1.png')} 
+            style={[styles.logo, { width: logoSize, height: logoSize, transform: [{ scale: logoScale }] }]}
+            resizeMode="contain"
+          />
+          {/* Laser Scan Line */}
+          <Animated.View style={[
+            styles.scannerLine,
+            {
+              transform: [{
+                translateY: scanLineAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, logoSize]
+                })
+              }]
+            }
+          ]} />
+        </View>
         
         <Animated.View style={{ 
           transform: [{ translateY: textSlide }],
           alignItems: 'center'
         }}>
-          <Text style={styles.title}>Pinnacle World</Text>
-          <Text style={styles.subtitle}>Your Gateway to Excellence</Text>
+          <Text style={styles.title}>Asset Auditing</Text>
+          <Text style={styles.subtitle}>Smart Verification & Tracking</Text>
         </Animated.View>
+
       </Animated.View>
     </LinearGradient>
   );
@@ -255,24 +282,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 30,
   },
+  logoContainer: {
+    position: 'relative',
+    marginBottom: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
   logo: {
-    width: Platform.select({ ios: 180, android: 160 }),
-    height: Platform.select({ ios: 180, android: 160 }),
-    marginBottom: 30,
+    // sizing handled inline
+  },
+  scannerLine: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: '#4f46e5', // Bright indigo laser
+    shadowColor: '#4f46e5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 6,
+    borderRadius: 2,
+    zIndex: 10,
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    color: "black",
+    fontWeight: '800',
+    color: "#0f172a",
     marginBottom: 8,
     letterSpacing: 0.5,
-    fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'sans-serif-medium',
   },
   subtitle: {
     fontSize: 16,
-    color: 'black',
+    color: '#64748b',
     marginBottom: 20,
-    fontFamily: Platform.OS === 'ios' ? 'Helvetica Neue' : 'sans-serif',
+    fontWeight: '500',
+    letterSpacing: 0.3,
   },
   lottie: {
     width: 150,
@@ -281,15 +328,16 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: '700',
     color: 'white',
     marginBottom: 10,
   },
   errorText: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     paddingHorizontal: 40,
+    fontWeight: '500',
   },
 });
 

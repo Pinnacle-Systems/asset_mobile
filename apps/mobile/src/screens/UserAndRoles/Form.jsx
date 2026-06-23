@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, Alert, Dimensions, ScrollView, Touch
 import Toast from "react-native-toast-message";
 import { useCreateUserMutation, useGetCompanycodeQuery, useGetDesignationQuery, useGetEmployeeidsQuery, useGetUserDetQuery, useGetUsersQuery } from "../../redux/service/user";
 import { Dropdown } from "../../components/inputs";
-import FloatingButton from "../../components/FloatingButton";
+
 import { showMessage } from 'react-native-flash-message';
 import ClearState from "../../components/ClearState";
 import { useSelector } from "react-redux";
@@ -101,8 +101,8 @@ const Form = ({ closeModal, onClose, userDet }) => {
         var hod=SelectedHod?.split("-")[1]
         var hr=SelectedHR?.split("-")[1]
 
-        if (selectLevel !== "admin"  && selectLevel !== "top" && (!selectedEmply || !SelectedHod || !username))
-            return Alert.alert("⚠ Warning!", !selectedEmply ? "Please Select Your Employee" : !username ? "Please Enter Your UserName" : "Please Select Your Hod")
+        if (selectLevel !== "admin"  && selectLevel !== "top" && (!selectedEmply || !username))
+            return Alert.alert("⚠ Warning!", !selectedEmply ? "Please Select Your Employee" : "Please Enter Your UserName")
 
         var company_code = SelectedCompany?.map((data) => {
             var companyId = companyCode?.data?.find((cdata) => cdata?.value == data)
@@ -111,7 +111,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
 
         var Id_card_Random=Date.now()+Math.floor(Math.random()*10000)
 
-        const formData = { username,approval:selectedKey, roleId: selectedRole, otpemail: otpEmail,hr, password, email, hod, Idcard: selectLevel=="top" || selectLevel=="admin" ? String(Id_card_Random) : Idcard, Compcodes: company_code, level: selectLevel, isAdmin:selectLevel=="top" || selectLevel=="admin" ? true : false };
+        const formData = { username, /*approval:selectedKey,*/ roleId: selectedRole, otpemail: otpEmail, /*hr,*/ password, email, /*hod,*/ Idcard: selectLevel=="top" || selectLevel=="admin" ? String(Id_card_Random) : Idcard, Compcodes: company_code, level: selectLevel, isAdmin:selectLevel=="top" || selectLevel=="admin" ? true : false };
 
         if (!validateData(formData)) {
             Toast.show({
@@ -238,7 +238,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
             const formData = {
                 Compcodes: company_code,
                 GCOMP:UserSelect?.GCOMPCODE,
-                hr,
+                /*hr,*/
                 username,
                  role: {
                connect: { name: selectedRole }  
@@ -246,8 +246,8 @@ const Form = ({ closeModal, onClose, userDet }) => {
                 otpemail: otpEmail,
                 password,
                 email,
-                hod,
-                approval:selectedKey,
+                /*hod,*/
+                /*approval:selectedKey,*/
                 Idcard:  selectLevel=="top" || selectLevel=="admin" ? String(Id_card_Random) : Idcard,
                 level: selectLevel,
                 user_updation:true,
@@ -353,6 +353,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
                         style={styles.dropdown}
                     />
 
+{/*
                     {(selectLevel === "user" || selectLevel === "hod") && (
                         <Dropdown
                             selected={SelectedHod}
@@ -378,6 +379,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
 
                       <Text >Approval Request TO:</Text>
                     <CheckboxGroup selectedKey={selectedKey} setSelectedKey={setSelectedKey} options={["HOD","HR","BOTH"]}></CheckboxGroup>
+*/}
                 </View>
 
                 {/* Login Credentials */}
@@ -505,18 +507,27 @@ const Form = ({ closeModal, onClose, userDet }) => {
                 </View>
             </ScrollView>
 
-            <FloatingButton
-                type="user"
-                save={isEditing ? handleUpdate : handleSubmit}
-                edit={editData}
-                Update={handleUpdate}
-                editable={isEditing}
-                New={() => {
-                    setIsEditing(false);
-                    setCurrentUserId(null);
-                    ClearState(setUserName, setPassword, setEmail, setSelectedCompany, setSelectedEmply, setSelectedRole, setSelectedHod);
-                }}
-            />
+            <View style={styles.bottomButtonsContainer}>
+                <TouchableOpacity 
+                    style={[styles.actionBtnRow, styles.newButton, { marginRight: 6 }]} 
+                    onPress={() => {
+                        setIsEditing(false);
+                        setCurrentUserId(null);
+                        ClearState(setUserName, setPassword, setEmail, setSelectedCompany, setSelectedEmply, setSelectedRole, setSelectedHod);
+                    }}
+                >
+                    <MaterialIcons name="add" size={20} color="#fff" />
+                    <Text style={styles.actionButtonText}>New</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                    style={[styles.actionBtnRow, isEditing ? styles.updateButton : styles.saveButton, { marginLeft: 6 }]} 
+                    onPress={isEditing ? handleUpdate : handleSubmit}
+                >
+                    <MaterialIcons name={isEditing ? "update" : "save"} size={20} color="#fff" />
+                    <Text style={styles.actionButtonText}>{isEditing ? 'Update' : 'Save'}</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     </>
     );
@@ -548,14 +559,16 @@ const styles = StyleSheet.create({
     },
     section: {
         backgroundColor: Colors.white,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 20,
         shadowColor: Colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 6,
+        borderWidth: 1,
+        borderColor: '#f4f5f7',
     },
     sectionTitle: {
         fontSize: 16,
@@ -576,13 +589,14 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     input: {
-        height: 48,
+        height: 50,
         borderWidth: 1,
         borderColor: Colors.border,
-        borderRadius: 8,
-        paddingHorizontal: 12,
+        borderRadius: 10,
+        paddingHorizontal: 16,
         fontSize: 16,
-        backgroundColor: Colors.white,
+        backgroundColor: '#fdfdfd',
+        color: Colors.darkText,
     },
     otpEmailRow: {
         flexDirection: 'row',
@@ -643,6 +657,46 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         backgroundColor: Colors.lightGray,
     },
+    bottomButtonsContainer: {
+        flexDirection: 'row',
+        padding: 16,
+        backgroundColor: '#ffffff',
+        borderTopWidth: 1,
+        borderColor: '#e2e8f0',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+    },
+    actionBtnRow: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 10,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    newButton: {
+        backgroundColor: '#94a3b8',
+    },
+    saveButton: {
+        backgroundColor: '#38c98d',
+    },
+    updateButton: {
+        backgroundColor: '#4facfe',
+    },
+    actionButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 8,
+    }
 });
 
 export default Form;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataTable, IconButton, Provider, useTheme } from 'react-native-paper';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
 
 const CustomDataTable = ({ 
   data, 
@@ -20,21 +20,24 @@ const CustomDataTable = ({
   const [page, setPage] = React.useState(0);
   const [itemsPerPageState, setItemsPerPage] = React.useState(itemsPerPage);
   const theme = useTheme();
+  
+  // Guard against missing or malformed data
+  const safeData = Array.isArray(data) ? data : [];
   const from = page * itemsPerPageState;
-  const to = Math.min((page + 1) * itemsPerPageState, data.length);
+  const to = Math.min((page + 1) * itemsPerPageState, safeData.length);
 
   const tableContent = (
     <DataTable style={[styles.table, { width }, style]}>
       {title && (
-        <DataTable.Header style={styles.header}>
-          <DataTable.Title style={styles.title}>{title}</DataTable.Title>
-        </DataTable.Header>
+        <View style={styles.titleContainer}>
+          <Text style={styles.titleText}>{title}</Text>
+        </View>
       )}
       
-      <DataTable.Header style={[styles.header,{backgroundColor:"#7999f2"}]}>
+      <DataTable.Header style={styles.columnHeader}>
         {fields.map((field, index) => (
           <DataTable.Title 
-          textStyle={{color:"white"}}
+            textStyle={styles.headerCellText}
             key={`header-${index}`} 
             {...field.titleProps}
             style={[
@@ -47,18 +50,18 @@ const CustomDataTable = ({
           </DataTable.Title>
         ))}
         {(onEdit || onDelete) && (
-          <DataTable.Title  textStyle={{color:"white"}} numeric style={styles.actionHeader}>
+          <DataTable.Title textStyle={styles.headerCellText} numeric style={styles.actionHeader}>
             Actions
           </DataTable.Title>
         )}
       </DataTable.Header>
 
-      {data.length === 0 ? (
+      {safeData.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <DataTable.Cell style={styles.emptyCell}>{emptyMessage}</DataTable.Cell>
+          <Text style={styles.emptyText}>{emptyMessage}</Text>
         </View>
       ) : (
-        data.slice(from, to).map((row, rowIndex) => (
+        safeData.slice(from, to).map((row, rowIndex) => (
           <DataTable.Row 
             key={`row-${rowIndex}`} 
             style={[
@@ -70,6 +73,7 @@ const CustomDataTable = ({
           >
             {fields.map((field, fieldIndex) => (
               <DataTable.Cell  
+                textStyle={styles.cellText}
                 key={`cell-${rowIndex}-${fieldIndex}`} 
                 {...field.cellProps}
                 style={[
@@ -86,7 +90,8 @@ const CustomDataTable = ({
               <DataTable.Cell numeric style={styles.actionCell}>
                 {onEdit && (
                   <IconButton
-                    icon="pencil"
+                    icon="pencil-outline"
+                    iconColor="#3b82f6"
                     size={20}
                     onPress={() => onEdit(row)}
                     style={styles.actionButton}
@@ -94,7 +99,8 @@ const CustomDataTable = ({
                 )}
                 {onDelete && (
                   <IconButton
-                    icon="delete"
+                    icon="trash-can-outline"
+                    iconColor="#ef4444"
                     size={20}
                     onPress={() => onDelete(row)}
                     style={styles.actionButton}
@@ -106,30 +112,29 @@ const CustomDataTable = ({
         ))
       )}
 
-      {pagination && data.length > itemsPerPageState && (
-     <Provider>
-     <DataTable.Pagination
-          page={page}
-          numberOfPages={Math.ceil(data.length / itemsPerPageState)}
-          onPageChange={(newPage) => setPage(newPage)}
-          label={`${from + 1}-${to} of ${data.length}`}
-          showFastPaginationControls
-          numberOfItemsPerPageList={[5, 10, 15, 20]}
-          numberOfItemsPerPage={itemsPerPageState}
-          onItemsPerPageChange={setItemsPerPage}
-          selectPageDropdownLabel={'Rows per page'}
-          style={styles.pagination}
-        />
+      {pagination && safeData.length > itemsPerPageState && (
+        <Provider>
+          <DataTable.Pagination
+            page={page}
+            numberOfPages={Math.ceil(safeData.length / itemsPerPageState)}
+            onPageChange={(newPage) => setPage(newPage)}
+            label={`${from + 1}-${to} of ${safeData.length}`}
+            showFastPaginationControls
+            numberOfItemsPerPageList={[5, 10, 15, 20]}
+            numberOfItemsPerPage={itemsPerPageState}
+            onItemsPerPageChange={setItemsPerPage}
+            selectPageDropdownLabel={'Rows per page'}
+            style={styles.pagination}
+          />
         </Provider>
       )}
     </DataTable>
-    
   );
 
   return (
     <View style={[styles.container, { height }]}>
       {scrollable ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, minWidth: '100%' }}>
           {tableContent}
         </ScrollView>
       ) : (
@@ -142,40 +147,74 @@ const CustomDataTable = ({
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   table: {
     flex: 1,
     minWidth: '100%',
   },
-  header: {
-    backgroundColor: '#f5f5f5',
+  titleContainer: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  titleText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1e293b',
+  },
+  columnHeader: {
+    backgroundColor: '#f8fafc',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+    paddingHorizontal: 16,
+    elevation: 0,
   },
   headerCell: {
     paddingVertical: 8,
-    color:"white"
+  },
+  headerCellText: {
+    color: '#64748b',
+    fontWeight: '600',
+    fontSize: 13,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   actionHeader: {
     justifyContent: 'flex-end',
     minWidth: 100,
   },
-  title: {
-    justifyContent: 'center',
-    paddingVertical: 12,
-  },
   row: {
-    minHeight: 48,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+    paddingHorizontal: 16,
+    minHeight: 56,
   },
   clickableRow: {
-    cursor: 'pointer',
+    // cursor: 'pointer' works on web, ignored natively usually
   },
   evenRow: {
     backgroundColor: '#ffffff',
   },
   oddRow: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fafafa',
   },
   cell: {
     paddingVertical: 8,
+  },
+  cellText: {
+    color: '#334155',
+    fontSize: 14,
   },
   actionCell: {
     justifyContent: 'flex-end',
@@ -183,18 +222,23 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     margin: 0,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
   },
   emptyContainer: {
-    padding: 16,
+    padding: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  emptyCell: {
-    justifyContent: 'center',
+  emptyText: {
+    color: '#94a3b8',
+    fontSize: 15,
+    textAlign: 'center',
   },
   pagination: {
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#f1f5f9',
+    backgroundColor: '#ffffff',
   },
 });
 

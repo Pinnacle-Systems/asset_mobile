@@ -9,10 +9,11 @@ import {
   Dimensions,
   FlatList,
   TouchableOpacity,
+  PanResponder,
 } from 'react-native';
-import LogoutModal from './Modal/LogutModal';
+import LogoutModal from './Modal/LogoutModal';
 import { handleLogout } from '../utils/Logout';
-import { CustomNavigation } from '../config/NavigationRef';
+import { CustomNavigation, ResetNavigation } from '../config/NavigationRef';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Common_Context } from '../contexts/Common_Context';
 import { BASE_URL, USERS_API } from '../constants/apiUrl';
@@ -28,6 +29,39 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
   const [openLogoutModal, setLogoutModal] = useState(false);
   const USER = useSelector((state) => state?.UserDetails);
   const slideAnim = useRef(new Animated.Value(drawerWidth)).current;
+
+  const openSidebarRef = useRef(openSidebar);
+  useEffect(() => {
+    openSidebarRef.current = openSidebar;
+  }, [openSidebar]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        const { dx, dy, x0 } = gestureState;
+        const isOpen = openSidebarRef.current;
+        
+        if (!isOpen) {
+           if (x0 > width - 40 && dx < -10 && Math.abs(dx) > Math.abs(dy)) {
+               return true;
+           }
+        } else {
+           if (dx > 10 && Math.abs(dx) > Math.abs(dy)) {
+               return true;
+           }
+        }
+        return false;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        const isOpen = openSidebarRef.current;
+        if (!isOpen && gestureState.dx < -50) {
+          setopenSidebar(true);
+        } else if (isOpen && gestureState.dx > 50) {
+          handleCloseDrawer();
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     Animated.spring(slideAnim, {
@@ -88,7 +122,7 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
   };
 
   return (
-    <>
+    <View style={[StyleSheet.absoluteFillObject, { zIndex: 999, elevation: 999 }]} pointerEvents="box-none" {...panResponder.panHandlers}>
       {openSidebar && (
         <Pressable 
           style={styles.backdrop} 
@@ -155,7 +189,7 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
             <LogoutModal
               isModalVisible={openLogoutModal}
               confirm={() => {
-                handleLogout(CustomNavigation);
+                handleLogout(ResetNavigation);
                 setLogoutModal(false);
                 setopenSidebar(false);
               }}
@@ -164,7 +198,7 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
           </View>
         </LinearGradient>
       </Animated.View>
-    </>
+    </View>
   );
 };
 

@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Pressable, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useSelector, useDispatch } from 'react-redux';
 import { Common_Context } from '../contexts/Common_Context';
@@ -79,14 +78,7 @@ export default function NavBar({ openSidebar, setopenSidebar }) {
       </View>
        
       <View style={styles.NotificationView}>
-        <Pressable style={{ position: "relative" }}>
-          <View style={styles.notificationBadge}>
-            <Text style={styles.badgeText}>0</Text>
-          </View>
-          <View>
-           <Ionicons style={styles.iconWrap} name="notifications-outline" size={24} color="#7da2d4" /> 
-          </View>
-        </Pressable>
+
         
         <Pressable onPress={() => setopenSidebar(true)} style={styles.iconContainer}>
           <AntDesign name="bars" size={22} color="#085fd1" /> 
@@ -139,29 +131,6 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 10,
     backgroundColor: "#FFF",
-    elevation: 2,
-  },
-  notificationBadge: {
-    position: "absolute",
-    top: -5,
-    right: -5,
-    backgroundColor: "#1e73e3",
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
-  badgeText: {
-    color: "white",
-    fontSize: 11,
-    fontWeight: "bold",
-  },
-  iconWrap: {
-    backgroundColor: "#FFF",
-    padding: 8,
-    borderRadius: 10,
     elevation: 2,
   },
 });

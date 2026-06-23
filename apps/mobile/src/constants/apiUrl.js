@@ -1,8 +1,10 @@
+import { API_URL } from '@env';
+
 // export const BASE_URL = 'https://bharanipriya.pinnaclesystems.co.in'
 //export const BASE_URL = 'http://192.168.1.43:8025/'
 //export const BASE_URL = 'https://bsamobile.pinnaclesystems.co.in'
 //export const BASE_URL = "https://bharanipriya.pinnaclesystems.co.in"
-export const BASE_URL = "https://agfapi.pinnaclesystems.co.in"
+export const BASE_URL = API_URL;
 
 export const PO_REGISTER = '/poRegister'
 export const COMMON_MAST = '/commonMast'
