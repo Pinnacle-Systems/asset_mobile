@@ -51,9 +51,9 @@ function LoginScreen({ navigation }) {
 
         if (company?.companyid) {
             await AsyncStorage.setItem('userName', JSON.stringify({
-                userName: username, Id: Id, GCOMPCODE: company?.companyCode, COMPID: company?.companyid,hr, hod: head, roleId: roleid
+                userName: username, Id: Id, GCOMPCODE: company?.companyCode, COMPID: company?.companyid, hr, hod: head, roleId: roleid
             }));
-            
+
             // Wipe all RTK Query caches before navigating so fresh data loads for this user
             dispatch(RESET_STORE);
             navigation_use.replace('HOME');
@@ -100,13 +100,13 @@ function LoginScreen({ navigation }) {
             return;
         }
         try {
-            const data = await loginUser({ username, password,deviceName:MobileDevice,MobileIP,COMPCODE:GlobalSelected}).unwrap();
+            const data = await loginUser({ username, password, deviceName: MobileDevice, MobileIP, COMPCODE: GlobalSelected }).unwrap();
             if (data.message === 'Login Successfull') {
                 var filterdata = data?.data;
 
                 if (filterdata?.isAdmin == 1) {
                     await AsyncStorage.setItem('userName', JSON.stringify({
-                        userName: username, Id: Id, hod: head,approval:filterdata?.approval,hr:hr, roleId: roleid, isAdmin: 1
+                        userName: username, Id: Id, hod: head, approval: filterdata?.approval, hr: hr, roleId: roleid, isAdmin: 1
                     }));
                     // Wipe all RTK Query caches before navigating so fresh data loads for this user
                     dispatch(RESET_STORE);
@@ -116,17 +116,16 @@ function LoginScreen({ navigation }) {
                 setrolid(filterdata?.roleId);
                 setGlobal(true);
                 sethr(filterdata?.hr)
-                var addComp=[]
-                var filterunique=filterdata?.Companies.filter((data)=>{
-                if(!addComp.includes(data?.companyCode) )
-                {
-                     addComp.push(data?.companyCode)
-                   return  data
-                }
+                var addComp = []
+                var filterunique = filterdata?.Companies.filter((data) => {
+                    if (!addComp.includes(data?.companyCode)) {
+                        addComp.push(data?.companyCode)
+                        return data
+                    }
                 });
-                
+
                 setGlobalData(filterunique);
-                addComp=[]
+                addComp = []
                 setId(filterdata?.Idcard);
                 setHead(filterdata?.hod);
             } else {
@@ -150,14 +149,9 @@ function LoginScreen({ navigation }) {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
         >
-            <StatusBar barStyle="light-content" backgroundColor="#1a365d" />
-            
-            <LinearGradient
-                colors={['#1a365d', '#4299e1']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 1}}
-                style={styles.background}
-            >
+            <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+
+            <View style={styles.background}>
                 <View style={styles.logoContainer}>
                     <Image
                         style={styles.logo}
@@ -169,7 +163,15 @@ function LoginScreen({ navigation }) {
 
                 {Global ? (
                     <View style={styles.companySelectionContainer}>
-                        <Text style={styles.selectionTitle}>Select Your Company</Text>
+                        <View style={styles.selectionHeader}>
+                            <Text style={styles.selectionTitle}>Select Your Company</Text>
+                            <TouchableOpacity
+                                style={styles.selectionCloseBtn}
+                                onPress={() => setGlobal(false)}
+                            >
+                                <Icon name="close" size={18} color="#718096" />
+                            </TouchableOpacity>
+                        </View>
                         <Dropdown
                             selected={GlobalSelected}
                             label={<Text style={styles.dropdownLabel}>Company</Text>}
@@ -180,8 +182,8 @@ function LoginScreen({ navigation }) {
                             zIndex={300}
                             style={styles.dropdown}
                         />
-                        <TouchableOpacity 
-                            style={styles.selectButton.ButtonOuter} 
+                        <TouchableOpacity
+                            style={styles.selectButton.ButtonOuter}
                             onPress={OnSelectCompany}
                         >
                             <Text style={styles.selectButton.ButtonText}>Continue</Text>
@@ -190,7 +192,7 @@ function LoginScreen({ navigation }) {
                 ) : (
                     <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
                         {error && <Text style={styles.errorText}>{error}</Text>}
-                        
+
                         <View style={styles.inputContainer}>
                             <Icon name="person" size={20} color="#4299e1" style={styles.inputIcon} />
                             <TextInput
@@ -205,7 +207,7 @@ function LoginScreen({ navigation }) {
                                 autoCapitalize="none"
                             />
                         </View>
-                        
+
                         <View style={styles.inputContainer}>
                             <Icon name="lock" size={20} color="#4299e1" style={styles.inputIcon} />
                             <TextInput
@@ -219,19 +221,19 @@ function LoginScreen({ navigation }) {
                                 }}
                                 secureTextEntry={!isPasswordVisible}
                             />
-                            <TouchableOpacity 
-                                style={styles.eyeIcon} 
+                            <TouchableOpacity
+                                style={styles.eyeIcon}
                                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                             >
-                                <Icon 
-                                    name={isPasswordVisible ? "visibility" : "visibility-off"} 
-                                    size={20} 
-                                    color="#4299e1" 
+                                <Icon
+                                    name={isPasswordVisible ? "visibility" : "visibility-off"}
+                                    size={20}
+                                    color="#4299e1"
                                 />
                             </TouchableOpacity>
                         </View>
-                        
-                        <TouchableOpacity 
+
+                        <TouchableOpacity
                             style={[styles.loginButton.ButtonOuter, { opacity: isLoading ? 0.7 : 1 }]}
                             onPress={handleLogin}
                             disabled={isLoading}
@@ -247,7 +249,7 @@ function LoginScreen({ navigation }) {
                         <Text style={styles.footerLink}>Sign up</Text>
                     </TouchableOpacity> */}
                 </View>
-            </LinearGradient>
+            </View>
         </KeyboardAvoidingView>
     );
 }
@@ -262,6 +264,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         width: '100%',
+        backgroundColor: '#ffffff',
     },
     logoContainer: {
         alignItems: 'center',
@@ -276,13 +279,13 @@ const styles = StyleSheet.create({
     appName: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: 'white',
+        color: '#1a365d',
         marginBottom: 8,
         fontFamily: 'Roboto-Bold',
     },
     appSubtitle: {
         fontSize: 16,
-        color: 'rgba(255,255,255,0.8)',
+        color: '#718096',
         fontFamily: 'Roboto-Regular',
     },
     card: {
@@ -364,13 +367,25 @@ const styles = StyleSheet.create({
         shadowRadius: 20,
         elevation: 10,
     },
+    selectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
     selectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         color: '#1a365d',
-        marginBottom: 20,
-        textAlign: 'center',
         fontFamily: 'Roboto-Bold',
+    },
+    selectionCloseBtn: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     dropdownLabel: {
         color: '#1a365d',
@@ -408,11 +423,11 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     footerText: {
-        color: 'rgba(255,255,255,0.8)',
+        color: '#a0aec0',
         marginRight: 5,
         fontFamily: 'Roboto-Regular',
-        width:210,
-        textAlign:"center"
+        width: 210,
+        textAlign: "center"
     },
     footerLink: {
         color: 'white',

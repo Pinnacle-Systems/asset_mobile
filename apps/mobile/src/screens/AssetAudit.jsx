@@ -35,22 +35,22 @@ const { width, height } = Dimensions.get('window');
 
 // ─── Color Tokens ─────────────────────────────────────────────────────────────
 const C = {
-  primary:    '#0A84FF',
+  primary: '#0A84FF',
   primaryDim: 'rgba(10,132,255,0.15)',
-  success:    '#30D158',
+  success: '#30D158',
   successDim: 'rgba(48,209,88,0.15)',
-  danger:     '#FF453A',
-  dangerDim:  'rgba(255,69,58,0.15)',
-  warning:    '#FFD60A',
+  danger: '#FF453A',
+  dangerDim: 'rgba(255,69,58,0.15)',
+  warning: '#FFD60A',
   warningDim: 'rgba(255,214,10,0.15)',
-  bg:         '#0C0C0E',
-  surface:    '#1C1C1E',
+  bg: '#0C0C0E',
+  surface: '#1C1C1E',
   surfaceAlt: '#2C2C2E',
-  border:     'rgba(255,255,255,0.08)',
-  textPri:    '#FFFFFF',
-  textSec:    'rgba(255,255,255,0.55)',
-  overlay:    'rgba(0,0,0,0.82)',
-  scanLine:   '#0A84FF',
+  border: 'rgba(255,255,255,0.08)',
+  textPri: '#FFFFFF',
+  textSec: 'rgba(255,255,255,0.55)',
+  overlay: 'rgba(0,0,0,0.82)',
+  scanLine: '#0A84FF',
 };
 
 // ─── Animated Scan Line ───────────────────────────────────────────────────────
@@ -117,26 +117,26 @@ function SectionHeader({ icon, label, badgeText, badgeColor = C.textSec, iconCol
 }
 
 const sectionStyles = StyleSheet.create({
-  row:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  left:      { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  label:     { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.6 },
-  badge:     { borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  left: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  label: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.6 },
+  badge: { borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3 },
   badgeText: { fontSize: 10, fontWeight: '600' },
 });
 
 // ─── Condition Pills ──────────────────────────────────────────────────────────
 const CONDITIONS = [
-  { key: 'Good',              icon: 'checkmark-circle', color: C.success, dim: C.successDim },
-  { key: 'Damaged',           icon: 'warning',          color: C.danger,  dim: C.dangerDim  },
-  { key: 'Under Maintenance', icon: 'construct',        color: C.warning, dim: C.warningDim },
+  { key: 'Good', icon: 'checkmark-circle', color: C.success, dim: C.successDim },
+  { key: 'Damaged', icon: 'warning', color: C.danger, dim: C.dangerDim },
+  { key: 'Under Maintenance', icon: 'construct', color: C.warning, dim: C.warningDim },
 ];
 
 // ─── Pre-Scan Setup Popup ─────────────────────────────────────────────────────
 function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoading, onCancel, onChangeDivision }) {
-  const [selRoom,     setSelRoom]     = useState(null);
-  const [selFloor,    setSelFloor]    = useState(null);
+  const [selRoom, setSelRoom] = useState(null);
+  const [selFloor, setSelFloor] = useState(null);
   const [selBuilding, setSelBuilding] = useState(null);
-  const [step,        setStep]        = useState(0);
+  const [step, setStep] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: floorData, isLoading: floorLoading, isFetching: floorFetching } = useGetFloorMasterQuery(
@@ -160,13 +160,13 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
   }, [visible]);
 
   const steps = [
-    { key: 'building', label: 'Building', icon: 'business', color: C.primary,  data: buildings, selected: selBuilding, setSelected: setSelBuilding },
-    { key: 'floor',    label: 'Floor',    icon: 'layers',   color: C.success,  data: floorData?.data || [], selected: selFloor,    setSelected: setSelFloor    },
-    { key: 'room',     label: 'Room',     icon: 'grid',     color: C.warning,  data: roomData?.data || [],  selected: selRoom,     setSelected: setSelRoom     },
+    { key: 'building', label: 'Building', icon: 'business', color: C.primary, data: buildings, selected: selBuilding, setSelected: setSelBuilding },
+    { key: 'floor', label: 'Floor', icon: 'layers', color: C.success, data: floorData?.data || [], selected: selFloor, setSelected: setSelFloor },
+    { key: 'room', label: 'Room', icon: 'grid', color: C.warning, data: roomData?.data || [], selected: selRoom, setSelected: setSelRoom },
   ];
 
   const current = steps[step];
-  const isLast  = step === steps.length - 1;
+  const isLast = step === steps.length - 1;
 
   const handleNext = () => {
     if (!current.selected) {
@@ -182,9 +182,9 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
   };
 
   return (
-    <Modal 
-      visible={visible} 
-      transparent 
+    <Modal
+      visible={visible}
+      transparent
       animationType="none"
       onRequestClose={() => {
         if (step > 0) {
@@ -224,7 +224,7 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
                   style={[
                     popup.dot,
                     i === step && { backgroundColor: current.color, width: 18 },
-                    i <  step  && { backgroundColor: C.success },
+                    i < step && { backgroundColor: C.success },
                   ]}
                 />
               ))}
@@ -354,30 +354,30 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
 export default function AssetAudit() {
   const navigation = useNavigation();
   const [hasPermission, setHasPermission] = useState(false);
-  const [scanned,       setScanned]       = useState(false);
-  const [assetData,     setAssetData]     = useState(null);
-  const [cameraActive,  setCameraActive]  = useState(true);
-  const [latitude,      setLatitude]      = useState(11.77);
-  const [longitude,     setLongitude]     = useState(77.3433);
-  const [address,       setAddress]       = useState('');
-  const [loading,       setLoading]       = useState(false);
-  const [showDetails,   setShowDetails]   = useState(false);
-  const [scanMode,      setScanMode]      = useState('barcode');
-  const [flashOn,       setFlashOn]       = useState(false);
-  const [condition,     setCondition]     = useState('Good');
-  const [showSetup,     setShowSetup]     = useState(true);
-  const [auditParams,   setAuditParams]   = useState(null);
-  const [companyCode,   setCompanyCode]   = useState('');
+  const [scanned, setScanned] = useState(false);
+  const [assetData, setAssetData] = useState(null);
+  const [cameraActive, setCameraActive] = useState(true);
+  const [latitude, setLatitude] = useState(11.77);
+  const [longitude, setLongitude] = useState(77.3433);
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [scanMode, setScanMode] = useState('barcode');
+  const [flashOn, setFlashOn] = useState(false);
+  const [condition, setCondition] = useState('Good');
+  const [showSetup, setShowSetup] = useState(true);
+  const [auditParams, setAuditParams] = useState(null);
+  const [companyCode, setCompanyCode] = useState('');
   const [asyncCompCode, setAsyncCompCode] = useState(null);
   const [userCompanies, setUserCompanies] = useState([]);
-  const [compid,        setCompid]        = useState(null);
+  const [compid, setCompid] = useState(null);
   const [showDivisionModal, setShowDivisionModal] = useState(false);
   const [savedDivision, setSavedDivision] = useState(null);
   const [isCompanyLoading, setIsCompanyLoading] = useState(true);
 
-  const camera    = useRef(null);
+  const camera = useRef(null);
   const slideAnim = useRef(new Animated.Value(height)).current;
-  const fadeAnim  = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const { data: divisionData, isLoading: divisionLoading } = useGetDivisionMasterQuery();
   const { data: companyMaster } = useGetCompanycodeQuery({});
@@ -387,7 +387,7 @@ export default function AssetAudit() {
   )?.label || companyCode;
 
   const divisions = divisionData?.data || [];
-  
+
   // Use saved division from AsyncStorage if it matches the current company, else fallback to auto-select if only 1 division
   const activeDivision = auditParams?.division || savedDivision || (divisions.length === 1 ? divisions[0] : null);
 
@@ -409,7 +409,7 @@ export default function AssetAudit() {
   const masterLoading = buildingLoading || divisionLoading || buildingFetching;
 
   const [BarcodeRefetch] = useLazyGetBarcodeDataQuery();
-  const [addBarcode]     = useSaveBarcodeDetailsMutation();
+  const [addBarcode] = useSaveBarcodeDetailsMutation();
 
   const { hasPermission: cameraPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back', { physicalDevices: ['wide-angle-camera'] });
@@ -437,24 +437,24 @@ export default function AssetAudit() {
           if (parsedUserData?.GCOMPCODE) setCompanyCode(parsedUserData.GCOMPCODE);
           if (parsedUserData?.COMPID) setCompid(parsedUserData.COMPID);
         }
-        
+
         const storedCompcode = await AsyncStorage.getItem('compcode');
         if (storedCompcode) setAsyncCompCode(storedCompcode);
-        
+
         const storedUserComps = await AsyncStorage.getItem('userCompanies');
         if (storedUserComps) setUserCompanies(JSON.parse(storedUserComps));
 
         // Load the user's previously saved division for this screen
         const savedDivStr = await AsyncStorage.getItem('defaultDivision');
         if (savedDivStr) {
-           const parsedDiv = JSON.parse(savedDivStr);
-           const currentComp = storedCompcode || (parsedUserData ? parsedUserData.GCOMPCODE : null);
-           
-           // Only use it if it belongs to the current company!
-           if (!currentComp || String(parsedDiv.COMPCODE).toUpperCase() === String(currentComp).toUpperCase()) {
-               setSavedDivision(parsedDiv);
-               setAuditParams(prev => ({ ...prev, division: parsedDiv }));
-           }
+          const parsedDiv = JSON.parse(savedDivStr);
+          const currentComp = storedCompcode || (parsedUserData ? parsedUserData.GCOMPCODE : null);
+
+          // Only use it if it belongs to the current company!
+          if (!currentComp || String(parsedDiv.COMPCODE).toUpperCase() === String(currentComp).toUpperCase()) {
+            setSavedDivision(parsedDiv);
+            setAuditParams(prev => ({ ...prev, division: parsedDiv }));
+          }
         }
       } catch (e) {
         console.log(e);
@@ -469,12 +469,12 @@ export default function AssetAudit() {
     if (showDetails) {
       Animated.parallel([
         Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, tension: 65, friction: 11 }),
-        Animated.timing(fadeAnim,  { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
       ]).start();
     } else {
       Animated.parallel([
         Animated.timing(slideAnim, { toValue: height, duration: 300, useNativeDriver: true }),
-        Animated.timing(fadeAnim,  { toValue: 0,      duration: 200, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
       ]).start();
     }
   }, [showDetails]);
@@ -495,7 +495,7 @@ export default function AssetAudit() {
     setLoading(true);
     try {
       const mockData = await BarcodeRefetch({ BARCODEID: assetId }).unwrap();
-      const bardata  = mockData?.data;
+      const bardata = mockData?.data;
       if (bardata && bardata.length > 0) {
         setAssetData(bardata[0]);
         setShowDetails(true);
@@ -537,9 +537,9 @@ export default function AssetAudit() {
       const url = `https://api.tomtom.com/search/2/reverseGeocode/${coords.latitude},${coords.longitude}.json?key=${TOMTOM_API_KEY}&radius=50&language=en-US`;
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data      = await response.json();
+      const data = await response.json();
       const bestMatch = data.addresses?.[0]?.address;
-      const addr      = bestMatch?.freeformAddress ||
+      const addr = bestMatch?.freeformAddress ||
         `${bestMatch?.streetNumber || ''} ${bestMatch?.streetName || ''}, ${bestMatch?.municipality || bestMatch?.country || 'Unknown location'}`.trim();
       if (addr) {
         setAddress(addr);
@@ -565,11 +565,11 @@ export default function AssetAudit() {
 
       const _data = await addBarcode({
         DOCID, ASSETID, SUBGRP, MMADE, MMODEL, REMARKS, MAINGRP, ABARID, AUDIT_DATE,
-        ROOM:      auditParams?.room?.ID,
-        BUILDING:  auditParams?.building?.ID,
-        FLOORS:    auditParams?.floor?.ID,
-        DIVISION:  auditParams?.division?.ID,
-        LOC:       address,
+        ROOM: auditParams?.room?.ID,
+        BUILDING: auditParams?.building?.ID,
+        FLOORS: auditParams?.floor?.ID,
+        DIVISION: auditParams?.division?.ID,
+        LOC: address,
         CONDITION: condition,
       })?.unwrap();
 
@@ -609,8 +609,8 @@ export default function AssetAudit() {
     return (
       <SafeAreaView style={styles.permContainer}>
         <StatusBar barStyle="light-content" />
-        <TouchableOpacity 
-          style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }} 
+        <TouchableOpacity
+          style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
           onPress={() => navigation && navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={28} color={C.textPri} />
@@ -630,8 +630,8 @@ export default function AssetAudit() {
   if (!device) {
     return (
       <SafeAreaView style={styles.permContainer}>
-        <TouchableOpacity 
-          style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }} 
+        <TouchableOpacity
+          style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
           onPress={() => navigation && navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={28} color={C.textPri} />
@@ -679,14 +679,14 @@ export default function AssetAudit() {
 
           {/* Top bar */}
           <SafeAreaView>
-            <ScrollView 
-              horizontal 
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.topBar}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <TouchableOpacity 
-                  style={styles.iconBtn} 
+                <TouchableOpacity
+                  style={styles.iconBtn}
                   onPress={() => {
                     if (navigation) navigation.goBack();
                   }}
@@ -699,8 +699,8 @@ export default function AssetAudit() {
                 </View>
 
                 {companyCode ? (
-                  <TouchableOpacity 
-                    style={styles.topBadge} 
+                  <TouchableOpacity
+                    style={styles.topBadge}
                     onPress={() => setShowDivisionModal(true)}
                   >
                     <Ionicons name="business" size={12} color={C.warning} />
@@ -713,7 +713,7 @@ export default function AssetAudit() {
                 <TouchableOpacity style={styles.iconBtn} onPress={() => setShowSetup(true)}>
                   <Ionicons name="settings-outline" size={20} color={C.textSec} />
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[styles.iconBtn, flashOn && styles.iconBtnActive]}
                   onPress={() => setFlashOn(f => !f)}
@@ -963,9 +963,9 @@ export default function AssetAudit() {
                     {loading
                       ? <ActivityIndicator size="small" color="#fff" />
                       : <>
-                          <Ionicons name="checkmark-circle" size={18} color="#fff" />
-                          <Text style={styles.primaryBtnText}>Confirm &amp; Save</Text>
-                        </>
+                        <Ionicons name="checkmark-circle" size={18} color="#fff" />
+                        <Text style={styles.primaryBtnText}>Confirm &amp; Save</Text>
+                      </>
                     }
                   </TouchableOpacity>
                 </View>
@@ -997,8 +997,8 @@ export default function AssetAudit() {
                   <Text style={popup.headerSub}>Allowed divisions</Text>
                 </View>
               </View>
-              <TouchableOpacity 
-                style={styles.closeBtn} 
+              <TouchableOpacity
+                style={styles.closeBtn}
                 onPress={() => {
                   if (activeDivision) {
                     setShowDivisionModal(false);
@@ -1041,6 +1041,20 @@ export default function AssetAudit() {
                 );
               })}
             </ScrollView>
+
+            {/* Back button footer */}
+            <View style={[popup.footer, { paddingTop: 8 }]}>
+              <TouchableOpacity
+                style={popup.backBtn}
+                onPress={() => {
+                  setShowDivisionModal(false);
+                  navigation.navigate('HOME');
+                }}
+              >
+                <Ionicons name="arrow-back" size={18} color={C.textSec} />
+                <Text style={popup.backBtnText}>Back</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -1065,14 +1079,14 @@ const popup = StyleSheet.create({
     paddingHorizontal: 24, paddingTop: 20, paddingBottom: 16,
     borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  headerLeft:  { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   headerIcon: {
     width: 44, height: 44, borderRadius: 14,
     justifyContent: 'center', alignItems: 'center',
   },
   headerTitle: { fontSize: 18, fontWeight: '700', color: C.textPri },
-  headerSub:   { fontSize: 13, color: C.textSec, marginTop: 2 },
-  dotsRow:     { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  headerSub: { fontSize: 13, color: C.textSec, marginTop: 2 },
+  dotsRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   dot: {
     width: 8, height: 8, borderRadius: 4,
     backgroundColor: C.border,
@@ -1099,8 +1113,8 @@ const popup = StyleSheet.create({
   searchInput: {
     flex: 1, color: C.textPri, fontSize: 15, padding: 0,
   },
-  listScroll:   { maxHeight: height * 0.38 },
-  listContent:  { paddingHorizontal: 20, paddingBottom: 8, gap: 8 },
+  listScroll: { maxHeight: height * 0.38 },
+  listContent: { paddingHorizontal: 20, paddingBottom: 8, gap: 8 },
   optionRow: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: C.surfaceAlt,
@@ -1112,7 +1126,7 @@ const popup = StyleSheet.create({
     borderWidth: 2, borderColor: C.border,
     justifyContent: 'center', alignItems: 'center',
   },
-  optionText:  { fontSize: 15, color: C.textPri, fontWeight: '500', flex: 1 },
+  optionText: { fontSize: 15, color: C.textPri, fontWeight: '500', flex: 1 },
   footer: {
     flexDirection: 'row', gap: 12,
     paddingHorizontal: 20, paddingTop: 16,
@@ -1123,21 +1137,21 @@ const popup = StyleSheet.create({
     borderRadius: 14, borderWidth: 1.5, borderColor: C.border,
     backgroundColor: C.surfaceAlt,
   },
-  backBtnText:     { color: C.textSec, fontSize: 15, fontWeight: '600' },
+  backBtnText: { color: C.textSec, fontSize: 15, fontWeight: '600' },
   nextBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center',
     justifyContent: 'center', gap: 8,
     paddingVertical: 15, borderRadius: 14,
   },
   nextBtnDisabled: { opacity: 0.5 },
-  nextBtnText:     { color: '#fff', fontSize: 15, fontWeight: '700' },
+  nextBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
 
 // ─── Main Styles ──────────────────────────────────────────────────────────────
-const FRAME_QR    = 240;
+const FRAME_QR = 240;
 const FRAME_BAR_W = 290;
 const FRAME_BAR_H = 130;
-const CORNER      = 22;
+const CORNER = 22;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
@@ -1151,12 +1165,12 @@ const styles = StyleSheet.create({
     backgroundColor: C.primaryDim,
     justifyContent: 'center', alignItems: 'center', marginBottom: 24,
   },
-  permTitle:   { fontSize: 22, fontWeight: '700', color: C.textPri, marginBottom: 10, textAlign: 'center' },
-  permSub:     { fontSize: 15, color: C.textSec, textAlign: 'center', lineHeight: 22, marginBottom: 32 },
-  permBtn:     { backgroundColor: C.primary, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 14 },
+  permTitle: { fontSize: 22, fontWeight: '700', color: C.textPri, marginBottom: 10, textAlign: 'center' },
+  permSub: { fontSize: 15, color: C.textSec, textAlign: 'center', lineHeight: 22, marginBottom: 32 },
+  permBtn: { backgroundColor: C.primary, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 14 },
   permBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 
-  overlay:   { flex: 1, justifyContent: 'space-between' },
+  overlay: { flex: 1, justifyContent: 'space-between' },
   topBar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8,
@@ -1166,7 +1180,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, gap: 8,
   },
-  dot:          { width: 7, height: 7, borderRadius: 4 },
+  dot: { width: 7, height: 7, borderRadius: 4 },
   topBadgeText: { color: C.textPri, fontSize: 14, fontWeight: '600', letterSpacing: 0.3 },
   iconBtn: {
     width: 44, height: 44, borderRadius: 22,
@@ -1184,20 +1198,20 @@ const styles = StyleSheet.create({
   paramsBannerText: { color: C.primary, fontSize: 13, fontWeight: '600', maxWidth: width * 0.7 },
 
   frameArea: { flex: 1, flexDirection: 'row' },
-  frameCol:  { flexDirection: 'column' },
-  dimLeft:   { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
-  dimRight:  { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
-  dimTop:    { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
+  frameCol: { flexDirection: 'column' },
+  dimLeft: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
+  dimRight: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
+  dimTop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
   dimBottom: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
 
-  qrFrame:      { width: FRAME_QR,    height: FRAME_QR,    overflow: 'hidden', position: 'relative' },
+  qrFrame: { width: FRAME_QR, height: FRAME_QR, overflow: 'hidden', position: 'relative' },
   barcodeFrame: { width: FRAME_BAR_W, height: FRAME_BAR_H, overflow: 'hidden', position: 'relative' },
 
-  corner:   { position: 'absolute', width: CORNER, height: CORNER, borderColor: C.primary, borderWidth: 3 },
-  cornerTL: { top: 0,    left: 0,  borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6     },
-  cornerTR: { top: 0,    right: 0, borderLeftWidth:  0, borderBottomWidth: 0, borderTopRightRadius: 6    },
-  cornerBL: { bottom: 0, left: 0,  borderRightWidth: 0, borderTopWidth: 0,    borderBottomLeftRadius: 6  },
-  cornerBR: { bottom: 0, right: 0, borderLeftWidth:  0, borderTopWidth: 0,    borderBottomRightRadius: 6 },
+  corner: { position: 'absolute', width: CORNER, height: CORNER, borderColor: C.primary, borderWidth: 3 },
+  cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
+  cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
+  cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
+  cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 6 },
 
   scanLineQR: {
     position: 'absolute', left: 4, right: 4, height: 2,
@@ -1210,9 +1224,9 @@ const styles = StyleSheet.create({
     shadowColor: C.danger, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.9, shadowRadius: 6,
   },
 
-  hintRow:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 },
-  hintText:   { color: C.textSec, fontSize: 14, fontWeight: '500' },
-  bottomBar:  { alignItems: 'center', paddingBottom: 80, paddingTop: 8 },
+  hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 },
+  hintText: { color: C.textSec, fontSize: 14, fontWeight: '500' },
+  bottomBar: { alignItems: 'center', paddingBottom: 80, paddingTop: 8 },
   modeBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: 'rgba(10,132,255,0.12)',
@@ -1226,8 +1240,8 @@ const styles = StyleSheet.create({
     backgroundColor: C.overlay,
     justifyContent: 'center', alignItems: 'center',
   },
-  processingCard:  { backgroundColor: C.surface, borderRadius: 20, padding: 32, alignItems: 'center', gap: 16, minWidth: 200 },
-  processingText:  { color: C.textSec, fontSize: 15, fontWeight: '500' },
+  processingCard: { backgroundColor: C.surface, borderRadius: 20, padding: 32, alignItems: 'center', gap: 16, minWidth: 200 },
+  processingText: { color: C.textSec, fontSize: 15, fontWeight: '500' },
 
   modalBg: { flex: 1, backgroundColor: C.overlay, justifyContent: 'flex-end' },
   sheet: {
@@ -1244,16 +1258,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24, paddingVertical: 16,
     borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  sheetTitle:      { fontSize: 20, fontWeight: '700', color: C.textPri },
-  sheetSub:        { fontSize: 13, color: C.textSec, marginTop: 3 },
+  sheetTitle: { fontSize: 20, fontWeight: '700', color: C.textPri },
+  sheetSub: { fontSize: 13, color: C.textSec, marginTop: 3 },
   closeBtn: {
     width: 34, height: 34, borderRadius: 17,
     backgroundColor: C.surfaceAlt,
     justifyContent: 'center', alignItems: 'center',
   },
-  sheetLoading:     { padding: 48, alignItems: 'center', gap: 16 },
+  sheetLoading: { padding: 48, alignItems: 'center', gap: 16 },
   sheetLoadingText: { color: C.textSec, fontSize: 15 },
-  sheetScroll:      { padding: 20, gap: 4 },
+  sheetScroll: { padding: 20, gap: 4 },
 
   // ── Info cards ──
   infoCard: {
@@ -1296,7 +1310,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   mismatchTitle: { fontSize: 13, fontWeight: '700', color: C.danger, marginBottom: 3 },
-  mismatchText:  { fontSize: 12, color: C.textSec, lineHeight: 18 },
+  mismatchText: { fontSize: 12, color: C.textSec, lineHeight: 18 },
 
   sectionLabel: {
     fontSize: 11, color: C.textSec, fontWeight: '600',
@@ -1310,7 +1324,7 @@ const styles = StyleSheet.create({
   },
   condChipText: { fontSize: 12, fontWeight: '600', color: C.textSec },
 
-  actionRow:       { flexDirection: 'row', gap: 12, marginTop: 8 },
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
   secondaryBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingVertical: 15, borderRadius: 14,

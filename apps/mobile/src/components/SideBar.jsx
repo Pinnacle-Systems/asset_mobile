@@ -4,7 +4,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  Image,
   Animated,
   Dimensions,
   FlatList,
@@ -18,7 +17,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { Common_Context } from '../contexts/Common_Context';
 import { BASE_URL, USERS_API } from '../constants/apiUrl';
 import { useSelector } from 'react-redux';
-import  LinearGradient  from 'react-native-linear-gradient';
+import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
 
 const { width } = Dimensions.get('window');
@@ -40,15 +39,15 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
       onMoveShouldSetPanResponder: (evt, gestureState) => {
         const { dx, dy, x0 } = gestureState;
         const isOpen = openSidebarRef.current;
-        
+
         if (!isOpen) {
-           if (x0 > width - 40 && dx < -10 && Math.abs(dx) > Math.abs(dy)) {
-               return true;
-           }
+          if (x0 > width - 40 && dx < -10 && Math.abs(dx) > Math.abs(dy)) {
+            return true;
+          }
         } else {
-           if (dx > 10 && Math.abs(dx) > Math.abs(dy)) {
-               return true;
-           }
+          if (dx > 10 && Math.abs(dx) > Math.abs(dy)) {
+            return true;
+          }
         }
         return false;
       },
@@ -114,7 +113,7 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
             {item.label || item.name}
           </Text>
           {isActive && (
-            <View style={styles.activeIndicator}/>
+            <View style={styles.activeIndicator} />
           )}
         </View>
       </TouchableOpacity>
@@ -124,12 +123,12 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
   return (
     <View style={[StyleSheet.absoluteFillObject, { zIndex: 999, elevation: 999 }]} pointerEvents="box-none" {...panResponder.panHandlers}>
       {openSidebar && (
-        <Pressable 
-          style={styles.backdrop} 
-          onPress={handleCloseDrawer} 
+        <Pressable
+          style={styles.backdrop}
+          onPress={handleCloseDrawer}
         />
       )}
-      
+
       <Animated.View style={[styles.drawerContainer, { transform: [{ translateX: slideAnim }] }]}>
         <LinearGradient
           colors={['#FFFFFF', '#F7FAFF']}
@@ -137,8 +136,8 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
-          <TouchableOpacity 
-            style={styles.closeButton} 
+          <TouchableOpacity
+            style={styles.closeButton}
             onPress={handleCloseDrawer}
             activeOpacity={0.7}
           >
@@ -147,13 +146,12 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
 
           <View style={styles.header}>
             <View style={styles.avatarWrapper}>
-              <Image
-                source={{
-                  uri:`${BASE_URL}/${USERS_API}/getUserImage/${USER?.userName?.toLowerCase()}`,
-                }}
-                style={styles.avatar}
+              <MaterialCommunityIcons
+                name="account"
+                size={60}
+                color="#5E72E4"
               />
-              <View style={styles.onlineIndicator}/>
+              <View style={styles.onlineIndicator} />
             </View>
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{USER?.userName || 'User'}</Text>
@@ -171,17 +169,17 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
           />
 
           <View style={styles.footer}>
-            <TouchableOpacity 
-              onPress={() => setLogoutModal(true)} 
+            <TouchableOpacity
+              onPress={() => setLogoutModal(true)}
               style={styles.logoutButton}
               activeOpacity={0.7}
             >
               <View style={styles.logoutRow}>
-                <MaterialCommunityIcons 
-                  name="logout" 
-                  size={20} 
-                  color="#FF3D71" 
-                /> 
+                <MaterialCommunityIcons
+                  name="logout"
+                  size={20}
+                  color="#FF3D71"
+                />
                 <Text style={styles.logoutText}>Sign Out</Text>
               </View>
             </TouchableOpacity>
@@ -205,9 +203,9 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
 const styles = StyleSheet.create({
   backdrop: {
     position: 'absolute',
-    top: 0, 
-    bottom: 0, 
-    left: 0, 
+    top: 0,
+    bottom: 0,
+    left: 0,
     right: 0,
     backgroundColor: 'rgba(0,0,0,0.3)',
     zIndex: 99,
