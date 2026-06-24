@@ -17,7 +17,7 @@ import {
 import XLSX from 'xlsx';
 import Orientation from 'react-native-orientation-locker';
 import Share from 'react-native-share';
-import * as FS from 'react-native-fs';
+import  FS from 'react-native-fs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -1629,66 +1629,80 @@ export default function AuditReport() {
   }, [filters, statFilter, dateFilter]);
 
   // Refresh
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([rAudit(), rVariance()]);
+const onRefresh = useCallback(async () => {
+  setRefreshing(true);
+  try {
+    if (mode === 'scanned') {
+      await rAudit();
+    } else {
+      await rVariance();
+    }
+  } catch (e) {
+    // silently ignore, RTK Query handles error state
+  } finally {
     setRefreshing(false);
-  }, []);
+  }
+}, [mode]);
 
   // Export
-  const exportExcel = async () => {
-    try {
-      setExporting(true);
-      if (!displayData.length) {
-        Alert.alert('No Data', 'Nothing to export');
-        return;
-      }
-      
-      const rows = displayData.map(i => ({
-        'Asset ID': i.assetId,
-        'Barcode': i.abarid,
-        'Name': i.subGroup,
-        'Machine': `${i.mmade} ${i.mmodel}`,
-        'Division': i.division,
-        'Scanned Room': i.scannedRoom,
-        'Scanned Building': i.scannedBuilding,
-        'Scanned Floor': i.scannedFloor,
-        'Prev Room': i.prevRoom,
-        'Prev Building': i.prevBuilding,
-        'Prev Condition': i.prevCondition,
-        'Expected Room': i.expectedRoom,
-        'Condition': i.condition,
-        'Status': i.status,
-        'Room Changed': i.roomChanged,
-        'Building Changed': i.buildingChanged,
-        'Floor Changed': i.floorChanged,
-        'Condition Changed': i.conditionChanged,
-        'Change Summary': i.changeSummary,
-        'Audit Date': i.auditDate,
-        'Prev Audit Date': i.prevAuditDate || 'N/A',
-        'Remarks': i.remarks,
-      }));
-      
-      const ws = XLSX.utils.json_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Audit Report');
-      const out = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
-      const path = `${FS.DocumentDirectoryPath}/Audit_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
-      
-      await FS.writeFile(path, out, 'base64');
-      await Share.open({
-        url: `file://${path}`,
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        title: 'Audit Report',
-      });
-    } catch (e) {
-      if (e?.message !== 'User did not share') {
-        Alert.alert('Error', e.message);
-      }
-    } finally {
-      setExporting(false);
+const exportExcel = async () => {
+  try {
+    setExporting(true);
+    if (!displayData.length) {
+      Alert.alert('No Data', 'Nothing to export');
+      return;
     }
-  };
+
+    const rows = displayData.map(i => ({
+      'Asset ID': i.assetId,
+      'Barcode': i.abarid,
+      'Name': i.subGroup,
+      'Machine': `${i.mmade} ${i.mmodel}`,
+      'Division': i.division,
+      'Scanned Room': i.scannedRoom,
+      'Scanned Building': i.scannedBuilding,
+      'Scanned Floor': i.scannedFloor,
+      'Prev Room': i.prevRoom,
+      'Prev Building': i.prevBuilding,
+      'Prev Condition': i.prevCondition,
+      'Expected Room': i.expectedRoom,
+      'Condition': i.condition,
+      'Status': i.status,
+      'Room Changed': i.roomChanged,
+      'Building Changed': i.buildingChanged,
+      'Floor Changed': i.floorChanged,
+      'Condition Changed': i.conditionChanged,
+      'Change Summary': i.changeSummary,
+      'Audit Date': i.auditDate,
+      'Prev Audit Date': i.prevAuditDate || 'N/A',
+      'Remarks': i.remarks,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Audit Report');
+    const out = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+
+    const fileName = `Audit_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
+    const path = `${FS.CachesDirectoryPath}/${fileName}`;
+
+    await FS.writeFile(path, out, 'base64');
+
+    await Share.open({
+      url: Platform.OS === 'android' ? `file://${path}` : path,
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      title: 'Audit Report',
+      filename: fileName,
+      failOnCancel: false,
+    });
+  } catch (e) {
+    if (e?.message !== 'User did not share') {
+      Alert.alert('Export Error', e?.message || 'Unknown error');
+    }
+  } finally {
+    setExporting(false);
+  }
+};
 
   // Loading / Error
   if (isLoading) {
