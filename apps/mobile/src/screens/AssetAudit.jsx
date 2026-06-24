@@ -19,6 +19,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PermissionsAndroid, Platform } from 'react-native';
 import {
   useLazyGetBarcodeDataQuery,
   useSaveBarcodeDetailsMutation,
@@ -28,7 +29,8 @@ import {
   useGetDivisionMasterQuery,
 } from '../redux/service/commonMasters';
 import { useGetCompanycodeQuery } from '../redux/service/user';
-import { getCurrentLocation } from '../utils/CustomLocation';
+
+import { getCurrentLocation, requestLocationPermission } from '../utils/CustomLocation';
 import { TOMTOM_API_KEY } from '../constants/apiUrl';
 
 const { width, height } = Dimensions.get('window');
@@ -374,6 +376,7 @@ export default function AssetAudit() {
   const [showDivisionModal, setShowDivisionModal] = useState(false);
   const [savedDivision, setSavedDivision] = useState(null);
   const [isCompanyLoading, setIsCompanyLoading] = useState(true);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   const camera = useRef(null);
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -491,6 +494,10 @@ export default function AssetAudit() {
     },
   });
 
+
+
+
+
   const fetchAssetData = async (assetId) => {
     setLoading(true);
     try {
@@ -530,28 +537,44 @@ export default function AssetAudit() {
 
   async function fetchAddress() {
     try {
-      setLoading(true);
-      const coords = await new Promise((resolve, reject) =>
-        getCurrentLocation(({ coords }) => resolve(coords), reject)
-      );
-      const url = `https://api.tomtom.com/search/2/reverseGeocode/${coords.latitude},${coords.longitude}.json?key=${TOMTOM_API_KEY}&radius=50&language=en-US`;
+      setLocationLoading(true);
+
+      const position = await getCurrentLocation();
+
+      // Guard: permission denied or native module returned null
+      if (!position || !position.coords) {
+        setAddress('Location unavailable');
+        return;
+      }
+
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      setLatitude(lat);
+      setLongitude(lng);
+
+      // Guard: skip TomTom call if API key is missing
+      if (!TOMTOM_API_KEY) {
+        setAddress(`${lat}, ${lng}`);
+        return;
+      }
+
+      const url = `https://api.tomtom.com/search/2/reverseGeocode/${lat},${lng}.json?key=${TOMTOM_API_KEY}&radius=50&language=en-US`;
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
       const data = await response.json();
-      const bestMatch = data.addresses?.[0]?.address;
-      const addr = bestMatch?.freeformAddress ||
-        `${bestMatch?.streetNumber || ''} ${bestMatch?.streetName || ''}, ${bestMatch?.municipality || bestMatch?.country || 'Unknown location'}`.trim();
-      if (addr) {
-        setAddress(addr);
-        setLatitude(coords.latitude);
-        setLongitude(coords.longitude);
-        return { latitude: coords.latitude, longitude: coords.longitude, address: addr };
-      }
-      return { latitude: coords.latitude, longitude: coords.longitude, address: 'Location not found' };
-    } catch {
-      return { latitude, longitude, address: `Lat: ${latitude}, Lng: ${longitude}` };
+      const best = data.addresses?.[0]?.address;
+      const addr = best?.freeformAddress ||
+        [best?.streetNumber, best?.streetName, best?.municipality || best?.country]
+          .filter(Boolean).join(', ');
+
+      setAddress(addr || `${lat}, ${lng}`);
+
+    } catch (e) {
+      console.warn('fetchAddress error:', e?.message);
+      setAddress('Location unavailable');
     } finally {
-      setLoading(false);
+      setLocationLoading(false);
     }
   }
 

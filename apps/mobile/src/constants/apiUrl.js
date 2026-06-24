@@ -1,4 +1,4 @@
-import { API_URL } from '@env';
+import { API_URL,ASSET_TOMTOM_API_KEY } from '@env';
 
 // export const BASE_URL = 'https://bharanipriya.pinnaclesystems.co.in'
 //export const BASE_URL = 'http://192.168.1.43:8025/'
@@ -22,4 +22,4 @@ export const Advance="advance"
 export const Role='role'
 export const onduty='onduty'
 export const Onduty_Image_url=BASE_URL+"/"+onduty+"/Onduty_uploaded_image"
-export const TOMTOM_API_KEY = 'uCLvWhKdNKupgoRI1jEfdpo8Uca7OxMu';
+export const TOMTOM_API_KEY = ASSET_TOMTOM_API_KEY ;
