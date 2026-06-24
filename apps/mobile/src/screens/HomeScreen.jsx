@@ -1,114 +1,173 @@
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import React, { useEffect, useState, useContext } from "react";
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  ScrollView, 
+  TouchableOpacity, 
+  SafeAreaView, 
+  StatusBar,
+  Dimensions,
+  Image
+} from "react-native";
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Common_Context } from "../contexts/Common_Context";
+import { AllowedTabs_Filter } from "../utils/AllowedPagesFiltering";
 
-import { Button } from "../components/Button.jsx";
-import { Screen } from "../components/Screen.jsx";
-import { Text } from "../components/Text.jsx";
-import { api } from "../services/api.js";
+const { width } = Dimensions.get('window');
+
+const CARDS = [
+  { id: '1', label: 'Asset Auditing', action: 'asset', image: require('../assets/barcode.png'), notify: 0, bg: "#8c98a3" },
+];
 
 export function HomeScreen() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [health, setHealth] = useState(null);
-
-  const loadHealth = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await api.getHealth();
-      setHealth(response?.data ?? null);
-    } catch (err) {
-      setError("Unable to reach the API right now.");
-      console.warn("Mobile health check failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const navigation = useNavigation();
+  const [username, setUsername] = useState("User");
+  const { page, admin } = useContext(Common_Context);
 
   useEffect(() => {
-    loadHealth();
+    const fetchUser = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('userName');
+        if (storedUser) {
+          let userNameObj = JSON.parse(storedUser);
+          if (userNameObj?.userName) {
+            setUsername(userNameObj.userName);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load user', e);
+      }
+    };
+    fetchUser();
   }, []);
 
+  const filterCards = (admin == 1 || !page || page.length === 0) ? CARDS : AllowedTabs_Filter({
+    tabs: CARDS,
+    allowedTabs: page,
+    tabsPath_key: "action",
+    allowedTabspath_key: "link",
+    condtion: "isdefault",
+    condtion_op: { op: "==", val: 1 }
+  });
+
   return (
-    <Screen style={styles.screen}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Asset Mobile</Text>
-        <Text style={styles.subtitle}>Checking the API connection...</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f9f9f9" />
+      
 
-        {loading ? (
-          <View style={styles.stateRow}>
-            <ActivityIndicator size="small" color="#2563eb" />
-            <Text style={styles.stateText}>Loading health status</Text>
-          </View>
-        ) : null}
 
-        {!loading && error ? (
-          <View style={styles.stateRow}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : null}
-
-        {!loading && health ? (
-          <View style={styles.card}>
-            <Text style={styles.label}>Status</Text>
-            <Text style={styles.value}>{health.status}</Text>
-            <Text style={styles.label}>Service</Text>
-            <Text style={styles.value}>{health.service}</Text>
-            <Text style={styles.label}>Timestamp</Text>
-            <Text style={styles.value}>{health.timestamp}</Text>
-          </View>
-        ) : null}
-
-        <Button title="Retry" onPress={loadHealth} disabled={loading} style={styles.button} />
+      {/* Dashboard title */}
+      <View style={styles.titleSection}>
+        <Text style={styles.sectionTitle}>Dashboard</Text>
+        <Text style={styles.sectionSubtitle}>Select an action to continue</Text>
       </View>
-    </Screen>
+
+      {/* Card Grid */}
+      <ScrollView 
+        contentContainerStyle={styles.cardContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.grid}>
+          {filterCards?.map((item) => (
+            <TouchableOpacity 
+              key={item.id} 
+              style={[styles.card, { backgroundColor: item.bg }]} 
+              onPress={() => {
+                navigation.navigate(item.action);
+              }}
+              activeOpacity={0.8}
+            >
+              <Image style={styles.cardImage} source={item.image} />
+              <Text style={styles.cardText}>{item.label}</Text>
+              
+              {item.notify !== undefined && item.notify > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{item.notify}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={{height: 40}} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    justifyContent: "center",
+  container: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
   },
-  content: {
-    gap: 16,
+
+  titleSection: {
+    paddingHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1f2937',
   },
-  subtitle: {
-    color: "#6b7280",
-    marginBottom: 8,
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 4,
   },
-  stateRow: {
-    flexDirection: "row",
-    alignItems: "center",
+  cardContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    alignItems: 'center',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: 8,
-  },
-  stateText: {
-    color: "#374151",
-  },
-  errorText: {
-    color: "#dc2626",
   },
   card: {
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 12,
-    padding: 16,
-    gap: 8,
+    width: width * 0.9,
+    height: 90,
+    borderRadius: 10,
+    elevation: 10,
+    justifyContent: "flex-start",
+    alignItems: 'center',
+    padding: 10,
+    marginVertical: 4,
+    flexDirection: "row",
+    gap: 15,
   },
-  label: {
-    color: "#6b7280",
+  cardImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    marginLeft: 12,
+  },
+  cardText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: "#FFF",
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: 0,
+    backgroundColor: 'red',
+    borderRadius: 50,
+    height: 25,
+    width: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  badgeText: {
+    color: '#fff',
     fontSize: 12,
-    textTransform: "uppercase",
-  },
-  value: {
-    color: "#111827",
-    fontWeight: "600",
-  },
-  button: {
-    marginTop: 8,
+    fontWeight: 'bold',
   },
 });
