@@ -1,32 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   Dimensions,
-  useWindowDimensions, 
+  useWindowDimensions,
   Alert
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { useTheme } from '../theme/ThemeProvider';
 
-export const Dropdown = ({ 
-  selected, 
+export const Dropdown = ({
+  selected,
   setSelected,
-  width, 
-  options, 
+  width,
+  options,
   label,
   _label,
   _value,
   multiple = false,
-  isLoading, 
-  placeholder, 
-  ...props 
+  isLoading,
+  placeholder,
+  style: wrapperStyle,
+  ...props
 }) => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const isPortrait = screenHeight > screenWidth;
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   useEffect(() => {
     const data = (options?.data || [])?.map((item) => ({
@@ -36,12 +40,13 @@ export const Dropdown = ({
     setItems(data);
   }, [options?.data]);
 
-  const dropdownWidth = width || (isPortrait ? screenWidth * 0.9 : screenWidth * 0.4);
+  const dropdownWidth = width || '100%';
 
   return (
     <View style={[
       styles.container,
-      { zIndex: open ? 1000 : 1 }
+      { zIndex: open ? 1000 : 1 },
+      wrapperStyle
     ]}>
       {label && (typeof label === 'string' ? <Text style={styles.label}>{label}</Text> : label)}
       <DropDownPicker
@@ -70,7 +75,7 @@ export const Dropdown = ({
         zIndex={100}
         maxHeight={screenHeight * 0.5}
         modalContentContainerStyle={{
-          backgroundColor: '#fff',
+          backgroundColor: theme.colors.surface,
           marginHorizontal: 20,
           marginTop: isPortrait ? '30%' : '10%',
           borderRadius: 12,
@@ -85,16 +90,20 @@ export const Dropdown = ({
           animationType: 'slide',
           transparent: true,
           presentationStyle: 'overFullScreen',
-          backdropColor: "#bbbfbd"
+          backdropColor: "rgba(0,0,0,0.5)"
+        }}
+        textStyle={{
+          color: theme.colors.text
         }}
         mode="SIMPLE"
         {...props}
+        theme={(theme.isDarkMode || theme.mode === 'dark') ? "DARK" : "LIGHT"}
       />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     marginVertical: 10,
   },
@@ -107,16 +116,16 @@ const styles = StyleSheet.create({
     marginHorizontal: '2.5%'
   },
   label: {
-    fontSize: 14,
+    fontSize: theme.fontSize?.sm || 14,
     fontWeight: '600',
     marginBottom: 6,
-    color: '#333',
+    color: theme.colors.text,
   },
   dropdown: {
-    backgroundColor: '#fff',
-    borderColor: '#4299e1',
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: theme.radius?.sm || 6,
     justifyContent: 'center',
   },
   portraitDropdown: {
@@ -128,16 +137,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   dropDownContainerStyle: {
-    backgroundColor: '#fff',
-    borderColor: '#4299e1',
-    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius?.sm || 6,
     marginTop: 2,
   },
   searchTextInputStyle: {
     height: 40,
-    borderColor: '#ddd',
+    borderColor: theme.colors.border,
     borderWidth: 1,
     borderRadius: 6,
     paddingHorizontal: 8,
+    color: theme.colors.text,
   },
 });

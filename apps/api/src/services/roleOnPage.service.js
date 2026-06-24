@@ -1,6 +1,7 @@
+import { logger } from "../utils/logger.js";
 import { prisma_Connector } from "../../index.js";
 
-export async function createRoleOnPage_Master(req, res) {
+export async function createRoleOnPage_Master(req, res, next) {
     const COMPCODE = String(req?.headers?.compcode).toUpperCase()
 
 
@@ -16,7 +17,7 @@ export async function createRoleOnPage_Master(req, res) {
         }
 
     } catch (error) {
-        console.log(error);
+        logger.info(error);
 
         return res.json({ statusCode: 500, message: 'An error occurred while creating the user' });
     }
@@ -24,7 +25,7 @@ export async function createRoleOnPage_Master(req, res) {
 
 
 
-export async function get_all_Role_name(req, res) {
+export async function get_all_Role_name(req, res, next) {
     // const COMPCODE=String(req?.headers?.compcode).toUpperCase()
     const where = req?.query?.where
 
@@ -37,7 +38,7 @@ export async function get_all_Role_name(req, res) {
     }
     catch (err) {
         res.json({ status: 0, data: {} })
-        console.log(err);
+        logger.info(err);
 
     }
 }

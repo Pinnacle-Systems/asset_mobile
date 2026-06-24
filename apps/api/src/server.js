@@ -1,10 +1,8 @@
 import 'dotenv/config';
-import { createLogger } from "@repo/logger";
+import { logger } from "./utils/logger.js";
 import createApp from "./app.js";
 import { env } from "./config/env.js";
 import oracledb from 'oracledb';
-
-const logger = createLogger({ service: "api", environment: env.NODE_ENV });
 
 // ─── Oracle DB connection check on startup ───────────────────
 async function checkOracleDB(label, config) {
@@ -19,7 +17,7 @@ async function checkOracleDB(label, config) {
         console.error(`\x1b[31m✘ Oracle [${label}] connection FAILED → ${config.connectString}\x1b[0m`);
         console.error(`  Reason: ${err.message}`);
     } finally {
-        if (conn) await conn.close().catch(() => {});
+        if (conn) await conn.close().catch(() => { });
     }
 }
 
@@ -46,19 +44,19 @@ async function checkAllDBConnections() {
     }
 
     const payrollConfig = {
-        user:          process.env.ORACLE_USER          || 'PSSPAYROLL',
-        password:      process.env.ORACLE_PASSWORD       || 'PSSPAYROLL_OCT2024',
+        user: process.env.ORACLE_USER || 'PSSPAYROLL',
+        password: process.env.ORACLE_PASSWORD || 'PSSPAYROLL_OCT2024',
         connectString: process.env.ORACLE_CONNECT_STRING || '103.125.155.220:1555/AN01P',
     };
     const assetConfig = {
-        user:          process.env.ORACLE_ASSET_USER          || 'PSSAGFASSET',
-        password:      process.env.ORACLE_ASSET_PASSWORD       || 'PSSAGFASSETMAR23',
+        user: process.env.ORACLE_ASSET_USER || 'PSSAGFASSET',
+        password: process.env.ORACLE_ASSET_PASSWORD || 'PSSAGFASSETMAR23',
         connectString: process.env.ORACLE_ASSET_CONNECT_STRING || '103.125.155.219:1555/AN01P',
     };
 
     await Promise.all([
         checkOracleDB('Payroll / User', payrollConfig),
-        checkOracleDB('Asset Audit',    assetConfig),
+        checkOracleDB('Asset Audit', assetConfig),
     ]);
 
     console.log('\x1b[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m\n');

@@ -10,7 +10,7 @@ import UserDetails from "./Slices/UserDetails";
 import inpuHandler from "./Slices/inputsHandler";
 import { createLogger } from 'redux-logger';
 import RoleOnSevices from "./service/RoleOn";
-import  slices from "./Slices/UserDetails";
+import slices from "./Slices/UserDetails";
 
 // Define logger BEFORE using it in configureStore
 const logger = createLogger({
@@ -52,14 +52,17 @@ const rootReducer = (state, action) => {
 export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
+    getDefaultMiddleware({
+      immutableCheck: false,
+      serializableCheck: false,
+    })
       .concat([
         commonMast.middleware,
         UsersApi.middleware,
         RoleOnSevices.middleware,
         ...(__DEV__ ? [logger] : []) // Only add logger in development
       ]),
-      
+
 });
 
 setupListeners(store.dispatch);

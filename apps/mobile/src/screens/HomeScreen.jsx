@@ -1,30 +1,34 @@
 import React, { useEffect, useState, useContext } from "react";
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
-  SafeAreaView, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
   StatusBar,
   Dimensions,
-  Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Common_Context } from "../contexts/Common_Context";
 import { AllowedTabs_Filter } from "../utils/AllowedPagesFiltering";
+import { useTheme } from "../theme/ThemeProvider";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 const { width } = Dimensions.get('window');
 
 const CARDS = [
-  { id: '1', label: 'Asset Auditing', subtitle: 'Manage and verify company assets', action: 'asset', image: require('../assets/barcode.png'), notify: 0 },
+  { id: '1', label: 'Asset Auditing', subtitle: 'Manage and verify company assets', action: 'asset', icon: 'barcode-scan', notify: 0 },
 ];
 
 export function HomeScreen() {
   const navigation = useNavigation();
   const [username, setUsername] = useState("User");
   const { page, admin } = useContext(Common_Context);
+  const { theme, isDarkMode } = useTheme();
+
+  const currentStyles = styles(theme);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,56 +57,60 @@ export function HomeScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f5f7fa" />
+    <SafeAreaView style={currentStyles.container}>
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.colors.background} />
 
       {/* Simple Header */}
-      <View style={styles.titleSection}>
-        <Text style={styles.sectionTitle}>Home Screen</Text>
-        <Text style={styles.sectionSubtitle}>Select an action to continue</Text>
+      <View style={currentStyles.titleSection}>
+        <Text style={currentStyles.sectionTitle}>Home Screen</Text>
+        <Text style={currentStyles.sectionSubtitle}>Select an action to continue</Text>
       </View>
 
       {/* Card Grid */}
-      <ScrollView 
-        contentContainerStyle={styles.cardContainer}
+      <ScrollView
+        contentContainerStyle={currentStyles.cardContainer}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.grid}>
+        <View style={currentStyles.grid}>
           {filterCards?.map((item) => (
-            <TouchableOpacity 
-              key={item.id} 
-              style={styles.card} 
+            <TouchableOpacity
+              key={item.id}
+              style={currentStyles.card}
               onPress={() => navigation.navigate(item.action)}
               activeOpacity={0.7}
             >
-              <View style={styles.iconWrapper}>
-                <Image style={styles.cardImage} source={item.image} resizeMode="contain" />
+              <View style={currentStyles.iconWrapper}>
+                <MaterialCommunityIcons
+                  name={item.icon}
+                  size={36}
+                  color={theme.colors.accent}
+                />
               </View>
-              <View style={styles.textContainer}>
-                <Text style={styles.cardText}>{item.label}</Text>
+              <View style={currentStyles.textContainer}>
+                <Text style={currentStyles.cardText}>{item.label}</Text>
                 {item.subtitle && (
-                  <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+                  <Text style={currentStyles.cardSubtitle}>{item.subtitle}</Text>
                 )}
               </View>
-              
+
               {item.notify !== undefined && item.notify > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{item.notify}</Text>
+                <View style={currentStyles.badge}>
+                  <Text style={currentStyles.badgeText}>{item.notify}</Text>
                 </View>
               )}
             </TouchableOpacity>
           ))}
         </View>
-        <View style={{height: 40}} />
+        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: theme.colors.background,
   },
   titleSection: {
     paddingHorizontal: 20,
@@ -112,13 +120,15 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#1e293b',
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#64748b',
+    color: theme.colors.subtext,
     marginTop: 6,
     fontWeight: '500',
+    fontFamily: theme.fonts.semiBold,
   },
   cardContainer: {
     paddingHorizontal: 20,
@@ -130,14 +140,14 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.colors.surface,
     borderRadius: 14,
     flexDirection: "row",
     alignItems: 'center',
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#64748b',
+    borderColor: theme.colors.border,
+    shadowColor: theme.colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -147,14 +157,10 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 16,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: theme.colors.accentLight,   // Light blue tint
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
-  },
-  cardImage: {
-    width: 54,
-    height: 54,
   },
   textContainer: {
     flex: 1,
@@ -162,16 +168,18 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 18,
     fontWeight: '700',
-    color: "#1e293b",
+    color: theme.colors.text,
     marginBottom: 2,
+    fontFamily: theme.fonts.bold,
   },
   cardSubtitle: {
     fontSize: 13,
-    color: '#64748b',
+    color: theme.colors.subtext,
     fontWeight: '500',
+    fontFamily: theme.fonts.regular,
   },
   badge: {
-    backgroundColor: '#ef4444',
+    backgroundColor: theme.colors.danger,
     borderRadius: 12,
     minWidth: 24,
     height: 24,
@@ -183,5 +191,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 12,
     fontWeight: '700',
+    fontFamily: theme.fonts.bold,
   },
 });

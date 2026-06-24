@@ -1,10 +1,11 @@
+import { logger } from "../utils/logger.js";
 import { prisma_Connector } from "../../index.js";
 import { getAssetConnection, getConnection } from "../constants/db.connection.js";
 import bcrypt from "bcrypt"
 import formatDateToOracle from "../utils/OracleDateFormat.js";
 
 
-export async function get(req, res) {
+export async function get(req, res, next) {
     const connection = await getConnection(res)
     try {
         const result = await connection.execute(`
@@ -18,15 +19,15 @@ export async function get(req, res) {
         return res.json({ statusCode: 0, data: resp })
     }
     catch (err) {
-        console.error('Error retrieving data:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error(`[get] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     }
     finally {
         await connection.close()
     }
 }
 
-export async function getBuyer(req, res) {
+export async function getBuyer(req, res, next) {
     const connection = await getConnection(res)
     try {
         const result = await connection.execute(`
@@ -43,8 +44,8 @@ GROUP BY C.COMPCODE
         return res.json({ statusCode: 0, data: resp })
     }
     catch (err) {
-        console.error('Error retrieving data:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error(`[getBuyer] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     }
     finally {
         await connection.close()
@@ -52,7 +53,7 @@ GROUP BY C.COMPCODE
 }
 
 
-export async function getMonthData(req, res) {
+export async function getMonthData(req, res, next) {
     const connection = await getConnection(res)
     try {
         const { filterYear, filterBuyer } = req.query;
@@ -62,7 +63,7 @@ export async function getMonthData(req, res) {
 GROUP BY A.PAYPERIOD
       ORDER BY TO_DATE(A.PAYPERIOD, 'Month YYYY')        
      `)
-        console.log(result, 'res');
+        logger.info(result, 'res');
         let resp = result.rows.map(po => ({
             month: po[0]
         }))
@@ -70,15 +71,15 @@ GROUP BY A.PAYPERIOD
         return res.json({ statusCode: 0, data: resp })
     }
     catch (err) {
-        console.error('Error retrieving data:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error(`[getMonthData] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     }
     finally {
         await connection.close()
     }
 }
 
-export async function getCompCodeData(req, res) {
+export async function getCompCodeData(req, res, next) {
     const connection = await getConnection(res)
     try {
         const { } = req.query;
@@ -89,7 +90,7 @@ JOIN HREMPLOYDETAILS B ON A.HREMPLOYMASTID = B.HREMPLOYMASTID
 JOIN GTCOMPMAST C ON C.GTCOMPMASTID = A.COMPCODE
 WHERE B.IDACTIVE = 'YES'
 GROUP BY C.COMPCODE`
-        console.log(sql, '84');
+        logger.info(sql, '84');
         const result = await connection.execute(sql)
         let resp = result.rows.map(po => ({
             com: po[0]
@@ -98,8 +99,8 @@ GROUP BY C.COMPCODE`
         return res.json({ statusCode: 0, data: resp })
     }
     catch (err) {
-        console.error('Error retrieving data:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error(`[getCompCodeData] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     }
     finally {
         await connection.close()
@@ -111,13 +112,13 @@ GROUP BY C.COMPCODE`
 
 
 
-export async function getBarcodeDetails(req, res) {
+export async function getBarcodeDetails(req, res, next) {
     const connection = await getAssetConnection(res)
    const COMPCODE=String(req?.headers?.compcode).toUpperCase()
     try {
         const {BARCODEID} = req.query;
 
-   console.log("DR",BARCODEID)
+   logger.info("DR",BARCODEID)
 
         const sql =
             ` SELECT J.COMPCODE COMPCODE1,A.DOCID DOCID1,A.ASSETID,C.SUBGRPNAME,A.MMADE MACHINEMADE,A.MMODEL MACHINEMODEL,A.REMARKS,D.RNAME RNAME1,A.ABARID,A.*
@@ -142,13 +143,13 @@ ORDER BY A.DOCID`
            });
 
 
-           console.log("bar"+BARCODEID,transformedResult);
+           logger.info("bar"+BARCODEID,transformedResult);
            
         return res.json({ statusCode: 0, data:transformedResult })
     }
     catch (err) {
-        console.error('Error retrieving data:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error(`[getBarcodeDetails] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     }
     finally {
         await connection.close()
@@ -157,7 +158,7 @@ ORDER BY A.DOCID`
 
 
 
-// export async function getAuditAssestDetails(req, res) {
+// export async function getAuditAssestDetails(req, res, next) {
 //     const connection = await getAssetConnection(res);
 //     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
     
@@ -174,7 +175,7 @@ ORDER BY A.DOCID`
 // where A.COMPCODE=:COMPCODE  ORDER BY A.DOCID 
 //         `;
 
-//         console.log("COm",COMPCODE);
+//         logger.info("COm",COMPCODE);
         
 
 //         const oracleResult = await connection.execute(sql,{COMPCODE});
@@ -188,7 +189,7 @@ ORDER BY A.DOCID`
 //             return keyValuePair;
 //         });
 
-//         console.log("Barcode query:", "Results:", transformedResult?.length);
+//         logger.info("Barcode query:", "Results:", transformedResult?.length);
         
 //         if (!transformedResult || transformedResult.length === 0) {
 //             return res.json({ 
@@ -205,12 +206,8 @@ ORDER BY A.DOCID`
 //         });
 //     }
 //     catch (err) {
-//         console.error('Error retrieving barcode details:', err);
-//         res.status(500).json({ 
-//             statusCode: 0, 
-//             error: 'Internal Server Error',
-//             message: err.message 
-//         });
+//         logger.error('Error retrieving barcode details:', err);
+//         return next(err);
 //     }
 //     finally {
 //         await connection.close();
@@ -219,9 +216,9 @@ ORDER BY A.DOCID`
 
 
 
-// export async function getAuditVarianceReport(req, res) {
+// export async function getAuditVarianceReport(req, res, next) {
 
-//     console.log("barc",req?.headers);
+//     logger.info("barc",req?.headers);
 //     const connection = await getAssetConnection(res);
 //     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
 
@@ -602,12 +599,8 @@ ORDER BY A.DOCID`
 //         });
 //     }
 //     catch (err) {
-//         console.error('Error generating variance report:', err);
-//         res.status(500).json({ 
-//             statusCode: 0, 
-//             error: 'Internal Server Error',
-//             message: err.message 
-//         });
+//         logger.error('Error generating variance report:', err);
+//         return next(err);
 //     }
 //     finally {
 //         await connection.close();
@@ -616,7 +609,7 @@ ORDER BY A.DOCID`
 
 
 
-export async function getAuditAssestDetails(req, res) {
+export async function getAuditAssestDetails(req, res, next) {
     const connection = await getAssetConnection(res);
     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
 
@@ -703,7 +696,7 @@ export async function getAuditAssestDetails(req, res) {
             return keyValuePair;
         });
 
-        console.log(`getAuditAssestDetails: Found ${transformedResult?.length || 0} records for COMPCODE: ${COMPCODE}`);
+        logger.info(`getAuditAssestDetails: Found ${transformedResult?.length || 0} records for COMPCODE: ${COMPCODE}`);
 
         return res.json({
             statusCode: 1,
@@ -712,19 +705,15 @@ export async function getAuditAssestDetails(req, res) {
         });
     }
     catch (err) {
-        console.error('getAuditAssestDetails error:', err);
-        res.status(500).json({
-            statusCode: 0,
-            error: 'Internal Server Error',
-            message: err.message
-        });
+        logger.error(`[getAuditAssestDetails] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     }
     finally {
         if (connection) {
             try {
                 await connection.close();
             } catch (closeErr) {
-                console.error('Error closing connection:', closeErr);
+                logger.error('Error closing connection:', closeErr);
             }
         }
     }
@@ -733,11 +722,11 @@ export async function getAuditAssestDetails(req, res) {
 
 
 // ─── ROOM MASTER ───────────────────────────────────────────────
-export async function getRoomMaster(req, res) {
+export async function getRoomMaster(req, res, next) {
     const connection = await getAssetConnection(res);
     const floorId = req?.query?.floorId || '';
     const divisionId = req?.query?.divisionId || '';
-    console.log('getRoomMaster params:', { floorId, divisionId });
+    logger.info('getRoomMaster params:', { floorId, divisionId });
 
     try {
         const sql = `
@@ -771,22 +760,22 @@ export async function getRoomMaster(req, res) {
             data: data || []
         });
     } catch (err) {
-        console.error('getRoomMaster error:', err);
-        res.status(500).json({ statusCode: 0, error: 'Internal Server Error', message: err.message });
+        logger.error(`[getRoomMaster] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     } finally {
         if (connection) {
-            try { await connection.close(); } catch (e) { console.error(e); }
+            try { await connection.close(); } catch (e) { logger.error(e); }
         }
     }
 }
 
 
 // ─── FLOOR MASTER ──────────────────────────────────────────────
-export async function getFloorMaster(req, res) {
+export async function getFloorMaster(req, res, next) {
     const connection = await getAssetConnection(res);
     const buildingId = req?.query?.buildingId || '';
     const divisionId = req?.query?.divisionId || '';
-    console.log('getFloorMaster params:', { buildingId, divisionId });
+    logger.info('getFloorMaster params:', { buildingId, divisionId });
 
     try {
         const sql = `
@@ -820,22 +809,22 @@ export async function getFloorMaster(req, res) {
             data: data || []
         });
     } catch (err) {
-        console.error('getFloorMaster error:', err);
-        res.status(500).json({ statusCode: 0, error: 'Internal Server Error', message: err.message });
+        logger.error('getFloorMaster error:', err);
+        return next(err);
     } finally {
         if (connection) {
-            try { await connection.close(); } catch (e) { console.error(e); }
+            try { await connection.close(); } catch (e) { logger.error(e); }
         }
     }
 }
 
 
 // ─── BUILDING MASTER ───────────────────────────────────────────
-export async function getBuildingMaster(req, res) {
+export async function getBuildingMaster(req, res, next) {
     const connection = await getAssetConnection(res);
     const COMPCODE = req?.query?.divisionId || '';
 
-console.log("log",COMPCODE)
+logger.info("log",COMPCODE)
     try {
         const sql = `
             SELECT 
@@ -862,18 +851,18 @@ console.log("log",COMPCODE)
             data: data || []
         });
     } catch (err) {
-        console.error('getBuildingMaster error:', err);
-        res.status(500).json({ statusCode: 0, error: 'Internal Server Error', message: err.message });
+        logger.error('getBuildingMaster error:', err);
+        return next(err);
     } finally {
         if (connection) {
-            try { await connection.close(); } catch (e) { console.error(e); }
+            try { await connection.close(); } catch (e) { logger.error(e); }
         }
     }
 }
 
 
 // ─── DIVISION MASTER ───────────────────────────────────────────
-export async function getDivisionMaster(req, res) {
+export async function getDivisionMaster(req, res, next) {
     const connection = await getAssetConnection(res);
    // const COMPCODE = String(req?.headers?.compcode || '').toUpperCase();
 
@@ -903,16 +892,16 @@ export async function getDivisionMaster(req, res) {
             data: data || []
         });
     } catch (err) {
-        console.error('getDivisionMaster error:', err);
-        res.status(500).json({ statusCode: 0, error: 'Internal Server Error', message: err.message });
+        logger.error('getDivisionMaster error:', err);
+        return next(err);
     } finally {
         if (connection) {
-            try { await connection.close(); } catch (e) { console.error(e); }
+            try { await connection.close(); } catch (e) { logger.error(e); }
         }
     }
 }
 
-export async function getAuditVarianceReport(req, res) {
+export async function getAuditVarianceReport(req, res, next) {
     const connection = await getAssetConnection(res);
     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
 
@@ -1122,7 +1111,7 @@ ORDER BY
     T.ASSETID
         `;
 
-        console.log('Executing SQL with params:', { COMPCODE1: COMPCODE, COMPCODE2: COMPCODE });
+        logger.info('Executing SQL with params:', { COMPCODE1: COMPCODE, COMPCODE2: COMPCODE });
         
         const oracleResult = await connection.execute(sql, {
             COMPCODE1: COMPCODE,
@@ -1139,7 +1128,7 @@ ORDER BY
 
         // Log first few rows for debugging
         if (transformedResult && transformedResult.length > 0) {
-            console.log('First row sample:', {
+            logger.info('First row sample:', {
                 ASSETID: transformedResult[0].ASSETID,
                 HAS_PREV_SCAN: transformedResult[0].HAS_PREV_SCAN,
                 PREV_ROOM_ID_RAW: transformedResult[0].PREV_ROOM_ID_RAW,
@@ -1158,12 +1147,8 @@ ORDER BY
         });
     }
     catch (err) {
-        console.error('getAuditVarianceReport error:', err);
-        res.status(500).json({
-            statusCode: 0,
-            error: 'Internal Server Error',
-            message: err.message
-        });
+        logger.error('getAuditVarianceReport error:', err);
+        return next(err);
     }
     finally {
         await connection.close();
@@ -1171,7 +1156,7 @@ ORDER BY
 }
 
 
-export async function SaveBarcodeDetails(req, res) {
+export async function SaveBarcodeDetails(req, res, next) {
     const connection = await getAssetConnection(res);
     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
     
@@ -1250,12 +1235,8 @@ export async function SaveBarcodeDetails(req, res) {
         }
     }
     catch (err) {
-        console.error('Error retrieving data:', err);
-        res.status(500).json({ 
-            statusCode: 0, 
-            error: 'Internal Server Error',
-            message: err.message 
-        });
+        logger.error(`[SaveBarcodeDetails] Error in endpoint ${req.originalUrl || req.url}:`, err);
+        return next(err);
     }
     finally {
         await connection.commit();
@@ -1266,7 +1247,7 @@ export async function SaveBarcodeDetails(req, res) {
 
 
 
-export async function chat(req, res) {
+export async function chat(req, res, next) {
     const COMPCODE=String(req?.headers?.compcode).toUpperCase()
     const chat_data=req?.body
     
@@ -1291,7 +1272,7 @@ export async function chat(req, res) {
 
 
 
-export async function get_chat(req, res) {
+export async function get_chat(req, res, next) {
     const COMPCODE=String(req?.headers?.compcode).toUpperCase()
     const DEPARTMENT=req?.query?.DEPARTMENT
     
@@ -1317,7 +1298,7 @@ export async function get_chat(req, res) {
 }
 
   
-export async function delete_Common_Data(req, res) {
+export async function delete_Common_Data(req, res, next) {
     const COMPCODE=String(req?.headers?.compcode).toUpperCase()
     const onlywhere=req?.body?.onlywhere
     const where=req?.body?.where
@@ -1328,13 +1309,13 @@ export async function delete_Common_Data(req, res) {
         }
         catch (err) {
           res.json({status:0,data:{}}) 
-           console.log(err);
+           logger.info(err);
            
         }
 }
 
 
-export async function Update_Common_Data_prisma(req, res) {
+export async function Update_Common_Data_prisma(req, res, next) {
     const COMPCODE=String(req?.headers?.compcode).toUpperCase()
     const where=req?.body?.where
     const onlywhere=req?.body?.onlywhere
@@ -1367,7 +1348,7 @@ export async function Update_Common_Data_prisma(req, res) {
 
             catch (err) {
           res.json({status:0,data:{}}) 
-           console.log(err);
+           logger.info(err);
            
             }
 
@@ -1388,7 +1369,7 @@ export async function Update_Common_Data_prisma(req, res) {
 
         catch (err) {
           res.json({status:0,data:{}}) 
-           console.log(err);
+           logger.info(err);
            
         }
 

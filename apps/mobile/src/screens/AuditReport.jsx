@@ -24,67 +24,72 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { setOptions } from '../redux/Slices/UserDetails';
 import { useDispatch } from 'react-redux';
+import { useTheme } from '../theme/ThemeProvider';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // ─── Design Tokens ──────────────────────────────────────────────────────────
-const C = {
-  // Base
-  bg: '#F8FAFC',
-  surface: '#FFFFFF',
-  surfaceHigh: '#F1F5F9',
-  border: '#E2E8F0',
-  borderBright: '#CBD5E1',
+const getC = (theme) => {
+  const isDark = theme.isDarkMode || theme.mode === 'dark';
+  return {
+    // Base
+    bg: isDark ? '#0f172a' : '#F8FAFC',
+    surface: isDark ? '#1e293b' : '#FFFFFF',
+    surfaceHigh: isDark ? '#334155' : '#F1F5F9',
+    border: isDark ? '#475569' : '#E2E8F0',
+    borderBright: isDark ? '#64748b' : '#CBD5E1',
 
-  // Accent
-  accent: '#2563EB',
-  accentGlow: '#2563EB15',
-  accentLight: '#3B82F6',
-  accentSoft: '#DBEAFE',
+    // Accent
+    accent: isDark ? '#60a5fa' : '#2563EB',
+    accentGlow: isDark ? 'rgba(96,165,250,0.15)' : '#2563EB15',
+    accentLight: isDark ? '#3B82F6' : '#3B82F6',
+    accentSoft: isDark ? 'rgba(56,130,246,0.2)' : '#DBEAFE',
 
-  // Status
-  available: '#059669',
-  availableBg: '#D1FAE5',
-  misplaced: '#D97706',
-  misplacedBg: '#FEF3C7',
-  damaged: '#DC2626',
-  damagedBg: '#FEE2E2',
-  ghost: '#7C3AED',
-  ghostBg: '#EDE9FE',
-  changed: '#0284C7',
-  changedBg: '#E0F2FE',
-  nochange: '#64748B',
-  nochangeBg: '#F1F5F9',
+    // Status
+    available: isDark ? '#34d399' : '#059669',
+    availableBg: isDark ? 'rgba(52,211,153,0.15)' : '#D1FAE5',
+    misplaced: isDark ? '#fbbf24' : '#D97706',
+    misplacedBg: isDark ? 'rgba(251,191,36,0.15)' : '#FEF3C7',
+    damaged: isDark ? '#f87171' : '#DC2626',
+    damagedBg: isDark ? 'rgba(248,113,113,0.15)' : '#FEE2E2',
+    ghost: isDark ? '#a78bfa' : '#7C3AED',
+    ghostBg: isDark ? 'rgba(167,139,250,0.15)' : '#EDE9FE',
+    changed: isDark ? '#38bdf8' : '#0284C7',
+    changedBg: isDark ? 'rgba(56,189,248,0.15)' : '#E0F2FE',
+    nochange: isDark ? '#94a3b8' : '#64748B',
+    nochangeBg: isDark ? 'rgba(148,163,184,0.15)' : '#F1F5F9',
 
-  // Flow colors
-  flowFrom: '#94A3B8',
-  flowTo: '#2563EB',
-  flowArrow: '#94A3B8',
-  flowBg: '#F8FAFC',
+    // Flow colors
+    flowFrom: isDark ? '#64748b' : '#94A3B8',
+    flowTo: isDark ? '#60a5fa' : '#2563EB',
+    flowArrow: isDark ? '#64748b' : '#94A3B8',
+    flowBg: isDark ? '#0f172a' : '#F8FAFC',
 
-  // Text
-  textPri: '#0F172A',
-  textSec: '#475569',
-  textMuted: '#64748B',
-  textLight: '#94A3B8',
+    // Text
+    textPri: isDark ? '#f8fafc' : '#0F172A',
+    textSec: isDark ? '#94a3b8' : '#475569',
+    textMuted: isDark ? '#64748b' : '#64748B',
+    textLight: isDark ? '#475569' : '#94A3B8',
 
-  // Diff
-  removed: '#DC2626',
-  added: '#059669',
+    // Diff
+    removed: isDark ? '#f87171' : '#DC2626',
+    added: isDark ? '#34d399' : '#059669',
+  };
 };
 
 // ─── Status Config ────────────────────────────────────────────────────────
-const STATUS_CFG = {
-  Available: { color: C.available, bg: C.availableBg, icon: 'check-circle', label: 'Available' },
-  Misplaced: { color: C.misplaced, bg: C.misplacedBg, icon: 'swap-horiz', label: 'Misplaced' },
-  Damaged: { color: C.damaged, bg: C.damagedBg, icon: 'warning', label: 'Damaged' },
-  Ghost: { color: C.ghost, bg: C.ghostBg, icon: 'help-outline', label: 'Ghost' },
-  Changed: { color: C.changed, bg: C.changedBg, icon: 'compare-arrows', label: 'Changed' },
-  'No Change': { color: C.nochange, bg: C.nochangeBg, icon: 'remove-circle', label: 'No Change' },
-  'First Scan': { color: C.accent, bg: C.accentGlow, icon: 'fiber-new', label: 'First Scan' },
+const getStatusCfg = (s, C) => {
+  const cfg = {
+    Available: { color: C.available, bg: C.availableBg, icon: 'check-circle', label: 'Available' },
+    Misplaced: { color: C.misplaced, bg: C.misplacedBg, icon: 'swap-horiz', label: 'Misplaced' },
+    Damaged: { color: C.damaged, bg: C.damagedBg, icon: 'warning', label: 'Damaged' },
+    Ghost: { color: C.ghost, bg: C.ghostBg, icon: 'help-outline', label: 'Ghost' },
+    Changed: { color: C.changed, bg: C.changedBg, icon: 'compare-arrows', label: 'Changed' },
+    'No Change': { color: C.nochange, bg: C.nochangeBg, icon: 'remove-circle', label: 'No Change' },
+    'First Scan': { color: C.accent, bg: C.accentGlow, icon: 'fiber-new', label: 'First Scan' },
+  };
+  return cfg[s] || { color: C.textSec, bg: C.border, icon: 'info', label: s || 'N/A' };
 };
-
-const getStatusCfg = s => STATUS_CFG[s] || { color: C.textSec, bg: C.border, icon: 'info', label: s || 'N/A' };
 
 // ─── Transform raw API row ─────────────────────────────────────────────────
 const transform = (item, mode) => ({
@@ -142,6 +147,9 @@ const transform = (item, mode) => ({
 
 // ─── Variance Flow Component ───────────────────────────────────────────────
 function VarianceFlow({ item }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const vf = React.useMemo(() => get_vf(C), [C]);
   const [expanded, setExpanded] = useState(false);
 
   const hasChanges = item.roomChanged === 'Yes' ||
@@ -249,7 +257,7 @@ function VarianceFlow({ item }) {
   );
 }
 
-const vf = StyleSheet.create({
+const get_vf = (C) => StyleSheet.create({
   container: {
     marginTop: 12,
     backgroundColor: C.surfaceHigh,
@@ -371,6 +379,9 @@ const vf = StyleSheet.create({
 
 // ─── Date Filter Component ─────────────────────────────────────────────────
 function DateFilterModal({ visible, onClose, onApply, initialDate }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const df = React.useMemo(() => get_df(C), [C]);
   const [startDate, setStartDate] = useState(initialDate?.start || null);
   const [endDate, setEndDate] = useState(initialDate?.end || null);
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -536,7 +547,7 @@ function DateFilterModal({ visible, onClose, onApply, initialDate }) {
   );
 }
 
-const df = StyleSheet.create({
+const get_df = (C) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -683,6 +694,9 @@ const df = StyleSheet.create({
 
 // ─── Diff Pill ─────────────────────────────────────────────────────────────
 function DiffPill({ from, to, changed }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const dp = React.useMemo(() => get_dp(C), [C]);
   if (!changed || changed === 'No' || changed === 'N/A') {
     return <Text style={dp.same} numberOfLines={1}>{to || '—'}</Text>;
   }
@@ -703,7 +717,7 @@ function DiffPill({ from, to, changed }) {
   );
 }
 
-const dp = StyleSheet.create({
+const get_dp = (C) => StyleSheet.create({
   same: { fontSize: 11, color: C.textSec },
   wrap: { flexDirection: 'row', alignItems: 'center', gap: 3, flexWrap: 'wrap' },
   from: { fontSize: 10, color: C.removed, textDecorationLine: 'line-through', maxWidth: 70 },
@@ -714,7 +728,10 @@ const dp = StyleSheet.create({
 
 // ─── Status Badge ─────────────────────────────────────────────────────────
 function StatusBadge({ status, small }) {
-  const cfg = getStatusCfg(status);
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const sb = React.useMemo(() => get_sb(C), [C]);
+  const cfg = getStatusCfg(status, C);
   return (
     <View style={[sb.wrap, { backgroundColor: cfg.bg }, small && sb.small]}>
       <Icon name={cfg.icon} size={small ? 10 : 12} color={cfg.color} />
@@ -723,7 +740,7 @@ function StatusBadge({ status, small }) {
   );
 }
 
-const sb = StyleSheet.create({
+const get_sb = (C) => StyleSheet.create({
   wrap: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
   text: { fontSize: 11, fontWeight: '700' },
   small: { paddingHorizontal: 6, paddingVertical: 2 },
@@ -732,6 +749,9 @@ const sb = StyleSheet.create({
 
 // ─── Stat Card ────────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, color, active, onPress }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const sc = React.useMemo(() => get_sc(C), [C]);
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePress = () => {
@@ -760,7 +780,7 @@ function StatCard({ label, value, icon, color, active, onPress }) {
   );
 }
 
-const sc = StyleSheet.create({
+const get_sc = (C) => StyleSheet.create({
   card: { width: 85, borderRadius: 14, padding: 10, alignItems: 'center', gap: 4, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border },
   icon: { width: 32, height: 32, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   val: { fontSize: 20, fontWeight: '800' },
@@ -769,6 +789,9 @@ const sc = StyleSheet.create({
 
 // ─── Card Item ────────────────────────────────────────────────────────────
 function CardItem({ item, mode }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const ci = React.useMemo(() => get_ci(C), [C]);
   const [open, setOpen] = useState(false);
 
   const hasChange = item.hasAnyChange;
@@ -883,7 +906,7 @@ function CardItem({ item, mode }) {
   );
 }
 
-const ci = StyleSheet.create({
+const get_ci = (C) => StyleSheet.create({
   card: {
     backgroundColor: C.surface,
     borderRadius: 16,
@@ -1059,6 +1082,9 @@ const ci = StyleSheet.create({
 
 // ─── Table Row ────────────────────────────────────────────────────────────
 function TableRow({ item, mode, even }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const tr = React.useMemo(() => get_tr(C), [C]);
   return (
     <View style={[tr.row, even && tr.even, item.hasAnyChange && tr.changed]}>
       <View style={tr.c1}>
@@ -1092,7 +1118,7 @@ function TableRow({ item, mode, even }) {
   );
 }
 
-const tr = StyleSheet.create({
+const get_tr = (C) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     borderBottomWidth: 1,
@@ -1120,6 +1146,9 @@ const tr = StyleSheet.create({
 
 // ─── Filter Sheet ─────────────────────────────────────────────────────────
 function FilterSheet({ visible, onClose, filters, setFilters, uniq }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const fs = React.useMemo(() => get_fs(C), [C]);
   const [local, setLocal] = useState(filters);
 
   useEffect(() => {
@@ -1265,7 +1294,7 @@ function FilterSheet({ visible, onClose, filters, setFilters, uniq }) {
   );
 }
 
-const fs = StyleSheet.create({
+const get_fs = (C) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -1466,6 +1495,9 @@ const defaultFilters = () => ({
 
 // ─── Main Component ────────────────────────────────────────────────────────
 export default function AuditReport() {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const s = React.useMemo(() => get_s(C), [C]);
   const [mode, setMode] = useState('scanned');
   const [view, setView] = useState('card');
   const [showFilters, setShowFilters] = useState(false);
@@ -1475,6 +1507,12 @@ export default function AuditReport() {
   const [statFilter, setStatFilter] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 10;
+
+  useEffect(() => {
+    setPage(0);
+  }, [filters, statFilter, dateFilter, mode]);
 
   const dispatch = useDispatch();
 
@@ -1937,44 +1975,69 @@ export default function AuditReport() {
           )}
 
           {view === 'table' && (
-            <ScrollView horizontal style={{ flex: 1 }}>
-              <View style={{ minWidth: mode === 'variance' ? 1300 : 1100 }}>
-                {/* Table header */}
-                <View style={s.tableHeader}>
-                  {[
-                    'Asset / Barcode',
-                    'Name',
-                    'Machine',
-                    'Room',
-                    'Building',
-                    'Condition',
-                    ...(mode === 'variance' ? ['Expected → Scanned'] : []),
-                    'Status',
-                    'Audit Date',
-                  ].map((h, i) => (
-                    <Text
-                      key={i}
-                      style={[
-                        s.tableHeaderCell,
-                        { width: [140, 160, 160, 140, 140, 120, 140, 120, 140][i] || 140 },
-                      ]}
-                    >
-                      {h}
-                    </Text>
-                  ))}
-                </View>
+            <View style={s.tableContainer}>
+              <ScrollView horizontal style={{ flex: 1 }}>
+                <View style={{ minWidth: mode === 'variance' ? 1300 : 1100 }}>
+                  {/* Table header */}
+                  <View style={s.tableHeader}>
+                    {[
+                      'Asset / Barcode',
+                      'Name',
+                      'Machine',
+                      'Room',
+                      'Building',
+                      'Condition',
+                      ...(mode === 'variance' ? ['Expected → Scanned'] : []),
+                      'Status',
+                      'Audit Date',
+                    ].map((h, i) => (
+                      <Text
+                        key={i}
+                        style={[
+                          s.tableHeaderCell,
+                          { width: [140, 160, 160, 140, 140, 120, 140, 120, 140][i] || 140 },
+                        ]}
+                      >
+                        {h}
+                      </Text>
+                    ))}
+                  </View>
 
-                {/* Table rows */}
-                <FlatList
-                  data={displayData}
-                  keyExtractor={(_, i) => i.toString()}
-                  renderItem={({ item, index }) => (
-                    <TableRow item={item} mode={mode} even={index % 2 === 0} />
-                  )}
-                  showsVerticalScrollIndicator={false}
-                />
-              </View>
-            </ScrollView>
+                  {/* Table rows */}
+                  <FlatList
+                    data={displayData.slice(page * rowsPerPage, (page + 1) * rowsPerPage)}
+                    keyExtractor={(_, i) => i.toString()}
+                    renderItem={({ item, index }) => (
+                      <TableRow item={item} mode={mode} even={index % 2 === 0} />
+                    )}
+                    showsVerticalScrollIndicator={false}
+                  />
+                </View>
+              </ScrollView>
+
+              {/* Pagination Controls */}
+              {displayData.length > 0 && (
+                <View style={s.pagination}>
+                  <TouchableOpacity
+                    style={[s.pageBtn, page === 0 && s.pageBtnDisabled]}
+                    disabled={page === 0}
+                    onPress={() => setPage(Math.max(0, page - 1))}
+                  >
+                    <Icon name="chevron-left" size={24} color={page === 0 ? C.textMuted : C.accent} />
+                  </TouchableOpacity>
+                  <Text style={s.pageText}>
+                    Page {page + 1} of {Math.ceil(displayData.length / rowsPerPage)}
+                  </Text>
+                  <TouchableOpacity
+                    style={[s.pageBtn, (page + 1) * rowsPerPage >= displayData.length && s.pageBtnDisabled]}
+                    disabled={(page + 1) * rowsPerPage >= displayData.length}
+                    onPress={() => setPage(page + 1)}
+                  >
+                    <Icon name="chevron-right" size={24} color={(page + 1) * rowsPerPage >= displayData.length ? C.textMuted : C.accent} />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           )}
         </>
       )}
@@ -1983,7 +2046,7 @@ export default function AuditReport() {
 }
 
 // ─── Global Styles ────────────────────────────────────────────────────────
-const s = StyleSheet.create({
+const get_s = (C) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: C.bg,
@@ -2233,12 +2296,27 @@ const s = StyleSheet.create({
   },
 
   // Table
+  tableContainer: {
+    flex: 1,
+    margin: 12,
+    padding: 12,
+    backgroundColor: C.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: C.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+    overflow: 'hidden',
+  },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: C.accent,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: C.borderBright,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   tableHeaderCell: {
     paddingHorizontal: 8,
@@ -2247,5 +2325,27 @@ const s = StyleSheet.create({
     color: '#fff',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  pagination: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: C.border,
+    marginTop: 8,
+  },
+  pageBtn: {
+    padding: 4,
+    borderRadius: 8,
+    backgroundColor: C.accentGlow,
+  },
+  pageBtnDisabled: {
+    backgroundColor: C.bg,
+  },
+  pageText: {
+    fontSize: 13,
+    color: C.textSec,
+    fontWeight: '600',
   },
 });

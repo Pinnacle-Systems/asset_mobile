@@ -2,12 +2,14 @@ import React, { useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Pressable, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AntDesign from "react-native-vector-icons/AntDesign";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useSelector, useDispatch } from 'react-redux';
 import { Common_Context } from '../contexts/Common_Context';
 import { TextOnlyDropdown } from './TextOnlyDropDown';
 import { useGetCompanycodeQuery } from '../redux/service/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setUserDetails } from '../redux/Slices/UserDetails';
+import { useTheme } from '../theme/ThemeProvider';
 
 export default function NavBar({ openSidebar, setopenSidebar }) {
   const navigation = useNavigation();
@@ -17,13 +19,16 @@ export default function NavBar({ openSidebar, setopenSidebar }) {
   const [GlobalSelected, setGlobalSelected] = React.useState();
   const { data: companyCode } = useGetCompanycodeQuery();
 
+  const { theme: activeTheme, isDarkMode, toggleTheme } = useTheme();
+  const currentStyles = styles(activeTheme);
+
   React.useEffect(() => {
     if (GlobalSelected) {
       AsyncStorage.getItem("userName", (error, result) => {
         if (!error && result) {
           const GetuserDetails = JSON.parse(result);
           const { GCOMPCODE: OLD, ...reset } = GetuserDetails;
-          
+
           AsyncStorage.setItem("userName", JSON.stringify({ ...reset, GCOMPCODE: GlobalSelected })).finally(() => {
             dispatch(setUserDetails({
               ...GetuserDetails,
@@ -52,43 +57,50 @@ export default function NavBar({ openSidebar, setopenSidebar }) {
   }, [GlobalSelected]);
 
   return (
-    <SafeAreaView style={styles.header}>
-      <View style={styles.wishesView}>
+    <SafeAreaView style={currentStyles.header}>
+      <View style={currentStyles.wishesView}>
         <TouchableOpacity onPress={() => navigation.navigate("HOME")}>
-          <Image 
-            style={styles.logoImage} 
-            resizeMode={"contain"} 
-            source={require("../assets/logo.png")} 
+          <Image
+            style={currentStyles.logoImage}
+            resizeMode={"contain"}
+            source={require("../assets/logo.png")}
           />
         </TouchableOpacity>
         <View>
           {commoncontext?.admin == 1 && commoncontext?.admin && (
-             <TextOnlyDropdown
-                selected={GlobalSelected}
-                disabled={commoncontext?.admin == 1 ? false : true}
-                auto_open={GlobalSelected || UserSelect?.GCOMPCODE}
-                label={GlobalSelected || UserSelect?.GCOMPCODE || "GLOBAL"}
-                setSelected={setGlobalSelected}
-                labelstyle={styles.wishesText}
-                options={companyCode}
-                zIndex={300}
-             />
+            <TextOnlyDropdown
+              selected={GlobalSelected}
+              disabled={commoncontext?.admin == 1 ? false : true}
+              auto_open={GlobalSelected || UserSelect?.GCOMPCODE}
+              label={GlobalSelected || UserSelect?.GCOMPCODE || "GLOBAL"}
+              setSelected={setGlobalSelected}
+              labelstyle={currentStyles.wishesText}
+              options={companyCode}
+              zIndex={300}
+            />
           )}
         </View>
       </View>
-       
-      <View style={styles.NotificationView}>
 
-        
-        <Pressable onPress={() => setopenSidebar(true)} style={styles.iconContainer}>
-          <AntDesign name="bars" size={22} color="#085fd1" /> 
+      <View style={currentStyles.NotificationView}>
+        {/* Functional Theme Toggle */}
+        <Pressable onPress={toggleTheme} style={currentStyles.iconContainer}>
+          <MaterialCommunityIcons
+            name={isDarkMode ? "weather-night" : "weather-sunny"}
+            size={22}
+            color={activeTheme.colors.accent}
+          />
+        </Pressable>
+
+        <Pressable onPress={() => setopenSidebar(true)} style={currentStyles.iconContainer}>
+          <AntDesign name="bars" size={22} color={activeTheme.colors.text} />
         </Pressable>
       </View>
-    </SafeAreaView> 
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -96,9 +108,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 16,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#d1d5db',
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
+    borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    shadowColor: theme.colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -119,18 +131,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     letterSpacing: 3,
-    color: "#57575e",
+    color: theme.colors.subtext,
     marginTop: 9,
   },
   NotificationView: {
     flexDirection: "row",
-    gap: 20,
+    gap: 12,
     alignItems: "center",
   },
   iconContainer: {
     padding: 8,
-    borderRadius: 10,
-    backgroundColor: "#FFF",
-    elevation: 2,
+    borderRadius: 12,
+    backgroundColor: theme.colors.background,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
 });

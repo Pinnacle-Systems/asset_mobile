@@ -5,6 +5,7 @@ import { env } from "./config/env.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 import notFoundMiddleware from "./middleware/not-found.middleware.js";
 import requestIdMiddleware from "./middleware/request-id.middleware.js";
+import loggerMiddleware from "./middleware/logger.middleware.js";
 import routes from "./routes/index.js";
 
 export default function createApp() {
@@ -18,6 +19,7 @@ export default function createApp() {
   );
   app.use(express.json());
   app.use(requestIdMiddleware);
+  app.use(loggerMiddleware);
   app.use(routes);
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

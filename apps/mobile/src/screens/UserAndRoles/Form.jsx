@@ -3,7 +3,6 @@ import { View, Text, TextInput, StyleSheet, Alert, Dimensions, ScrollView, Touch
 import Toast from "react-native-toast-message";
 import { useCreateUserMutation, useGetCompanycodeQuery, useGetDesignationQuery, useGetEmployeeidsQuery, useGetUserDetQuery, useGetUsersQuery } from "../../redux/service/user";
 import { Dropdown } from "../../components/inputs";
-
 import { showMessage } from 'react-native-flash-message';
 import ClearState from "../../components/ClearState";
 import { useSelector } from "react-redux";
@@ -12,9 +11,9 @@ import { useGet_all_roleQuery } from "../../redux/service/RoleOn";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CheckboxLevelGroup from "./LeaveGroup";
 import { useDelete_CommonMutation, useUpdate_CommonMutation } from '../../redux/service/commonMasters';
-import { Colors } from "./../../constants/Colors";
 import ProgressPopup from "../../components/PopupLoading";
 import CheckboxGroup from "../../components/GroupCheckBox";
+import { useTheme } from '../../theme/ThemeProvider';
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,7 +25,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
     const [password, setPassword] = useState("");
     const [isotpEmail, setotpEmail] = useState();
     const [otpEmail, setotpEmail_inp] = useState({});
-   
+
     const [selectedEmply, setSelectedEmply] = useState('');
     const [SelectedCompany, setSelectedCompany] = useState('');
     const [SelectedHod, setSelectedHod] = useState('');
@@ -40,15 +39,15 @@ const Form = ({ closeModal, onClose, userDet }) => {
     const [update_row] = useUpdate_CommonMutation();
     const [isEditing, setIsEditing] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
-     const { data: all_Role_names, refetch: get_all_refresh } = useGet_all_roleQuery({feilds:"COMPCODE",where:SelectedCompany});
+    const { data: all_Role_names, refetch: get_all_refresh } = useGet_all_roleQuery({ feilds: "COMPCODE", where: SelectedCompany });
 
-  //  const { data: role, refetch } = useGetDesignationQuery();
+    const { theme } = useTheme();
+    const currentStyles = styles(theme);
+
+    //  const { data: role, refetch } = useGetDesignationQuery();
     const { data: companyCode, refetch: companycoderef } = useGetCompanycodeQuery();
     const { data: employee, refetch: employeecoderef } = useGetEmployeeidsQuery();
 
-
-
-   
     // Alert.alert("",JSON?.stringify(tableData))
     useEffect(() => {
         if (userDet) {
@@ -56,9 +55,9 @@ const Form = ({ closeModal, onClose, userDet }) => {
         }
     }, [userDet]);
 
-    useEffect(()=>{
-    setIsEditing(false)
-    },[])
+    useEffect(() => {
+        setIsEditing(false)
+    }, [])
 
     const validateData = (data) => {
         if (data.username && data.password) {
@@ -87,7 +86,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
                 ClearState(setUserName, setPassword, setEmail, setSelectedCompany, setSelectedEmply, setSelectedRole, setSelectedHod);
                 refetchUsers();
             }
-            onClose &&  onClose();
+            onClose && onClose();
         } catch (error) {
             console.log(`Error: ${error.message}`);
         } finally {
@@ -97,21 +96,21 @@ const Form = ({ closeModal, onClose, userDet }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        var Idcard=selectedEmply?.split("-")[1]
-        var hod=SelectedHod?.split("-")[1]
-        var hr=SelectedHR?.split("-")[1]
+        var Idcard = selectedEmply?.split("-")[1]
+        var hod = SelectedHod?.split("-")[1]
+        var hr = SelectedHR?.split("-")[1]
 
-        if (selectLevel !== "admin"  && selectLevel !== "top" && (!selectedEmply || !username))
+        if (selectLevel !== "admin" && selectLevel !== "top" && (!selectedEmply || !username))
             return Alert.alert("⚠ Warning!", !selectedEmply ? "Please Select Your Employee" : "Please Enter Your UserName")
 
         var company_code = SelectedCompany?.map((data) => {
             var companyId = companyCode?.data?.find((cdata) => cdata?.value == data)
-            return { companyCode: data, companyid: String(companyId?.COMPID),GCOMP:UserSelect?.GCOMPCODE }
+            return { companyCode: data, companyid: String(companyId?.COMPID), GCOMP: UserSelect?.GCOMPCODE }
         });
 
-        var Id_card_Random=Date.now()+Math.floor(Math.random()*10000)
+        var Id_card_Random = Date.now() + Math.floor(Math.random() * 10000)
 
-        const formData = { username, /*approval:selectedKey,*/ roleId: selectedRole, otpemail: otpEmail, /*hr,*/ password, email, /*hod,*/ Idcard: selectLevel=="top" || selectLevel=="admin" ? String(Id_card_Random) : Idcard, Compcodes: company_code, level: selectLevel, isAdmin:selectLevel=="top" || selectLevel=="admin" ? true : false };
+        const formData = { username, /*approval:selectedKey,*/ roleId: selectedRole, otpemail: otpEmail, /*hr,*/ password, email, /*hod,*/ Idcard: selectLevel == "top" || selectLevel == "admin" ? String(Id_card_Random) : Idcard, Compcodes: company_code, level: selectLevel, isAdmin: selectLevel == "top" || selectLevel == "admin" ? true : false };
 
         if (!validateData(formData)) {
             Toast.show({
@@ -138,23 +137,23 @@ const Form = ({ closeModal, onClose, userDet }) => {
         );
     };
 
-    const editData =  useCallback(async (item) => {
+    const editData = useCallback(async (item) => {
         try {
 
-           
+
             setIsEditing(true);
             setCurrentUserId(item.id);
             setUserName(item.username);
             setEmail(item.gmail);
             setotpEmail_inp(item?.otpemail)
-           // setotpEmail(item?.otpemail)
-           setSelectedHR(item?.role?.COMPCODE+"-"+item?.hr)
+            // setotpEmail(item?.otpemail)
+            setSelectedHR(item?.role?.COMPCODE + "-" + item?.hr)
             setSelectedRole(item.roleId);
             setSelectedLevel(item.level);
             setSelectedKey(item?.approval)
-            setSelectedEmply(item?.role?.COMPCODE+"-"+item.Idcard);
-            setSelectedHod(item?.role?.COMPCODE+"-"+item.hod);
- 
+            setSelectedEmply(item?.role?.COMPCODE + "-" + item.Idcard);
+            setSelectedHod(item?.role?.COMPCODE + "-" + item.hod);
+
             if (item?.Companies) {
                 const companyValues = item?.Companies.map(code => code.companyCode);
                 setSelectedCompany(companyValues);
@@ -174,13 +173,13 @@ const Form = ({ closeModal, onClose, userDet }) => {
             });
             console.error('Error loading user data:', error);
         }
-    },[isEditing])
+    }, [isEditing])
 
 
-   
+
 
     const onDelete = (id) => {
-        
+
         Alert.alert(
             "Confirmation",
             "Are you sure you want to delete this user?",
@@ -199,8 +198,8 @@ const Form = ({ closeModal, onClose, userDet }) => {
             setloading(true);
             const response = await delete_row({
                 table: 'user',
-                where: { id: id ,GCOMP:UserSelect?.GCOMPCODE},
-                onlywhere:true
+                where: { id: id, GCOMP: UserSelect?.GCOMPCODE },
+                onlywhere: true
             }).unwrap();
 
             if (response.status === 1) {
@@ -228,42 +227,42 @@ const Form = ({ closeModal, onClose, userDet }) => {
             setloading(true);
             const company_code = SelectedCompany?.map((data) => {
                 const companyId = companyCode?.data?.find((cdata) => cdata?.value == data);
-                return { companyCode: data, companyid: String(companyId?.COMPID),GCOMP:UserSelect?.GCOMPCODE };
+                return { companyCode: data, companyid: String(companyId?.COMPID), GCOMP: UserSelect?.GCOMPCODE };
             });
 
-              var Idcard=selectedEmply?.split("-")[1]
-              var hod=SelectedHod?.split("-")[1]
-              var hr=SelectedHR?.split("-")[1]
-             var Id_card_Random=Date.now()+Math.floor((Math?.random()*10000))
+            var Idcard = selectedEmply?.split("-")[1]
+            var hod = SelectedHod?.split("-")[1]
+            var hr = SelectedHR?.split("-")[1]
+            var Id_card_Random = Date.now() + Math.floor((Math?.random() * 10000))
             const formData = {
                 Compcodes: company_code,
-                GCOMP:UserSelect?.GCOMPCODE,
+                GCOMP: UserSelect?.GCOMPCODE,
                 /*hr,*/
                 username,
-                 role: {
-               connect: { name: selectedRole }  
-                  },
+                role: {
+                    connect: { name: selectedRole }
+                },
                 otpemail: otpEmail,
                 password,
                 email,
                 /*hod,*/
                 /*approval:selectedKey,*/
-                Idcard:  selectLevel=="top" || selectLevel=="admin" ? String(Id_card_Random) : Idcard,
+                Idcard: selectLevel == "top" || selectLevel == "admin" ? String(Id_card_Random) : Idcard,
                 level: selectLevel,
-                user_updation:true,
-                isAdmin:selectLevel=="top" || selectLevel=="admin" ? true : false 
+                user_updation: true,
+                isAdmin: selectLevel == "top" || selectLevel == "admin" ? true : false
             };
 
-           
+
 
             const response = await update_row({
                 table: 'user',
                 data: formData,
-                onlywhere:true,
+                onlywhere: true,
                 where: { id: currentUserId },
             }).unwrap();
 
-           
+
 
             if (response?.status == 1) {
                 showMessage({
@@ -271,9 +270,9 @@ const Form = ({ closeModal, onClose, userDet }) => {
                     description: "User updated successfully",
                     type: "success",
                 });
-             refetchUsers();
-             ClearState(setUserName, setPassword, setEmail, setSelectedCompany, setSelectedEmply, setSelectedRole, setSelectedHod);
-               onClose && onClose();
+                refetchUsers();
+                ClearState(setUserName, setPassword, setEmail, setSelectedCompany, setSelectedEmply, setSelectedRole, setSelectedHod);
+                onClose && onClose();
             }
         } catch (error) {
             showMessage({
@@ -287,7 +286,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
         }
     };
 
-   const filterRole =all_Role_names  ?  (all_Role_names?.data?.length>0 ? all_Role_names?.data : [] )?.filter((data) => data?.RoleOnPage?.length > 0) : []
+    const filterRole = all_Role_names ? (all_Role_names?.data?.length > 0 ? all_Role_names?.data : [])?.filter((data) => data?.RoleOnPage?.length > 0) : []
 
     return (<>
         {loading && (
@@ -296,21 +295,21 @@ const Form = ({ closeModal, onClose, userDet }) => {
                 message={isEditing ? "Updating User Please wait....." : "Creating User Please wait....."}
             />
         )}
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={currentStyles.container}>
+            <ScrollView contentContainerStyle={currentStyles.scrollContainer}>
                 {/* Header */}
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>
+                <View style={currentStyles.header}>
+                    <Text style={currentStyles.headerTitle}>
                         {isEditing ? "Edit User" : "Create New User"}
                     </Text>
-                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                        <MaterialIcons name="close" size={24} color={Colors.darkGray} />
+                    <TouchableOpacity onPress={onClose} style={currentStyles.closeButton}>
+                        <MaterialIcons name="close" size={24} color={theme.colors.subtext} />
                     </TouchableOpacity>
                 </View>
 
                 {/* Company and Employee Selection */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Basic Information</Text>
+                <View style={currentStyles.section}>
+                    <Text style={currentStyles.sectionTitle}>Basic Information</Text>
 
                     <Dropdown
                         selected={SelectedCompany}
@@ -319,7 +318,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
                         setSelected={setSelectedCompany}
                         options={companyCode}
                         zIndex={300}
-                        style={styles.dropdown}
+                        style={currentStyles.dropdown}
                     />
 
                     <Dropdown
@@ -328,18 +327,18 @@ const Form = ({ closeModal, onClose, userDet }) => {
                         setSelected={setSelectedEmply}
                         options={employee}
                         zIndex={300}
-                        style={styles.dropdown}
+                        style={currentStyles.dropdown}
                     />
                 </View>
 
                 {/* User Role and Level */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>User Role</Text>
+                <View style={currentStyles.section}>
+                    <Text style={currentStyles.sectionTitle}>User Role</Text>
 
                     <CheckboxLevelGroup
                         selected={selectLevel}
                         setSelected={setSelectedLevel}
-                        style={styles.levelGroup}
+                        style={currentStyles.levelGroup}
                     />
 
                     <Dropdown
@@ -348,89 +347,64 @@ const Form = ({ closeModal, onClose, userDet }) => {
                         setSelected={setSelectedRole}
                         _label={"name"}
                         _value={"name"}
-                        options={{ data:filterRole  } || []}
+                        options={{ data: filterRole } || []}
                         zIndex={300}
-                        style={styles.dropdown}
+                        style={currentStyles.dropdown}
                     />
-
-{/*
-                    {(selectLevel === "user" || selectLevel === "hod") && (
-                        <Dropdown
-                            selected={SelectedHod}
-                            label="Select HOD"
-                            setSelected={setSelectedHod}
-                            options={employee}
-                            zIndex={300}
-                            style={styles.dropdown}
-                        />
-                    )}
-
-
-                    {(selectLevel === "user" || selectLevel === "hod") && (
-                        <Dropdown
-                            selected={SelectedHR}
-                            label="Select HR"
-                            setSelected={setSelectedHR}
-                            options={employee}
-                            zIndex={300}
-                            style={styles.dropdown}
-                        />
-                    )}
-
-                      <Text >Approval Request TO:</Text>
-                    <CheckboxGroup selectedKey={selectedKey} setSelectedKey={setSelectedKey} options={["HOD","HR","BOTH"]}></CheckboxGroup>
-*/}
                 </View>
 
                 {/* Login Credentials */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Login Credentials</Text>
+                <View style={currentStyles.section}>
+                    <Text style={currentStyles.sectionTitle}>Login Credentials</Text>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Username*</Text>
+                    <View style={currentStyles.inputGroup}>
+                        <Text style={currentStyles.label}>Username*</Text>
                         <TextInput
                             value={username}
                             onChangeText={setUserName}
-                            style={styles.input}
+                            style={currentStyles.input}
+                            placeholderTextColor={theme.colors.placeholder}
                             placeholder="Enter username"
                         />
                     </View>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Password*</Text>
+                    <View style={currentStyles.inputGroup}>
+                        <Text style={currentStyles.label}>Password*</Text>
                         <TextInput
                             value={password}
                             onChangeText={setPassword}
-                            style={styles.input}
+                            style={currentStyles.input}
                             secureTextEntry
+                            placeholderTextColor={theme.colors.placeholder}
                             placeholder="Enter password"
                         />
                     </View>
                 </View>
 
                 {/* Email Settings */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Email Settings</Text>
+                <View style={currentStyles.section}>
+                    <Text style={currentStyles.sectionTitle}>Email Settings</Text>
 
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email</Text>
+                    <View style={currentStyles.inputGroup}>
+                        <Text style={currentStyles.label}>Email</Text>
                         <TextInput
                             value={email}
                             onChangeText={(e) => {
                                 !isotpEmail && setotpEmail_inp(e);
                                 setEmail(e);
                             }}
-                            style={styles.input}
+                            style={currentStyles.input}
+                            placeholderTextColor={theme.colors.placeholder}
                             placeholder="Enter email"
                             keyboardType="email-address"
                         />
                     </View>
 
-                    <View style={styles.inputGroup}>
-                        <View style={styles.otpEmailRow}>
-                            <Text style={styles.label}>OTP Email</Text>
+                    <View style={currentStyles.inputGroup}>
+                        <View style={currentStyles.otpEmailRow}>
+                            <Text style={currentStyles.label}>OTP Email</Text>
                             <TouchableOpacity
-                                style={styles.checkboxContainer}
+                                style={currentStyles.checkboxContainer}
                                 onPress={() => {
                                     if (isotpEmail) {
                                         setotpEmail_inp('');
@@ -442,16 +416,18 @@ const Form = ({ closeModal, onClose, userDet }) => {
                             >
                                 <Checkbox
                                     status={isotpEmail ? 'checked' : 'unchecked'}
-                                    color={Colors.primary}
+                                    color={theme.colors.primary}
+                                    uncheckedColor={theme.colors.text}
                                 />
-                                <Text style={styles.checkboxLabel}>Different from Email</Text>
+                                <Text style={currentStyles.checkboxLabel}>Different from Email</Text>
                             </TouchableOpacity>
                         </View>
 
                         <TextInput
                             value={otpEmail}
                             onChangeText={setotpEmail_inp}
-                            style={styles.input}
+                            style={currentStyles.input}
+                            placeholderTextColor={theme.colors.placeholder}
                             placeholder="Enter OTP email"
                             keyboardType="email-address"
                             editable={isotpEmail}
@@ -460,16 +436,16 @@ const Form = ({ closeModal, onClose, userDet }) => {
                 </View>
 
                 {/* Existing Users Table */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Existing Users</Text>
+                <View style={currentStyles.section}>
+                    <Text style={currentStyles.sectionTitle}>Existing Users</Text>
 
-                    <View style={styles.tableHeader}>
-                        <Text style={[styles.tableHeaderText, { flex: 0.5 }]}>#</Text>
-                        <Text style={[styles.tableHeaderText, { flex: 2 }]}>Username</Text>
-                         <Text style={[styles.tableHeaderText, { flex: 2 }]}>Role</Text>
-                        <Text style={[styles.tableHeaderText, { flex: 2 }]}>Email</Text>
-                        
-                        <Text style={[styles.tableHeaderText, { flex: 1.5 }]}>Actions</Text>
+                    <View style={currentStyles.tableHeader}>
+                        <Text style={[currentStyles.tableHeaderText, { flex: 0.5 }]}>#</Text>
+                        <Text style={[currentStyles.tableHeaderText, { flex: 2 }]}>Username</Text>
+                        <Text style={[currentStyles.tableHeaderText, { flex: 2 }]}>Role</Text>
+                        <Text style={[currentStyles.tableHeaderText, { flex: 2 }]}>Email</Text>
+
+                        <Text style={[currentStyles.tableHeaderText, { flex: 1.5 }]}>Actions</Text>
                     </View>
 
                     {tableData?.data ? (
@@ -477,39 +453,39 @@ const Form = ({ closeModal, onClose, userDet }) => {
                             <View
                                 key={index}
                                 style={[
-                                    styles.tableRow,
-                                    index % 2 === 0 ? styles.evenRow : styles.oddRow
+                                    currentStyles.tableRow,
+                                    index % 2 === 0 ? currentStyles.evenRow : currentStyles.oddRow
                                 ]}
                             >
-                                <Text style={[styles.tableCell, { flex: 0.5 }]}>{index + 1}</Text>
-                                <Text style={[styles.tableCell, { flex: 2 }]}>{item.username}</Text>
-                                 <Text style={[styles.tableCell, { flex: 2 }]}>{item?.role?.name || "-"}</Text>
-                                <Text style={[styles.tableCell, { flex: 2 }]}>{item.gmail || "-"}</Text>
-                                <View style={[styles.tableCell, { flex: 1.5, flexDirection: 'row', justifyContent: 'center' }]}>
+                                <Text style={[currentStyles.tableCell, { flex: 0.5 }]}>{index + 1}</Text>
+                                <Text style={[currentStyles.tableCell, { flex: 2 }]}>{item.username}</Text>
+                                <Text style={[currentStyles.tableCell, { flex: 2 }]}>{item?.role?.name || "-"}</Text>
+                                <Text style={[currentStyles.tableCell, { flex: 2 }]}>{item.gmail || "-"}</Text>
+                                <View style={[currentStyles.tableCell, { flex: 1.5, flexDirection: 'row', justifyContent: 'center' }]}>
                                     <TouchableOpacity
                                         onPress={() => editData(item)}
-                                        style={styles.actionButton}
+                                        style={currentStyles.actionButton}
                                     >
-                                        <MaterialIcons name="edit" size={20} color={Colors.primary} />
+                                        <MaterialIcons name="edit" size={20} color={theme.colors.primary} />
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => onDelete(item.id)}
-                                        style={[styles.actionButton, { marginLeft: 10 }]}
+                                        style={[currentStyles.actionButton, { marginLeft: 10 }]}
                                     >
-                                        <MaterialIcons name="delete" size={20} color={Colors.error} />
+                                        <MaterialIcons name="delete" size={20} color={theme.colors.danger} />
                                     </TouchableOpacity>
                                 </View>
                             </View>
                         ))
                     ) : (
-                        <Text style={styles.noDataText}>No users available</Text>
+                        <Text style={currentStyles.noDataText}>No users available</Text>
                     )}
                 </View>
             </ScrollView>
 
-            <View style={styles.bottomButtonsContainer}>
-                <TouchableOpacity 
-                    style={[styles.actionBtnRow, styles.newButton, { marginRight: 6 }]} 
+            <View style={currentStyles.bottomButtonsContainer}>
+                <TouchableOpacity
+                    style={[currentStyles.actionBtnRow, currentStyles.newButton, { marginRight: 6 }]}
                     onPress={() => {
                         setIsEditing(false);
                         setCurrentUserId(null);
@@ -517,15 +493,15 @@ const Form = ({ closeModal, onClose, userDet }) => {
                     }}
                 >
                     <MaterialIcons name="add" size={20} color="#fff" />
-                    <Text style={styles.actionButtonText}>New</Text>
+                    <Text style={currentStyles.actionButtonText}>New</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
-                    style={[styles.actionBtnRow, isEditing ? styles.updateButton : styles.saveButton, { marginLeft: 6 }]} 
+
+                <TouchableOpacity
+                    style={[currentStyles.actionBtnRow, isEditing ? currentStyles.updateButton : currentStyles.saveButton, { marginLeft: 6 }]}
                     onPress={isEditing ? handleUpdate : handleSubmit}
                 >
                     <MaterialIcons name={isEditing ? "update" : "save"} size={20} color="#fff" />
-                    <Text style={styles.actionButtonText}>{isEditing ? 'Update' : 'Save'}</Text>
+                    <Text style={currentStyles.actionButtonText}>{isEditing ? 'Update' : 'Save'}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -533,10 +509,10 @@ const Form = ({ closeModal, onClose, userDet }) => {
     );
 };
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.lightBackground,
+        backgroundColor: 'transparent',
         position: "relative"
     },
     scrollContainer: {
@@ -552,28 +528,28 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: Colors.dark,
+        color: theme.colors.text,
     },
     closeButton: {
         padding: 4,
     },
     section: {
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colors.surface,
         borderRadius: 16,
         padding: 20,
         marginBottom: 20,
-        shadowColor: Colors.shadow,
+        shadowColor: theme.colors.shadow,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.08,
         shadowRadius: 8,
         elevation: 6,
         borderWidth: 1,
-        borderColor: '#f4f5f7',
+        borderColor: theme.colors.border,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: Colors.darkText,
+        color: theme.colors.text,
         marginBottom: 12,
     },
     dropdown: {
@@ -585,18 +561,18 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '500',
-        color: Colors.darkGray,
+        color: theme.colors.subtext,
         marginBottom: 8,
     },
     input: {
         height: 50,
         borderWidth: 1,
-        borderColor: Colors.border,
+        borderColor: theme.colors.border,
         borderRadius: 10,
         paddingHorizontal: 16,
         fontSize: 16,
-        backgroundColor: '#fdfdfd',
-        color: Colors.darkText,
+        backgroundColor: theme.colors.surface,
+        color: theme.colors.text,
     },
     otpEmailRow: {
         flexDirection: 'row',
@@ -610,12 +586,12 @@ const styles = StyleSheet.create({
     },
     checkboxLabel: {
         fontSize: 14,
-        color: Colors.darkGray,
+        color: theme.colors.subtext,
         marginLeft: 8,
     },
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: "#38c98d",
+        backgroundColor: theme.colors.primary,
         paddingVertical: 12,
         paddingHorizontal: 8,
         borderTopLeftRadius: 8,
@@ -623,7 +599,7 @@ const styles = StyleSheet.create({
     },
     tableHeaderText: {
         fontWeight: 'bold',
-        color: Colors.white,
+        color: theme.colors.textOnPrimary,
         textAlign: 'center',
     },
     tableRow: {
@@ -631,23 +607,23 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 8,
         borderBottomWidth: 1,
-        borderColor: Colors.border,
+        borderColor: theme.colors.border,
     },
     evenRow: {
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colors.surface,
     },
     oddRow: {
-        backgroundColor: Colors.lightGray,
+        backgroundColor: theme.colors.background,
     },
     tableCell: {
         textAlign: 'center',
         fontSize: 14,
-        color: Colors.darkText,
+        color: theme.colors.text,
     },
     noDataText: {
         textAlign: 'center',
         padding: 16,
-        color: Colors.darkGray,
+        color: theme.colors.subtext,
     },
     levelGroup: {
         marginBottom: 16,
@@ -655,16 +631,16 @@ const styles = StyleSheet.create({
     actionButton: {
         padding: 6,
         borderRadius: 20,
-        backgroundColor: Colors.lightGray,
+        backgroundColor: theme.colors.background,
     },
     bottomButtonsContainer: {
         flexDirection: 'row',
         padding: 16,
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.surface,
         borderTopWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: theme.colors.border,
         elevation: 8,
-        shadowColor: '#000',
+        shadowColor: theme.colors.shadow,
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.05,
         shadowRadius: 8,
@@ -683,16 +659,16 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     newButton: {
-        backgroundColor: '#94a3b8',
+        backgroundColor: theme.colors.gray || '#6b7280',   // Neutral gray for New
     },
     saveButton: {
-        backgroundColor: '#38c98d',
+        backgroundColor: theme.colors.primary,  // Green for Save
     },
     updateButton: {
-        backgroundColor: '#4facfe',
+        backgroundColor: theme.colors.accent,   // Blue for Update
     },
     actionButtonText: {
-        color: '#ffffff',
+        color: theme.colors.textOnPrimary,
         fontSize: 16,
         fontWeight: '700',
         marginLeft: 8,

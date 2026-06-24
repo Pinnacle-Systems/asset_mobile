@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 // ============================================================
 // Asset Audit Backend - user.service.js
 // Only functions used by the Asset Mobile screens are kept.
@@ -19,16 +20,16 @@ function transformRows(result) {
 }
 
 // ─── LOGIN ──────────────────────────────────────────────────
-export async function login(req, res) {
+export async function login(req, res, next) {
     const { deviceName, MobileIP, username, password, COMPCODE } = req.body;
-    if (!username) return res.json({ statusCode: 1, message: 'Username is Required' });
-    if (!password) return res.json({ statusCode: 1, message: 'Password is Required' });
+    if (!username) return res.json({ statusCode: 1, message: 'Please provide a valid username.' });
+    if (!password) return res.json({ statusCode: 1, message: 'Please provide a valid password.' });
 
     const user = await prisma_Connector.user.findFirst({ where: { username }, include: { Companies: true } });
-    if (!user?.username) return res.json({ statusCode: 1, message: "Username Doesn't Exist" });
+    if (!user?.username) return res.json({ statusCode: 1, message: "We couldn't find an account with that username." });
 
     const isMatched = await bcrypt.compare(password, user.password);
-    if (!isMatched) return res.json({ statusCode: 1, message: "Password Doesn't Match" });
+    if (!isMatched) return res.json({ statusCode: 1, message: "The password you entered is incorrect. Please try again." });
 
     await prisma_Connector?.userLog.create({
         data: { MobileName: deviceName, MobileIP, User: user.username, COMPCODE, Idcard: user?.Idcard, type: 'Login' }
@@ -37,7 +38,7 @@ export async function login(req, res) {
 }
 
 // ─── CREATE USER ────────────────────────────────────────────
-export async function create(req, res) {
+export async function create(req, res, next) {
     const { username, password, hod, email, otpemail, roleId, Idcard, Compcodes, level, ...rest } = req.body;
     if (!username || !password) return res.json({ statusCode: 1, message: 'Username and Password are Required' });
 
@@ -51,27 +52,27 @@ export async function create(req, res) {
         });
         return res.json({ statusCode: 0, message: 'User created successfully', data: newUser });
     } catch (error) {
-        console.error('create user error:', error);
+        logger.error('create user error:', error);
         return res.json({ statusCode: 1, message: 'An error occurred while creating the user' });
     }
 }
 
 // ─── GET ALL USERS ──────────────────────────────────────────
-export async function get(req, res) {
+export async function get(req, res, next) {
     const connection = await getConnection(res);
     try {
         const result = await prisma_Connector.user.findMany({ include: { Companies: true, role: true }, where: { active: true } });
         return res.json({ statusCode: 0, data: result.map(d => ({ gmail: d?.email, ...d })) });
     } catch (err) {
-        console.error('Get users error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error('Get users error:', err);
+        return next(err);
     } finally {
         await connection.close();
     }
 }
 
 // ─── GET LOGGED-IN USER DETAILS ─────────────────────────────
-export async function getUserDet(req, res) {
+export async function getUserDet(req, res, next) {
     const connection = await getConnection(res);
     try {
         const sql = `SELECT B.IDCARD||'@'||C.COMPCODE MOBUSER, C.COMPCODE, D.BANDNAME, E.MNNAME1 DEPTNAME, F.DESIGNATION
@@ -85,72 +86,21 @@ export async function getUserDet(req, res) {
         const result = await connection.execute(sql);
         return res.json({ statusCode: 0, data: result.rows.map(u => ({ id: u[0], value: u[0], role: u[4] })) });
     } catch (err) {
-        console.error('getUserDet error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error('getUserDet error:', err);
+        return next(err);
     } finally {
         await connection.close();
     }
 }
 
-// ─── GET SINGLE USER (legacy Oracle) ────────────────────────
-export async function getOne(req, res) {
-    const connection = await getConnection(res);
-    try {
-        const sql = `SELECT T.userName, mobuserlog.allowedpages, T.DEFAULTADMIN
-            FROM mobileuser T
-            LEFT JOIN mobuserlog ON T.USERNAME = mobuserlog.USERNAME
-            ORDER BY userName`;
-        const result = await connection.execute(sql);
-        return res.json({ statusCode: 0, data: result.rows.map(u => ({ userName: u[0], allowedpages: u[1], defaultAdmin: u[2] })) });
-    } catch (err) {
-        console.error('getOne error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    } finally {
-        await connection.close();
-    }
-}
 
-// ─── GET USER BASIC DETAILS ─────────────────────────────────
-export async function getUserDetails(req, res) {
-    const Idcard = req.query.Idcard;
-    const COMPCODE = String(req?.headers?.compcode).toUpperCase();
-    const connection = await getConnection(res);
-    try {
-        const sql = `SELECT D.MNNAME1 DeptName,A.FNAME,A.IDCARDNO EMPID,C.DESIGNATION,E.MOBNO
-            FROM HREMPLOYMAST A
-            JOIN HREMPLOYDETAILS B ON A.HREMPLOYMASTID=B.HREMPLOYMASTID
-            JOIN GTDESIGNATIONMAST C ON C.GTDESIGNATIONMASTID=B.DESIGNATION
-            JOIN GTDEPTDESGMAST D ON D.GTDEPTDESGMASTID=B.DEPTNAME
-            JOIN GTCOMPMAST CM ON CM.GTCOMPMASTID=A.COMPCODE
-            LEFT JOIN HRECONTACTDETAILS E ON E.HREMPLOYMASTID=A.HREMPLOYMASTID
-            WHERE A.IDCARDNO=:IDCARDNO AND CM.COMPCODE=:COMPCODE`;
-        const result = await connection.execute(sql, { COMPCODE, IDCARDNO: Idcard });
-        const r = result?.rows[0];
-        return res.json({ statusCode: 0, data: r ? { Department: r[0], Name: r[1], EmpId: r[2], Designation: r[3], Mobile: r[4] } : {} });
-    } catch (err) {
-        console.error('getUserDetails error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    } finally {
-        await connection.close();
-    }
-}
 
-// ─── GET DESIGNATION ────────────────────────────────────────
-export async function getDesignation(req, res) {
-    const connection = await getConnection(res);
-    try {
-        const result = await connection.execute(`SELECT DISTINCT(role) FROM mobuserlog`);
-        return res.json({ statusCode: 0, data: result.rows.map(u => ({ value: u[0], id: u[0] })) });
-    } catch (err) {
-        console.error('getDesignation error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    } finally {
-        await connection.close();
-    }
-}
+
+
+
 
 // ─── GET ROLES ON PAGE (by RoleId) ──────────────────────────
-export async function getRolesOnPage(req, res) {
+export async function getRolesOnPage(req, res, next) {
     const { RoleId } = req?.query;
     try {
         const result = await prisma_Connector.roleOnPage.findMany({ where: RoleId ? { roleName: RoleId } : {} });
@@ -159,13 +109,13 @@ export async function getRolesOnPage(req, res) {
             data: result.map(d => ({ dbid: d?.id, id: d?.roleId, create: d?.create, read: d?.read, delete: d?.delete, edit: d?.edit, isdefault: d?.isdefault, link: d?.link }))
         });
     } catch (error) {
-        console.error('getRolesOnPage error:', error);
+        logger.error('getRolesOnPage error:', error);
         res.json({ status: 500, data: {}, message: 'An error occurred while fetching roles' });
     }
 }
 
 // ─── GET USER ROLES ON PAGE ─────────────────────────────────
-export async function getUserRolesOnPage(req, res) {
+export async function getUserRolesOnPage(req, res, next) {
     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
     const { RoleId } = req?.query;
     try {
@@ -173,13 +123,13 @@ export async function getUserRolesOnPage(req, res) {
         const pages = result[0]?.RoleOnPage?.map(d => ({ id: d?.roleId, create: d?.create, read: d?.read, delete: d?.delete, edit: d?.edit, isdefault: d?.isdefault, link: d?.link }));
         return res.json({ status: 1, data: pages });
     } catch (error) {
-        console.error('getUserRolesOnPage error:', error);
+        logger.error('getUserRolesOnPage error:', error);
         res.json({ status: 500, data: {}, message: 'An error occurred while fetching roles' });
     }
 }
 
 // ─── GET CREATED ROLES ON PAGE ──────────────────────────────
-export async function getCreatedRolesOnPage(req, res) {
+export async function getCreatedRolesOnPage(req, res, next) {
     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
     try {
         const result = await prisma_Connector.role.findMany({
@@ -188,13 +138,13 @@ export async function getCreatedRolesOnPage(req, res) {
         });
         return res.json({ status: 1, data: result });
     } catch (error) {
-        console.error('getCreatedRolesOnPage error:', error);
+        logger.error('getCreatedRolesOnPage error:', error);
         res.json({ status: 500, data: {}, message: 'An error occurred while fetching roles' });
     }
 }
 
 // ─── CREATE ROLE ON PAGE ────────────────────────────────────
-export async function createRoleOnPage(req, res) {
+export async function createRoleOnPage(req, res, next) {
     const { roleName, permissions } = req.body;
     try {
         const insertData = Object.entries(permissions).map(([page, p]) => ({
@@ -204,15 +154,15 @@ export async function createRoleOnPage(req, res) {
         const result = await prisma_Connector.roleOnPage.createMany({ data: insertData });
         return res.json({ status: 1, data: result });
     } catch (err) {
-        console.error('createRoleOnPage error:', err);
+        logger.error('createRoleOnPage error:', err);
         res.json({ status: 0, data: {} });
     }
 }
 
 // ─── UPDATE ROLE ON PAGE ────────────────────────────────────
-export async function UpdateRoleOnPage(req, res) {
+export async function UpdateRoleOnPage(req, res, next) {
     const { roleName, permissions } = req.body;
-    if (!roleName || !permissions) return res.status(400).json({ status: 0, message: 'roleName and permissions are required' });
+    if (!roleName || !permissions) return next(err);
 
     try {
         const results = await Promise.all(
@@ -221,33 +171,33 @@ export async function UpdateRoleOnPage(req, res) {
                 return prisma_Connector.roleOnPage.upsert({
                     where: { id: p.dbid ?? -1, link: page, roleName, AND: { roleName, link: page, id: p.dbid ?? -1 } },
                     update: upsertData, create: upsertData
-                }).catch(err => { console.error(`Error on page ${page}:`, err); return null; });
+                }).catch(err => { logger.error(`Error on page ${page}:`, err); return null; });
             })
         );
         const failed = results.filter(r => r === null).length;
         return res.json({ status: 1, data: { successCount: results.length - failed, failedCount: failed } });
     } catch (error) {
-        console.error('UpdateRoleOnPage error:', error);
-        return res.status(500).json({ status: 0, message: 'An error occurred while updating permissions' });
+        logger.error('UpdateRoleOnPage error:', error);
+        return next(err);
     }
 }
 
 // ─── GET COMPANY CODES ──────────────────────────────────────
-export async function getCompanyCode(req, res) {
+export async function getCompanyCode(req, res, next) {
     const connection = await getConnection(res);
     try {
         const result = await connection.execute(`SELECT A.COMPCODE "id", A.COMPCODE "value", A.GTCOMPMASTID COMPID FROM GTCOMPMAST A WHERE A.PTRANSACTION = 'COMPANY' ORDER BY 1`);
         return res.json({ statusCode: 0, data: transformRows(result) });
     } catch (err) {
-        console.error('getCompanyCode error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error('getCompanyCode error:', err);
+        return next(err);
     } finally {
         await connection?.close();
     }
 }
 
 // ─── GET EMPLOYEE IDs ───────────────────────────────────────
-export async function getEmployeeIds(req, res) {
+export async function getEmployeeIds(req, res, next) {
     const connection = await getConnection(res);
     try {
         const sql = `SELECT C.COMPCODE||'('||B.IDCARD||')'||'('||D.FNAME||')' "value", C.COMPCODE||'-'||B.IDCARD "id", C.COMPCODE, C.COMPNAME, B.DEPTNAME
@@ -259,15 +209,15 @@ export async function getEmployeeIds(req, res) {
         const result = await connection.execute(sql);
         return res.json({ statusCode: 0, data: transformRows(result) });
     } catch (err) {
-        console.error('getEmployeeIds error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error('getEmployeeIds error:', err);
+        return next(err);
     } finally {
         await connection.close();
     }
 }
 
 // ─── UPDATE FCM TOKEN ───────────────────────────────────────
-export async function update_fcm(req, res) {
+export async function update_fcm(req, res, next) {
     const { Idcard, fcm } = req.body;
     try {
         if (Idcard && fcm) {
@@ -276,76 +226,26 @@ export async function update_fcm(req, res) {
         }
         return res.json({ statusCode: 500, data: {}, message: 'Id Not Found' });
     } catch (err) {
-        console.error('update_fcm error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error('update_fcm error:', err);
+        return next(err);
     }
 }
 
-// ─── SEND OTP (Forgot Password) ─────────────────────────────
-export async function send_Otp(req, res) {
-    const reset = req?.body?.reset;
-    try {
-        const data = await prisma_Connector.user?.findFirst({
-            where: reset ? { OR: [{ otpemail: req?.body?.username }, { username: req?.body?.username }] } : { username: req?.body?.username }
-        });
-        const isMatched = !reset && await bcrypt.compare(req?.body?.password, data?.password);
-        if (isMatched || (reset && data?.otpemail)) {
-            const otpVal = Random_Otp();
-            const otp = await sendMail({ to: data?.otpemail, otp: otpVal });
-            if (otp?.accepted[0] === data?.otpemail) {
-                await prisma_Connector.user?.update({ where: { username: data?.username }, data: { otp: otpVal } });
-                return res.json({ status: 1 });
-            }
-            return res.json({ status: 0 });
-        } else if (!data?.otpemail) {
-            return res.json({ status: 0, err: 'Email is Not Registered!' });
-        } else {
-            return res.json({ status: 0, err: 'Password is Not Correct!' });
-        }
-    } catch (error) {
-        console.error('send_Otp error:', error);
-        res.json({ status: 500, err: error.message });
-    }
-}
 
-// ─── VERIFY OTP & CHANGE PASSWORD ──────────────────────────
-export async function verify_Otp_and_change_pass(req, res) {
-    const { otp, username, NewPass } = req?.body;
-    try {
-        const data = await prisma_Connector.user?.findFirst({ where: { otp } });
-        if (data?.otp) {
-            const hashedPassword = await bcrypt.hash(NewPass, 10);
-            const result = await prisma_Connector?.user?.update({ where: { username }, data: { password: hashedPassword } });
-            return res?.json({ status: result?.password ? 1 : 0 });
-        }
-        return res?.json({ status: 0 });
-    } catch (err) {
-        console.error('verify_Otp_and_change_pass error:', err);
-    }
-}
 
-// ─── CHANGE SETTINGS ────────────────────────────────────────
-export async function Change_Settings(req, res) {
-    const compCode = String(req.headers?.compcode).toUpperCase();
-    const { Idcard, data } = req.body;
-    try {
-        const result = await prisma_Connector.settings.upsert({ where: { UserId: Idcard, COMPCODE: compCode }, update: data, create: data });
-        return res.json({ statusCode: 1, data: result });
-    } catch (err) {
-        console.error('Change_Settings error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-}
+
+
+
 
 // ─── GET SETTINGS ───────────────────────────────────────────
-export async function get_Change_Settings(req, res) {
+export async function get_Change_Settings(req, res, next) {
     const compCode = String(req.headers?.compcode).toUpperCase();
     const Idcard = req.query?.Idcard;
     try {
         const result = Idcard ? await prisma_Connector.settings.findUnique({ where: { UserId: Idcard, COMPCODE: compCode } }) : {};
         return res.json({ statusCode: 0, data: result });
     } catch (err) {
-        console.error('get_Change_Settings error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        logger.error('get_Change_Settings error:', err);
+        return next(err);
     }
 }

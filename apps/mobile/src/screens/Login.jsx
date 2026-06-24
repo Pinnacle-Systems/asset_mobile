@@ -26,6 +26,7 @@ import CustomText from '../components/Text';
 import Custom_Notification from '../utils/Custom_Notification';
 import { LinearGradient } from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { theme } from '../theme/index';
 
 function LoginScreen({ navigation }) {
     const [username, setUsername] = useState('');
@@ -101,7 +102,7 @@ function LoginScreen({ navigation }) {
         }
         try {
             const data = await loginUser({ username, password, deviceName: MobileDevice, MobileIP, COMPCODE: GlobalSelected }).unwrap();
-            if (data.message === 'Login Successfull') {
+            if (data.statusCode === 0 || data.message === 'Login Successfull') {
                 var filterdata = data?.data;
 
                 if (filterdata?.isAdmin == 1) {
@@ -129,20 +130,35 @@ function LoginScreen({ navigation }) {
                 setId(filterdata?.Idcard);
                 setHead(filterdata?.hod);
             } else {
-                setError('Login failed, please try again.');
+                setError(data?.message || 'Login failed, please try again.');
             }
         } catch (error) {
+            let errorMessage = "An unexpected error occurred. Please try again.";
+
             if (error?.data?.message) {
-                setError(error.data.message);
+                errorMessage = error.data.message;
             } else if (error?.error) {
-                setError(error.error);
+                errorMessage = error.error;
             } else if (error?.message) {
-                setError(error.message);
-            } else {
-                setError("An unexpected error occurred. Please try again.");
+                errorMessage = error.message;
             }
+
+            // Provide more user-friendly messages for common scenarios
+            const lowerMsg = errorMessage.toLowerCase();
+            if (lowerMsg.includes("fetch") || lowerMsg.includes("network")) {
+                errorMessage = "Unable to connect to the server. Please check your internet connection.";
+            } else if (lowerMsg.includes("invalid password") || lowerMsg.includes("incorrect password") || lowerMsg.includes("wrong password")) {
+                errorMessage = "The password you entered is incorrect. Please try again.";
+            } else if (lowerMsg.includes("not found") || lowerMsg.includes("invalid user")) {
+                errorMessage = "We couldn't find an account with that username.";
+            } else if (lowerMsg.includes("bad credentials")) {
+                errorMessage = "Invalid username or password. Please try again.";
+            }
+
+            setError(errorMessage);
         }
     };
+
 
     return (
         <KeyboardAvoidingView
@@ -191,10 +207,15 @@ function LoginScreen({ navigation }) {
                     </View>
                 ) : (
                     <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
-                        {error && <Text style={styles.errorText}>{error}</Text>}
+                        {error ? (
+                            <View style={styles.errorContainer}>
+                                <Icon name="error-outline" size={20} color="#e53e3e" style={styles.errorIcon} />
+                                <Text style={styles.errorText}>{error}</Text>
+                            </View>
+                        ) : null}
 
                         <View style={styles.inputContainer}>
-                            <Icon name="person" size={20} color="#4299e1" style={styles.inputIcon} />
+                            <Icon name="person" size={20} color={theme.colors.accent} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
                                 placeholder="Username"
@@ -209,7 +230,7 @@ function LoginScreen({ navigation }) {
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Icon name="lock" size={20} color="#4299e1" style={styles.inputIcon} />
+                            <Icon name="lock" size={20} color={theme.colors.accent} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
                                 placeholder="Password"
@@ -228,7 +249,7 @@ function LoginScreen({ navigation }) {
                                 <Icon
                                     name={isPasswordVisible ? "visibility" : "visibility-off"}
                                     size={20}
-                                    color="#4299e1"
+                                    color={theme.colors.accent}
                                 />
                             </TouchableOpacity>
                         </View>
@@ -264,120 +285,140 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         width: '100%',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#f4f7fa',
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 35,
     },
     logo: {
-        width: 120,
-        height: 120,
+        width: 110,
+        height: 110,
         resizeMode: 'contain',
-        marginBottom: 20,
+        marginBottom: 15,
     },
     appName: {
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: 'bold',
-        color: '#1a365d',
-        marginBottom: 8,
-        fontFamily: 'Roboto-Bold',
+        color: '#1e293b',
+        marginBottom: 5,
+        fontFamily: theme.fonts.bold,
+        letterSpacing: 0.5,
     },
     appSubtitle: {
         fontSize: 16,
-        color: '#718096',
-        fontFamily: 'Roboto-Regular',
+        color: '#64748b',
+        fontFamily: theme.fonts.regular,
+        marginBottom: 5,
     },
     card: {
-        width: '90%',
-        backgroundColor: 'white',
-        borderRadius: 15,
-        padding: 25,
-        shadowColor: '#000',
+        width: '94%',
+        backgroundColor: '#ffffff',
+        borderRadius: 24,
+        padding: 30,
+        shadowColor: '#94a3b8',
         shadowOffset: {
             width: 0,
-            height: 10,
+            height: 12,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-        elevation: 10,
+        shadowOpacity: 0.15,
+        shadowRadius: 36,
+        elevation: 8,
         marginBottom: 20,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
-        marginBottom: 25,
-        paddingBottom: 5,
+        backgroundColor: '#f8fafc',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        marginBottom: 20,
+        paddingHorizontal: 15,
+        height: 55,
     },
     inputIcon: {
         marginRight: 10,
     },
     input: {
         flex: 1,
-        height: 45,
+        height: '100%',
         fontSize: 16,
         color: '#2d3748',
-        fontFamily: 'Roboto-Regular',
+        fontFamily: theme.fonts.regular,
     },
     eyeIcon: {
         padding: 5,
     },
     loginButton: {
         ButtonOuter: {
-            backgroundColor: '#1a365d',
-            borderRadius: 30,
-            height: 50,
+            backgroundColor: theme.colors.primary,   // Green
+            borderRadius: 14,
+            height: 55,
             justifyContent: 'center',
             alignItems: 'center',
-            shadowColor: '#1a365d',
+            shadowColor: theme.colors.primaryDark,
             shadowOffset: {
                 width: 0,
-                height: 4,
+                height: 8,
             },
             shadowOpacity: 0.3,
-            shadowRadius: 4,
-            elevation: 5,
+            shadowRadius: 12,
+            elevation: 6,
+            marginTop: 10,
         },
         ButtonText: {
-            color: 'white',
-            fontSize: 16,
-            fontWeight: 'bold',
-            fontFamily: 'Roboto-Bold',
+            color: theme.colors.textOnPrimary,
+            fontSize: 18,
+            fontWeight: '600',
+            fontFamily: theme.fonts.semiBold,
+            letterSpacing: 0.5,
         },
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff5f5',
+        padding: 12,
+        borderRadius: 10,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#feb2b2',
+    },
+    errorIcon: {
+        marginRight: 10,
     },
     errorText: {
-        color: '#e53e3e',
-        textAlign: 'center',
-        marginBottom: 15,
-        fontFamily: 'Roboto-Medium',
+        color: '#c53030',
+        flex: 1,
+        fontSize: 14,
+        fontFamily: theme.fonts.semiBold,
     },
     companySelectionContainer: {
-        width: '90%',
-        backgroundColor: 'white',
-        borderRadius: 15,
-        padding: 25,
-        shadowColor: '#000',
+        width: '94%',
+        backgroundColor: '#ffffff',
+        borderRadius: 24,
+        padding: 30,
+        shadowColor: '#94a3b8',
         shadowOffset: {
             width: 0,
-            height: 10,
+            height: 12,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-        elevation: 10,
+        shadowOpacity: 0.15,
+        shadowRadius: 36,
+        elevation: 8,
     },
     selectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 25,
     },
     selectionTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        color: '#1a365d',
-        fontFamily: 'Roboto-Bold',
+        color: '#1e293b',
+        fontFamily: theme.fonts.bold,
     },
     selectionCloseBtn: {
         width: 32,
@@ -390,32 +431,34 @@ const styles = StyleSheet.create({
     dropdownLabel: {
         color: '#1a365d',
         marginBottom: 5,
-        fontFamily: 'Roboto-Medium',
+        fontFamily: theme.fonts.semiBold,
     },
     dropdown: {
         marginBottom: 25,
     },
     selectButton: {
         ButtonOuter: {
-            backgroundColor: '#1a365d',
-            borderRadius: 30,
-            height: 50,
+            backgroundColor: theme.colors.primary,   // Green
+            borderRadius: 14,
+            height: 55,
             justifyContent: 'center',
             alignItems: 'center',
-            shadowColor: '#1a365d',
+            shadowColor: theme.colors.primaryDark,
             shadowOffset: {
                 width: 0,
-                height: 4,
+                height: 8,
             },
             shadowOpacity: 0.3,
-            shadowRadius: 4,
-            elevation: 5,
+            shadowRadius: 12,
+            elevation: 6,
+            marginTop: 10,
         },
         ButtonText: {
-            color: 'white',
-            fontSize: 16,
-            fontWeight: 'bold',
-            fontFamily: 'Roboto-Bold',
+            color: theme.colors.textOnPrimary,
+            fontSize: 18,
+            fontWeight: '600',
+            fontFamily: theme.fonts.semiBold,
+            letterSpacing: 0.5,
         },
     },
     footer: {
@@ -425,7 +468,7 @@ const styles = StyleSheet.create({
     footerText: {
         color: '#a0aec0',
         marginRight: 5,
-        fontFamily: 'Roboto-Regular',
+        fontFamily: theme.fonts.regular,
         width: 210,
         textAlign: "center"
     },
@@ -433,7 +476,7 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         textDecorationLine: 'underline',
-        fontFamily: 'Roboto-Bold',
+        fontFamily: theme.fonts.bold,
     },
 
 });

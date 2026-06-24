@@ -1,11 +1,12 @@
 import React from 'react';
-import { DataTable, IconButton, Provider, useTheme } from 'react-native-paper';
+import { DataTable, IconButton, Provider } from 'react-native-paper';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { useTheme as useAppTheme } from '../theme/ThemeProvider';
 
-const CustomDataTable = ({ 
-  data, 
-  fields, 
-  onEdit, 
+const CustomDataTable = ({
+  data,
+  fields,
+  onEdit,
   onDelete,
   title,
   itemsPerPage = 5,
@@ -19,8 +20,10 @@ const CustomDataTable = ({
 }) => {
   const [page, setPage] = React.useState(0);
   const [itemsPerPageState, setItemsPerPage] = React.useState(itemsPerPage);
-  const theme = useTheme();
-  
+
+  const { theme } = useAppTheme();
+  const styles = createStyles(theme);
+
   // Guard against missing or malformed data
   const safeData = Array.isArray(data) ? data : [];
   const from = page * itemsPerPageState;
@@ -33,14 +36,16 @@ const CustomDataTable = ({
           <Text style={styles.titleText}>{title}</Text>
         </View>
       )}
-      
+
       <DataTable.Header style={styles.columnHeader}>
         {fields.map((field, index) => (
-          <DataTable.Title 
-            textStyle={styles.headerCellText}
-            key={`header-${index}`} 
+          <DataTable.Title
+            textStyle={[styles.headerCellText, field.align && { textAlign: field.align }]}
+            key={`header-${index}`}
             {...field.titleProps}
             style={[
+              field.titleProps?.style,
+              field.align && { justifyContent: field.align === 'center' ? 'center' : field.align === 'right' ? 'flex-end' : 'flex-start' },
               field.width && { width: field.width },
               field.flex && { flex: field.flex },
               styles.headerCell
@@ -62,8 +67,8 @@ const CustomDataTable = ({
         </View>
       ) : (
         safeData.slice(from, to).map((row, rowIndex) => (
-          <DataTable.Row 
-            key={`row-${rowIndex}`} 
+          <DataTable.Row
+            key={`row-${rowIndex}`}
             style={[
               styles.row,
               onRowPress && styles.clickableRow,
@@ -72,11 +77,13 @@ const CustomDataTable = ({
             onPress={onRowPress ? () => onRowPress(row) : undefined}
           >
             {fields.map((field, fieldIndex) => (
-              <DataTable.Cell  
-                textStyle={styles.cellText}
-                key={`cell-${rowIndex}-${fieldIndex}`} 
+              <DataTable.Cell
+                textStyle={[styles.cellText, field.align && { textAlign: field.align }]}
+                key={`cell-${rowIndex}-${fieldIndex}`}
                 {...field.cellProps}
                 style={[
+                  field.cellProps?.style,
+                  field.align && { justifyContent: field.align === 'center' ? 'center' : field.align === 'right' ? 'flex-end' : 'flex-start' },
                   field.width && { width: field.width },
                   field.flex && { flex: field.flex },
                   styles.cell
@@ -85,13 +92,13 @@ const CustomDataTable = ({
                 {field.renderCell ? field.renderCell(row) : row[field.key]}
               </DataTable.Cell>
             ))}
-            
+
             {(onEdit || onDelete) && (
               <DataTable.Cell numeric style={styles.actionCell}>
                 {onEdit && (
                   <IconButton
                     icon="pencil-outline"
-                    iconColor="#3b82f6"
+                    iconColor={theme.colors.accent}
                     size={20}
                     onPress={() => onEdit(row)}
                     style={styles.actionButton}
@@ -100,7 +107,7 @@ const CustomDataTable = ({
                 {onDelete && (
                   <IconButton
                     icon="trash-can-outline"
-                    iconColor="#ef4444"
+                    iconColor={theme.colors.error || "#ef4444"}
                     size={20}
                     onPress={() => onDelete(row)}
                     style={styles.actionButton}
@@ -124,6 +131,7 @@ const CustomDataTable = ({
             numberOfItemsPerPage={itemsPerPageState}
             onItemsPerPageChange={setItemsPerPage}
             selectPageDropdownLabel={'Rows per page'}
+            theme={{ colors: { text: theme.colors.text } }}
             style={styles.pagination}
           />
         </Provider>
@@ -144,15 +152,15 @@ const CustomDataTable = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     overflow: 'hidden',
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: theme.colors.border,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: theme.colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -164,19 +172,19 @@ const styles = StyleSheet.create({
   titleContainer: {
     paddingVertical: 16,
     paddingHorizontal: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: theme.colors.border,
   },
   titleText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1e293b',
+    color: theme.colors.text,
   },
   columnHeader: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: theme.colors.border,
     paddingHorizontal: 16,
     elevation: 0,
   },
@@ -184,7 +192,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   headerCellText: {
-    color: '#64748b',
+    color: theme.colors.subtext,
     fontWeight: '600',
     fontSize: 13,
     textTransform: 'uppercase',
@@ -196,24 +204,22 @@ const styles = StyleSheet.create({
   },
   row: {
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: theme.colors.borderLight || theme.colors.border,
     paddingHorizontal: 16,
     minHeight: 56,
   },
-  clickableRow: {
-    // cursor: 'pointer' works on web, ignored natively usually
-  },
+  clickableRow: {},
   evenRow: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.colors.surface,
   },
   oddRow: {
-    backgroundColor: '#fafafa',
+    backgroundColor: theme.colors.background,
   },
   cell: {
     paddingVertical: 8,
   },
   cellText: {
-    color: '#334155',
+    color: theme.colors.text,
     fontSize: 14,
   },
   actionCell: {
@@ -222,7 +228,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     margin: 0,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
   },
   emptyContainer: {
@@ -231,14 +237,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: '#94a3b8',
+    color: theme.colors.subtext,
     fontSize: 15,
     textAlign: 'center',
   },
   pagination: {
     borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-    backgroundColor: '#ffffff',
+    borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
   },
 });
 

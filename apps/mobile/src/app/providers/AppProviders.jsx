@@ -14,6 +14,8 @@ import { Common_Context } from "../../contexts/Common_Context";
 import { AllowedTabs_Filter } from "../../utils/AllowedPagesFiltering";
 import NoAllocatedPage from "../../components/Common/NoAllocatedPage";
 
+import { ThemeProvider } from "../../theme/ThemeProvider";
+
 const Stack = createNativeStackNavigator();
 
 export function AppProviders() {
@@ -59,13 +61,13 @@ export function AppProviders() {
   const filteredTabs = [
     ...((pages.length > 0 && isAdmin == 0)
       ? tabs
-          .filter(tab => pages?.includes(tab?.key))
-          .filter(tab => tab.name !== "LOGIN" && tab.name !== "SPLASH")
-          .map(tab =>
-            tab.name === "HOME" && !hasRoles && !isLoading && !loading
-              ? { ...tab, component: NoAllocatedPage }
-              : tab
-          )
+        .filter(tab => pages?.includes(tab?.key))
+        .filter(tab => tab.name !== "LOGIN" && tab.name !== "SPLASH")
+        .map(tab =>
+          tab.name === "HOME" && !hasRoles && !isLoading && !loading
+            ? { ...tab, component: NoAllocatedPage }
+            : tab
+        )
       : tabs.filter(tab => tab.name !== "LOGIN" && tab.name !== "SPLASH")),
     { name: "LOGIN", component: LoginScreen },
     { name: "SPLASH", component: Splash },
@@ -84,32 +86,34 @@ export function AppProviders() {
   });
 
   return (
-    <Common_Context.Provider value={{ page: rolesOnPage?.data || [], loading: isLoading || loading, admin: isAdmin }}>
-      <NavigationContainer ref={NavRef} onStateChange={handleStateChange}>
-        {currentRoute !== "LOGIN" && currentRoute !== "SPLASH" && (
-          <NavBar openSidebar={SidebarOpen} setopenSidebar={setSidebarOpen} />
-        )}
+    <ThemeProvider>
+      <Common_Context.Provider value={{ page: rolesOnPage?.data || [], loading: isLoading || loading, admin: isAdmin }}>
+        <NavigationContainer ref={NavRef} onStateChange={handleStateChange}>
+          {currentRoute !== "LOGIN" && currentRoute !== "SPLASH" && (
+            <NavBar openSidebar={SidebarOpen} setopenSidebar={setSidebarOpen} />
+          )}
 
-        <Stack.Navigator initialRouteName="SPLASH">
-          {(isAdmin == 1 ? tabs : filteredTabs)?.map((item) => (
-            <Stack.Screen
-              key={item?.name}
-              name={item?.name}
-              component={item?.component}
-              options={{ headerShown: false }}
+          <Stack.Navigator initialRouteName="SPLASH">
+            {(isAdmin == 1 ? tabs : filteredTabs)?.map((item) => (
+              <Stack.Screen
+                key={item?.name}
+                name={item?.name}
+                component={item?.component}
+                options={{ headerShown: false }}
+              />
+            ))}
+          </Stack.Navigator>
+
+          {currentRoute !== "LOGIN" && currentRoute !== "SPLASH" && (
+            <CustomDrawer
+              activeRoute={currentRoute}
+              tabs={filterSidebar}
+              openSidebar={SidebarOpen}
+              setopenSidebar={setSidebarOpen}
             />
-          ))}
-        </Stack.Navigator>
-
-        {currentRoute !== "LOGIN" && currentRoute !== "SPLASH" && (
-          <CustomDrawer
-            activeRoute={currentRoute}
-            tabs={filterSidebar}
-            openSidebar={SidebarOpen}
-            setopenSidebar={setSidebarOpen}
-          />
-        )}
-      </NavigationContainer>
-    </Common_Context.Provider>
+          )}
+        </NavigationContainer>
+      </Common_Context.Provider>
+    </ThemeProvider>
   );
 }

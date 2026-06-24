@@ -12,7 +12,7 @@ const commonMast = createApi({
             return headers
         }
     }),
-    tagTypes: ['commonMast', 'get_chat', 'barcode'],
+    tagTypes: ['commonMast', 'get_chat', 'barcode', 'update_delete', 'common_delete'],
     endpoints: (builder) => ({
         getFinYear: builder.query({
             query: () => {
@@ -174,7 +174,7 @@ const commonMast = createApi({
             }),
             invalidatesTags: ["barcode"],
         }),
-         getRoomMaster: builder.query({
+        getRoomMaster: builder.query({
             query: ({ floorId, divisionId }) => {
                 return {
                     url: `${COMMON_MAST}/master/rooms`,
