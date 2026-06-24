@@ -25,16 +25,20 @@ export function AppProviders() {
   const [isAdmin, setisAdmin] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
     const fetchUser = async () => {
-      const storedUser = await AsyncStorage.getItem("userName");
-      var Id = JSON?.parse(storedUser);
-      setisAdmin(Id?.isAdmin || 0);
-      setcompcode(Id?.GCOMPCODE);
-      setTempUser(Id?.roleId);
+      setLoading(true);
+      try {
+        const storedUser = await AsyncStorage.getItem("userName");
+        var Id = JSON?.parse(storedUser);
+        setisAdmin(Id?.isAdmin || 0);
+        setcompcode(Id?.GCOMPCODE || "");
+        setTempUser(Id?.roleId || "");
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchUser().finally(() => setLoading(false));
-  }, []);
+    fetchUser();
+  }, [currentRoute]);
 
   const userRoleId = useMemo(() => (tempUser?.split("@")[0]) + "@" + compcode, [compcode, tempUser]);
   const { data: rolesOnPage, isLoading } = useGetUserRolesOnPageQuery({ RoleId: userRoleId });
@@ -58,7 +62,7 @@ export function AppProviders() {
           .filter(tab => pages?.includes(tab?.key))
           .filter(tab => tab.name !== "LOGIN" && tab.name !== "SPLASH")
           .map(tab =>
-            tab.name === "DashBoard" && !hasRoles
+            tab.name === "HOME" && !hasRoles && !isLoading && !loading
               ? { ...tab, component: NoAllocatedPage }
               : tab
           )

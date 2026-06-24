@@ -46,7 +46,7 @@ function RoleOnPage_Master() {
   };
 
   const fields = [
-    { key: 'name', label: 'Name', titleProps: { numeric: false }, cellProps: { numeric: false } },
+    { key: 'displayName', label: 'Name', titleProps: { numeric: false }, cellProps: { numeric: false } },
     { key: 'active', label: 'Active', titleProps: { numeric: false }, cellProps: { numeric: false } },
   ];
 
@@ -135,7 +135,7 @@ function RoleOnPage_Master() {
           <View style={styles.tableContainer}>
             <CustomDataTable
               title="Role List"
-              data={all_Role_names?.data || []}
+              data={(all_Role_names?.data || []).map(role => ({ ...role, displayName: role.name?.split('@')[0] || role.name }))}
               fields={fields}
               onEdit={handleEdit}
               onDelete={handleDelete}
@@ -149,17 +149,63 @@ function RoleOnPage_Master() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 10 },
-  card: { borderRadius: 12, elevation: 3, marginBottom: 20, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: 'transparent' },
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#f4f5f7',
+  },
   header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: '#2c3e50' },
   formContainer: { marginBottom: 20 },
   inputGroup: { marginBottom: 15 },
-  label: { fontSize: 14, fontWeight: '500', color: '#555', marginBottom: 5 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, fontSize: 16, backgroundColor: '#fff' },
-  pickerContainer: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, overflow: 'hidden' },
-  submitButton: { backgroundColor: '#3498db', paddingVertical: 12, borderRadius: 8, alignItems: 'center', marginTop: 15, flexDirection: 'row', justifyContent: 'center', elevation: 2 },
-  submitButtonText: { color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 5 },
-  tableContainer: { marginTop: 20, borderRadius: 8, overflow: 'hidden' }
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#636e72',
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  input: { 
+    borderWidth: 1, 
+    borderColor: '#dfe6e9', 
+    borderRadius: 10, 
+    paddingHorizontal: 16, 
+    paddingVertical: 12, 
+    fontSize: 16, 
+    backgroundColor: '#fdfdfd',
+    color: '#2d3436',
+  },
+  pickerContainer: { 
+    borderWidth: 1, 
+    borderColor: '#dfe6e9', 
+    borderRadius: 10, 
+    backgroundColor: '#fdfdfd',
+    overflow: 'hidden',
+  },
+  submitButton: { 
+    backgroundColor: '#4facfe', 
+    paddingVertical: 14, 
+    borderRadius: 10, 
+    alignItems: 'center', 
+    marginTop: 10, 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    elevation: 3,
+    shadowColor: '#4facfe',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  submitButtonText: { color: '#fff', fontSize: 16, fontWeight: '700', marginLeft: 8 },
+  tableContainer: { marginTop: 24, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#f0f0f0' }
 });
 
 export default RoleOnPage_Master;

@@ -43,7 +43,7 @@ export const Dropdown = ({
       styles.container,
       { zIndex: open ? 1000 : 1 }
     ]}>
-      {label && label}
+      {label && (typeof label === 'string' ? <Text style={styles.label}>{label}</Text> : label)}
       <DropDownPicker
         open={open}
         value={multiple ? selected || [] : selected}

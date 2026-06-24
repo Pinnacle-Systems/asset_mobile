@@ -1160,7 +1160,11 @@ function FilterSheet({ visible, onClose, filters, setFilters, uniq }) {
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={fs.content} showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            style={{ flexShrink: 1 }}
+            contentContainerStyle={[fs.content, { paddingBottom: 40 }]} 
+            showsVerticalScrollIndicator={false}
+          >
             {/* Change filter */}
             <Text style={fs.sectionTitle}>SHOW ONLY</Text>
             <View style={fs.chips}>

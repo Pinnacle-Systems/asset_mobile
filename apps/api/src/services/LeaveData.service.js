@@ -1,8 +1,8 @@
 import moment from "moment";
 import { prisma_Connector } from "../../index.js";
 import { getConnection } from "../constants/db.connection.js";
-import formatDateToOracle from "../Utiles/OracleDateFormat.js";
-import { generateNumericId } from "../Utiles/UniqueId.js";
+import formatDateToOracle from "../utils/OracleDateFormat.js";
+import { generateNumericId } from "../utils/UniqueId.js";
 
 
 export async function get(req, res) {

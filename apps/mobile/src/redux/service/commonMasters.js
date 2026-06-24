@@ -85,7 +85,8 @@ const commonMast = createApi({
                     params,
                     headers: {
                         'Content-type': 'application/json; charset=UTF-8',
-                    }
+                    },
+                    params
                 }
             },
             providesTags: ['barcode'],
@@ -98,7 +99,8 @@ const commonMast = createApi({
                     params,
                     headers: {
                         'Content-type': 'application/json; charset=UTF-8',
-                    }
+                    },
+                    params
                 }
             },
             providesTags: ['barcode'],
@@ -111,7 +113,8 @@ const commonMast = createApi({
                     params,
                     headers: {
                         'Content-type': 'application/json; charset=UTF-8',
-                    }
+                    },
+                    params
                 }
             },
             providesTags: ['barcode'],

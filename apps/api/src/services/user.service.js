@@ -6,8 +6,8 @@
 import bcrypt from 'bcrypt';
 import { getConnection } from '../constants/db.connection.js';
 import { prisma_Connector } from '../../index.js';
-import Random_Otp from '../Utiles/Random_Otp.js';
-import { sendMail } from '../Utiles/Mailer.js';
+import Random_Otp from '../utils/Random_Otp.js';
+import { sendMail } from '../utils/Mailer.js';
 
 // ─── Helper: transform Oracle rows to key-value objects ─────
 function transformRows(result) {
@@ -63,7 +63,7 @@ export async function get(req, res) {
         const result = await prisma_Connector.user.findMany({ include: { Companies: true, role: true }, where: { active: true } });
         return res.json({ statusCode: 0, data: result.map(d => ({ gmail: d?.email, ...d })) });
     } catch (err) {
-        console.error('get users error:', err);
+        console.error('Get users error:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     } finally {
         await connection.close();

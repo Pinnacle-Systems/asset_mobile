@@ -9,3 +9,14 @@ export function CustomNavigation(name, params) {
         console.warn("NavRef is NOT ready! Cannot navigate to:", name);
     }
 }
+
+export function ResetNavigation(name, params) {
+    if (NavRef.isReady()) {
+        NavRef.reset({
+            index: 0,
+            routes: [{ name, params }],
+        });
+    } else {
+        console.warn("NavRef is NOT ready! Cannot reset to:", name);
+    }
+}
