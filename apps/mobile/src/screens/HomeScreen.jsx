@@ -1,114 +1,187 @@
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import React, { useEffect, useState, useContext } from "react";
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  ScrollView, 
+  TouchableOpacity, 
+  SafeAreaView, 
+  StatusBar,
+  Dimensions,
+  Image
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Common_Context } from "../contexts/Common_Context";
+import { AllowedTabs_Filter } from "../utils/AllowedPagesFiltering";
 
-import { Button } from "../components/Button.jsx";
-import { Screen } from "../components/Screen.jsx";
-import { Text } from "../components/Text.jsx";
-import { api } from "../services/api.js";
+const { width } = Dimensions.get('window');
+
+const CARDS = [
+  { id: '1', label: 'Asset Auditing', subtitle: 'Manage and verify company assets', action: 'asset', image: require('../assets/barcode.png'), notify: 0 },
+];
 
 export function HomeScreen() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [health, setHealth] = useState(null);
-
-  const loadHealth = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await api.getHealth();
-      setHealth(response?.data ?? null);
-    } catch (err) {
-      setError("Unable to reach the API right now.");
-      console.warn("Mobile health check failed", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const navigation = useNavigation();
+  const [username, setUsername] = useState("User");
+  const { page, admin } = useContext(Common_Context);
 
   useEffect(() => {
-    loadHealth();
+    const fetchUser = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('userName');
+        if (storedUser) {
+          let userNameObj = JSON.parse(storedUser);
+          if (userNameObj?.userName) {
+            setUsername(userNameObj.userName);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load user', e);
+      }
+    };
+    fetchUser();
   }, []);
 
+  const filterCards = (admin == 1 || !page || page.length === 0) ? CARDS : AllowedTabs_Filter({
+    tabs: CARDS,
+    allowedTabs: page,
+    tabsPath_key: "action",
+    allowedTabspath_key: "link",
+    condtion: "isdefault",
+    condtion_op: { op: "==", val: 1 }
+  });
+
   return (
-    <Screen style={styles.screen}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Asset Mobile</Text>
-        <Text style={styles.subtitle}>Checking the API connection...</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f7fa" />
 
-        {loading ? (
-          <View style={styles.stateRow}>
-            <ActivityIndicator size="small" color="#2563eb" />
-            <Text style={styles.stateText}>Loading health status</Text>
-          </View>
-        ) : null}
-
-        {!loading && error ? (
-          <View style={styles.stateRow}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : null}
-
-        {!loading && health ? (
-          <View style={styles.card}>
-            <Text style={styles.label}>Status</Text>
-            <Text style={styles.value}>{health.status}</Text>
-            <Text style={styles.label}>Service</Text>
-            <Text style={styles.value}>{health.service}</Text>
-            <Text style={styles.label}>Timestamp</Text>
-            <Text style={styles.value}>{health.timestamp}</Text>
-          </View>
-        ) : null}
-
-        <Button title="Retry" onPress={loadHealth} disabled={loading} style={styles.button} />
+      {/* Simple Header */}
+      <View style={styles.titleSection}>
+        <Text style={styles.sectionTitle}>Home Screen</Text>
+        <Text style={styles.sectionSubtitle}>Select an action to continue</Text>
       </View>
-    </Screen>
+
+      {/* Card Grid */}
+      <ScrollView 
+        contentContainerStyle={styles.cardContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.grid}>
+          {filterCards?.map((item) => (
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.card} 
+              onPress={() => navigation.navigate(item.action)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.iconWrapper}>
+                <Image style={styles.cardImage} source={item.image} resizeMode="contain" />
+              </View>
+              <View style={styles.textContainer}>
+                <Text style={styles.cardText}>{item.label}</Text>
+                {item.subtitle && (
+                  <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+                )}
+              </View>
+              
+              {item.notify !== undefined && item.notify > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{item.notify}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={{height: 40}} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    justifyContent: "center",
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f7fa',
   },
-  content: {
-    gap: 16,
+  titleSection: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1e293b',
   },
-  subtitle: {
-    color: "#6b7280",
-    marginBottom: 8,
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 6,
+    fontWeight: '500',
   },
-  stateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  cardContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
-  stateText: {
-    color: "#374151",
-  },
-  errorText: {
-    color: "#dc2626",
+  grid: {
+    flexDirection: 'column',
+    gap: 12,
   },
   card: {
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 12,
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    flexDirection: "row",
+    alignItems: 'center',
     padding: 16,
-    gap: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#64748b',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  label: {
-    color: "#6b7280",
+  iconWrapper: {
+    width: 72,
+    height: 72,
+    borderRadius: 16,
+    backgroundColor: '#f1f5f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  cardImage: {
+    width: 54,
+    height: 54,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  cardText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: "#1e293b",
+    marginBottom: 2,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  badge: {
+    backgroundColor: '#ef4444',
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+  badgeText: {
+    color: '#ffffff',
     fontSize: 12,
-    textTransform: "uppercase",
-  },
-  value: {
-    color: "#111827",
-    fontWeight: "600",
-  },
-  button: {
-    marginTop: 8,
+    fontWeight: '700',
   },
 });
