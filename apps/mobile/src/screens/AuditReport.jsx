@@ -17,7 +17,7 @@ import {
 import XLSX from 'xlsx';
 import Orientation from 'react-native-orientation-locker';
 import Share from 'react-native-share';
-import  FS from 'react-native-fs';
+import FS from 'react-native-fs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -92,7 +92,7 @@ const transform = (item, mode) => ({
   abarid: String(item.ABARID || 'N/A'),
   assetId: String(item.ASSETID || 'N/A'),
   docId: String(item.DOCID || 'N/A'),
-  
+
   // Asset info
   mmade: String(item.MMADE || 'N/A'),
   mmodel: String(item.MMODEL || 'N/A'),
@@ -101,30 +101,30 @@ const transform = (item, mode) => ({
   condition: String(item.CONDITION || 'N/A'),
   loc: String(item.LOC || 'N/A'),
   remarks: String(item.REMARKS || 'N/A'),
-  
+
   // Dates
   auditDate: item.AUDIT_DATE ? moment(item.AUDIT_DATE).format('DD MMM YY HH:mm') : 'N/A',
   auditDateObj: item.AUDIT_DATE ? new Date(item.AUDIT_DATE) : null,
   auditDateRaw: item.AUDIT_DATE,
   prevAuditDate: item.PREV_AUDIT_DATE ? moment(item.PREV_AUDIT_DATE).format('DD MMM YY HH:mm') : null,
   prevAuditDateRaw: item.PREV_AUDIT_DATE,
-  
+
   // Locations — today
   scannedRoom: String(item.SCANNED_ROOM || 'N/A'),
   scannedBuilding: String(item.SCANNED_BUILDING || 'N/A'),
   scannedFloor: String(item.SCANNED_FLOOR || 'N/A'),
-  
+
   // Locations — previous
   prevRoom: String(item.PREV_ROOM || 'N/A'),
   prevBuilding: String(item.PREV_BUILDING || 'N/A'),
   prevFloor: String(item.PREV_FLOOR || 'N/A'),
   prevCondition: String(item.PREV_CONDITION || 'N/A'),
-  
+
   // Locations — expected (master)
   expectedRoom: String(item.EXPECTED_ROOM || 'N/A'),
   expectedBuilding: String(item.EXPECTED_BUILDING || 'N/A'),
   expectedFloor: String(item.EXPECTED_FLOOR || 'N/A'),
-  
+
   // Status & variance flags
   status: String(item.STATUS || (mode === 'scanned' ? 'Scanned' : 'N/A')),
   roomChanged: String(item.ROOM_CHANGED || 'N/A'),
@@ -133,7 +133,7 @@ const transform = (item, mode) => ({
   conditionChanged: String(item.CONDITION_CHANGED || 'N/A'),
   changeSummary: String(item.CHANGE_SUMMARY || 'N/A'),
   roomVariance: String(item.ROOM_VARIANCE || ''),
-  
+
   // Helpers
   hasAnyChange: ['ROOM_CHANGED', 'BUILDING_CHANGED', 'FLOOR_CHANGED', 'CONDITION_CHANGED']
     .some(k => item[k] === 'Yes'),
@@ -143,18 +143,18 @@ const transform = (item, mode) => ({
 // ─── Variance Flow Component ───────────────────────────────────────────────
 function VarianceFlow({ item }) {
   const [expanded, setExpanded] = useState(false);
-  
-  const hasChanges = item.roomChanged === 'Yes' || 
-                     item.buildingChanged === 'Yes' || 
-                     item.floorChanged === 'Yes' || 
-                     item.conditionChanged === 'Yes';
-  
+
+  const hasChanges = item.roomChanged === 'Yes' ||
+    item.buildingChanged === 'Yes' ||
+    item.floorChanged === 'Yes' ||
+    item.conditionChanged === 'Yes';
+
   if (!hasChanges && !item.isFirstScan) return null;
-  
+
   return (
     <View style={vf.container}>
-      <TouchableOpacity 
-        style={vf.header} 
+      <TouchableOpacity
+        style={vf.header}
         onPress={() => setExpanded(!expanded)}
         activeOpacity={0.7}
       >
@@ -164,7 +164,7 @@ function VarianceFlow({ item }) {
         </View>
         <Icon name={expanded ? 'expand-less' : 'expand-more'} size={20} color={C.textSec} />
       </TouchableOpacity>
-      
+
       {expanded && (
         <View style={vf.content}>
           {/* Previous Scan Date */}
@@ -181,7 +181,7 @@ function VarianceFlow({ item }) {
               </View>
             </View>
           )}
-          
+
           {/* Changes Flow */}
           <View style={vf.flowContainer}>
             {item.roomChanged === 'Yes' && (
@@ -194,7 +194,7 @@ function VarianceFlow({ item }) {
                 </View>
               </View>
             )}
-            
+
             {item.buildingChanged === 'Yes' && (
               <View style={vf.flowItem}>
                 <Text style={vf.flowLabel}>🏢 Building</Text>
@@ -205,7 +205,7 @@ function VarianceFlow({ item }) {
                 </View>
               </View>
             )}
-            
+
             {item.floorChanged === 'Yes' && (
               <View style={vf.flowItem}>
                 <Text style={vf.flowLabel}>📊 Floor</Text>
@@ -216,7 +216,7 @@ function VarianceFlow({ item }) {
                 </View>
               </View>
             )}
-            
+
             {item.conditionChanged === 'Yes' && (
               <View style={vf.flowItem}>
                 <Text style={vf.flowLabel}>🔧 Condition</Text>
@@ -227,7 +227,7 @@ function VarianceFlow({ item }) {
                 </View>
               </View>
             )}
-            
+
             {item.isFirstScan && (
               <View style={vf.firstScanBadge}>
                 <Icon name="fiber-new" size={16} color={C.accent} />
@@ -235,7 +235,7 @@ function VarianceFlow({ item }) {
               </View>
             )}
           </View>
-          
+
           {/* Change Summary */}
           {item.changeSummary !== 'N/A' && item.changeSummary !== 'No Change' && (
             <View style={vf.summaryBox}>
@@ -381,8 +381,8 @@ function DateFilterModal({ visible, onClose, onApply, initialDate }) {
     const today = new Date();
     let start = new Date();
     let end = new Date();
-    
-    switch(option) {
+
+    switch (option) {
       case 'today':
         start = moment().startOf('day').toDate();
         end = moment().endOf('day').toDate();
@@ -408,7 +408,7 @@ function DateFilterModal({ visible, onClose, onApply, initialDate }) {
         end = moment().subtract(1, 'months').endOf('month').toDate();
         break;
     }
-    
+
     setStartDate(start);
     setEndDate(end);
     setQuickSelect(option);
@@ -430,7 +430,7 @@ function DateFilterModal({ visible, onClose, onApply, initialDate }) {
       <View style={df.overlay}>
         <View style={df.sheet}>
           <View style={df.handle} />
-          
+
           <View style={df.header}>
             <Text style={df.title}>Filter by Date</Text>
             <TouchableOpacity onPress={onClose} style={df.closeBtn}>
@@ -464,8 +464,8 @@ function DateFilterModal({ visible, onClose, onApply, initialDate }) {
 
             {/* Custom Range */}
             <Text style={df.sectionTitle}>CUSTOM RANGE</Text>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={df.dateField}
               onPress={() => setShowStartPicker(true)}
             >
@@ -476,7 +476,7 @@ function DateFilterModal({ visible, onClose, onApply, initialDate }) {
               <Icon name="calendar-today" size={18} color={C.accent} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={df.dateField}
               onPress={() => setShowEndPicker(true)}
             >
@@ -733,7 +733,7 @@ const sb = StyleSheet.create({
 // ─── Stat Card ────────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, color, active, onPress }) {
   const scale = useRef(new Animated.Value(1)).current;
-  
+
   const handlePress = () => {
     Animated.sequence([
       Animated.timing(scale, { toValue: 0.93, duration: 80, useNativeDriver: true }),
@@ -1132,10 +1132,7 @@ function FilterSheet({ visible, onClose, filters, setFilters, uniq }) {
   };
 
   const reset = () => {
-    const d = defaultFilters();
-    setLocal(d);
-    setFilters(d);
-    onClose();
+    setLocal(defaultFilters());
   };
 
   const pickers = [
@@ -1152,7 +1149,7 @@ function FilterSheet({ visible, onClose, filters, setFilters, uniq }) {
       <View style={fs.overlay}>
         <View style={fs.sheet}>
           <View style={fs.handle} />
-          
+
           <View style={fs.header}>
             <Text style={fs.title}>Filters</Text>
             <TouchableOpacity onPress={onClose} style={fs.closeBtn}>
@@ -1160,9 +1157,9 @@ function FilterSheet({ visible, onClose, filters, setFilters, uniq }) {
             </TouchableOpacity>
           </View>
 
-          <ScrollView 
+          <ScrollView
             style={{ flexShrink: 1 }}
-            contentContainerStyle={[fs.content, { paddingBottom: 40 }]} 
+            contentContainerStyle={[fs.content, { paddingBottom: 40 }]}
             showsVerticalScrollIndicator={false}
           >
             {/* Change filter */}
@@ -1478,7 +1475,7 @@ export default function AuditReport() {
   const [statFilter, setStatFilter] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const dispatch = useDispatch();
 
   const { data: auditData, isLoading: aLoad, error: aErr, refetch: rAudit } = useGetAuditAssestDetailsQuery();
@@ -1528,7 +1525,7 @@ export default function AuditReport() {
       conditions: new Set(),
       statuses: new Set()
     };
-    
+
     allData.forEach(i => {
       if (i.scannedBuilding !== 'N/A') sets.buildings.add(i.scannedBuilding);
       if (i.scannedFloor !== 'N/A') sets.floors.add(i.scannedFloor);
@@ -1537,7 +1534,7 @@ export default function AuditReport() {
       if (i.condition !== 'N/A') sets.conditions.add(i.condition);
       if (i.status !== 'N/A') sets.statuses.add(i.status);
     });
-    
+
     return Object.fromEntries(
       Object.entries(sets).map(([k, v]) => [k, [...v].sort()])
     );
@@ -1594,7 +1591,7 @@ export default function AuditReport() {
         av = a.assetId;
         bv = b.assetId;
       }
-      
+
       if (typeof av === 'string') {
         return filters.sortOrder === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
       }
@@ -1629,80 +1626,80 @@ export default function AuditReport() {
   }, [filters, statFilter, dateFilter]);
 
   // Refresh
-const onRefresh = useCallback(async () => {
-  setRefreshing(true);
-  try {
-    if (mode === 'scanned') {
-      await rAudit();
-    } else {
-      await rVariance();
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      if (mode === 'scanned') {
+        await rAudit();
+      } else {
+        await rVariance();
+      }
+    } catch (e) {
+      // silently ignore, RTK Query handles error state
+    } finally {
+      setRefreshing(false);
     }
-  } catch (e) {
-    // silently ignore, RTK Query handles error state
-  } finally {
-    setRefreshing(false);
-  }
-}, [mode]);
+  }, [mode]);
 
   // Export
-const exportExcel = async () => {
-  try {
-    setExporting(true);
-    if (!displayData.length) {
-      Alert.alert('No Data', 'Nothing to export');
-      return;
+  const exportExcel = async () => {
+    try {
+      setExporting(true);
+      if (!displayData.length) {
+        Alert.alert('No Data', 'Nothing to export');
+        return;
+      }
+
+      const rows = displayData.map(i => ({
+        'Asset ID': i.assetId,
+        'Barcode': i.abarid,
+        'Name': i.subGroup,
+        'Machine': `${i.mmade} ${i.mmodel}`,
+        'Division': i.division,
+        'Scanned Room': i.scannedRoom,
+        'Scanned Building': i.scannedBuilding,
+        'Scanned Floor': i.scannedFloor,
+        'Prev Room': i.prevRoom,
+        'Prev Building': i.prevBuilding,
+        'Prev Condition': i.prevCondition,
+        'Expected Room': i.expectedRoom,
+        'Condition': i.condition,
+        'Status': i.status,
+        'Room Changed': i.roomChanged,
+        'Building Changed': i.buildingChanged,
+        'Floor Changed': i.floorChanged,
+        'Condition Changed': i.conditionChanged,
+        'Change Summary': i.changeSummary,
+        'Audit Date': i.auditDate,
+        'Prev Audit Date': i.prevAuditDate || 'N/A',
+        'Remarks': i.remarks,
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Audit Report');
+      const out = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+
+      const fileName = `Audit_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
+      const path = `${FS.CachesDirectoryPath}/${fileName}`;
+
+      await FS.writeFile(path, out, 'base64');
+
+      await Share.open({
+        url: Platform.OS === 'android' ? `file://${path}` : path,
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        title: 'Audit Report',
+        filename: fileName,
+        failOnCancel: false,
+      });
+    } catch (e) {
+      if (e?.message !== 'User did not share') {
+        Alert.alert('Export Error', e?.message || 'Unknown error');
+      }
+    } finally {
+      setExporting(false);
     }
-
-    const rows = displayData.map(i => ({
-      'Asset ID': i.assetId,
-      'Barcode': i.abarid,
-      'Name': i.subGroup,
-      'Machine': `${i.mmade} ${i.mmodel}`,
-      'Division': i.division,
-      'Scanned Room': i.scannedRoom,
-      'Scanned Building': i.scannedBuilding,
-      'Scanned Floor': i.scannedFloor,
-      'Prev Room': i.prevRoom,
-      'Prev Building': i.prevBuilding,
-      'Prev Condition': i.prevCondition,
-      'Expected Room': i.expectedRoom,
-      'Condition': i.condition,
-      'Status': i.status,
-      'Room Changed': i.roomChanged,
-      'Building Changed': i.buildingChanged,
-      'Floor Changed': i.floorChanged,
-      'Condition Changed': i.conditionChanged,
-      'Change Summary': i.changeSummary,
-      'Audit Date': i.auditDate,
-      'Prev Audit Date': i.prevAuditDate || 'N/A',
-      'Remarks': i.remarks,
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Audit Report');
-    const out = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
-
-    const fileName = `Audit_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
-    const path = `${FS.CachesDirectoryPath}/${fileName}`;
-
-    await FS.writeFile(path, out, 'base64');
-
-    await Share.open({
-      url: Platform.OS === 'android' ? `file://${path}` : path,
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      title: 'Audit Report',
-      filename: fileName,
-      failOnCancel: false,
-    });
-  } catch (e) {
-    if (e?.message !== 'User did not share') {
-      Alert.alert('Export Error', e?.message || 'Unknown error');
-    }
-  } finally {
-    setExporting(false);
-  }
-};
+  };
 
   // Loading / Error
   if (isLoading) {
@@ -1746,22 +1743,22 @@ const exportExcel = async () => {
       {/* Header */}
       <View style={s.header}>
 
-          <View style={s.segmentedControl}>
-            {[
-              ['scanned', 'Scanned'],
-              ['variance', 'Variance'],
-            ].map(([k, l]) => (
-              <TouchableOpacity
-                key={k}
-                style={[s.segmentedBtn, mode === k && s.segmentedBtnActive]}
-                onPress={() => setMode(k)}
-              >
-                <Text style={[s.segmentedText, mode === k && s.segmentedTextActive]}>
-                  {l}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+        <View style={s.segmentedControl}>
+          {[
+            ['scanned', 'Scanned'],
+            ['variance', 'Variance'],
+          ].map(([k, l]) => (
+            <TouchableOpacity
+              key={k}
+              style={[s.segmentedBtn, mode === k && s.segmentedBtnActive]}
+              onPress={() => setMode(k)}
+            >
+              <Text style={[s.segmentedText, mode === k && s.segmentedTextActive]}>
+                {l}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         <View>
           <Text style={s.title}>Asset Audit</Text>
           <Text style={s.subtitle}>
@@ -1771,8 +1768,8 @@ const exportExcel = async () => {
         </View>
 
         <View style={s.headerRight}>
-        {/* Mode toggle */}
-        
+          {/* Mode toggle */}
+
 
           {/* View toggle */}
           <View style={s.segmentedControl}>
@@ -1826,14 +1823,14 @@ const exportExcel = async () => {
               <Icon name="file-download" size={18} color="#fff" />
             )}
           </TouchableOpacity>
-        
 
-      
+
+
 
         </View>
       </View>
 
-    
+
 
       {/* Active filter bar */}
       {hasActiveFilters && (
@@ -1966,7 +1963,7 @@ const exportExcel = async () => {
                     </Text>
                   ))}
                 </View>
-                
+
                 {/* Table rows */}
                 <FlatList
                   data={displayData}
@@ -2044,7 +2041,7 @@ const s = StyleSheet.create({
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap:"wrap",
+    flexWrap: "wrap",
     gap: 10,
   },
 

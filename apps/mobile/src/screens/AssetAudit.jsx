@@ -16,10 +16,8 @@ import {
 } from "react-native";
 import { Camera, useCameraDevice, useCameraPermission, useCodeScanner } from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PermissionsAndroid, Platform } from 'react-native';
 import {
   useLazyGetBarcodeDataQuery,
   useSaveBarcodeDetailsMutation,
@@ -56,7 +54,7 @@ const C = {
 };
 
 // ─── Animated Scan Line ───────────────────────────────────────────────────────
-function ScanLine({ mode }) {
+function ScanLine() {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
@@ -66,11 +64,11 @@ function ScanLine({ mode }) {
       ])
     ).start();
   }, []);
-  const frameH = mode === 'qr' ? 240 : 130;
+  const frameH = 240;
   const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, frameH - 4] });
   return (
     <Animated.View style={[
-      mode === 'qr' ? styles.scanLineQR : styles.scanLineBarcode,
+      styles.scanLineQR,
       { transform: [{ translateY }] }
     ]} />
   );
@@ -212,7 +210,7 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
                 {activeDivision && (
                   <TouchableOpacity onPress={onChangeDivision} style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: C.warning + '22', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, marginTop: 6 }}>
                     <Ionicons name="business" size={10} color={C.warning} style={{ marginRight: 4 }} />
-                    <Text style={{ fontSize: 10, color: C.warning, fontWeight: '600', maxWidth: 180 }} numberOfLines={1}>
+                    <Text style={{ fontSize: 12, color: C.warning, fontWeight: '600', maxWidth: 290 }} numberOfLines={1}>
                       {activeDivision.NAME}
                     </Text>
                   </TouchableOpacity>
@@ -238,14 +236,14 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, marginTop: 16, flexWrap: 'wrap', gap: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.primary + '18', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
                 <Ionicons name="business" size={12} color={C.primary} style={{ marginRight: 4 }} />
-                <Text style={{ fontSize: 11, color: C.primary, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selBuilding?.NAME}</Text>
+                <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selBuilding?.NAME}</Text>
               </View>
               {step > 1 && (
                 <>
                   <Ionicons name="chevron-forward" size={12} color={C.textSec} />
                   <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.success + '18', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
                     <Ionicons name="layers" size={12} color={C.success} style={{ marginRight: 4 }} />
-                    <Text style={{ fontSize: 11, color: C.success, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selFloor?.NAME}</Text>
+                    <Text style={{ fontSize: 13, color: C.success, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selFloor?.NAME}</Text>
                   </View>
                 </>
               )}
@@ -342,7 +340,7 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
               onPress={handleNext}
             >
               <Text style={popup.nextBtnText}>{isLast ? 'Start Scanning' : 'Next'}</Text>
-              <Ionicons name={isLast ? 'scan' : 'arrow-forward'} size={18} color="#fff" />
+              <Ionicons name={isLast ? 'scan' : 'arrow-forward'} size={18} color="#2c2a2a" />
             </TouchableOpacity>
           </View>
 
@@ -364,7 +362,6 @@ export default function AssetAudit() {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [scanMode, setScanMode] = useState('barcode');
   const [flashOn, setFlashOn] = useState(false);
   const [condition, setCondition] = useState('Good');
   const [showSetup, setShowSetup] = useState(true);
@@ -483,9 +480,7 @@ export default function AssetAudit() {
   }, [showDetails]);
 
   const codeScanner = useCodeScanner({
-    codeTypes: scanMode === 'qr'
-      ? ['qr']
-      : ['ean-13', 'code-128', 'upc-a', 'code-39'],
+    codeTypes: ['qr', 'ean-13', 'code-128', 'upc-a', 'code-39'],
     onCodeScanned: (codes) => {
       if (!scanned && codes.length > 0 && codes[0].value) {
         setScanned(true);
@@ -615,7 +610,7 @@ export default function AssetAudit() {
     setShowSetup(false);
   };
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ── Validation Helpers ────────────────────────────────────────────────────
   const registeredLocation = [
     assetData?.BUILDINGNAME,
     assetData?.FLOORNAME,
@@ -626,43 +621,6 @@ export default function AssetAudit() {
     assetData?.RNAME1 &&
     auditParams?.room?.NAME &&
     assetData.RNAME1 !== auditParams.room.NAME;
-
-  // ── Permission screens ────────────────────────────────────────────────────
-  if (!hasPermission) {
-    return (
-      <SafeAreaView style={styles.permContainer}>
-        <StatusBar barStyle="light-content" />
-        <TouchableOpacity
-          style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
-          onPress={() => navigation && navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={28} color={C.textPri} />
-        </TouchableOpacity>
-        <View style={styles.permIconWrap}>
-          <Ionicons name="camera" size={40} color={C.primary} />
-        </View>
-        <Text style={styles.permTitle}>Camera Access Needed</Text>
-        <Text style={styles.permSub}>Allow camera access to scan asset barcodes and QR codes</Text>
-        <TouchableOpacity style={styles.permBtn} onPress={requestPermission}>
-          <Text style={styles.permBtnText}>Grant Permission</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
-
-  if (!device) {
-    return (
-      <SafeAreaView style={styles.permContainer}>
-        <TouchableOpacity
-          style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
-          onPress={() => navigation && navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={28} color={C.textPri} />
-        </TouchableOpacity>
-        <Text style={styles.permTitle}>Camera Unavailable</Text>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <View style={styles.root}>
@@ -683,8 +641,40 @@ export default function AssetAudit() {
         onChangeDivision={() => setShowDivisionModal(true)}
       />
 
+      {/* ── Permission / No Device Screens ── */}
+      {!showSetup && !hasPermission && (
+        <SafeAreaView style={styles.permContainer}>
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
+            onPress={() => navigation && navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={28} color={C.textPri} />
+          </TouchableOpacity>
+          <View style={styles.permIconWrap}>
+            <Ionicons name="camera" size={40} color={C.primary} />
+          </View>
+          <Text style={styles.permTitle}>Camera Access Needed</Text>
+          <Text style={styles.permSub}>Allow camera access to scan asset barcodes and QR codes</Text>
+          <TouchableOpacity style={styles.permBtn} onPress={requestPermission}>
+            <Text style={styles.permBtnText}>Grant Permission</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      )}
+
+      {!showSetup && hasPermission && !device && (
+        <SafeAreaView style={styles.permContainer}>
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
+            onPress={() => navigation && navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={28} color={C.textPri} />
+          </TouchableOpacity>
+          <Text style={styles.permTitle}>Camera Unavailable</Text>
+        </SafeAreaView>
+      )}
+
       {/* ── Camera ── */}
-      {cameraActive && !showSetup && (
+      {cameraActive && !showSetup && hasPermission && device && (
         <Camera
           ref={camera}
           style={StyleSheet.absoluteFill}
@@ -697,7 +687,7 @@ export default function AssetAudit() {
       )}
 
       {/* ── Scanner Overlay ── */}
-      {cameraActive && !showSetup && (
+      {cameraActive && !showSetup && hasPermission && device && (
         <View style={styles.overlay}>
 
           {/* Top bar */}
@@ -762,9 +752,9 @@ export default function AssetAudit() {
             <View style={styles.dimLeft} />
             <View style={styles.frameCol}>
               <View style={styles.dimTop} />
-              <View style={scanMode === 'qr' ? styles.qrFrame : styles.barcodeFrame}>
+              <View style={styles.qrFrame}>
                 <Corners />
-                <ScanLine mode={scanMode} />
+                <ScanLine />
               </View>
               <View style={styles.dimBottom} />
             </View>
@@ -773,29 +763,13 @@ export default function AssetAudit() {
 
           {/* Hint label */}
           <View style={styles.hintRow}>
-            <Ionicons name={scanMode === 'qr' ? 'qr-code' : 'barcode'} size={16} color={C.textSec} />
+            <Ionicons name="scan-outline" size={16} color={C.textSec} />
             <Text style={styles.hintText}>
-              Point camera at {scanMode === 'qr' ? 'QR code' : 'barcode'}
+              Point camera at QR code or barcode
             </Text>
           </View>
 
-          {/* Bottom controls */}
-          <SafeAreaView>
-            <View style={styles.bottomBar}>
-              <TouchableOpacity
-                style={styles.modeBtn}
-                onPress={() => { setScanMode(m => m === 'qr' ? 'barcode' : 'qr'); setScanned(false); }}
-              >
-                <Ionicons
-                  name={scanMode === 'qr' ? 'barcode-outline' : 'qr-code-outline'}
-                  size={22} color={C.primary}
-                />
-                <Text style={styles.modeBtnText}>
-                  Switch to {scanMode === 'qr' ? 'Barcode' : 'QR'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </SafeAreaView>
+
         </View>
       )}
 
@@ -1167,7 +1141,7 @@ const popup = StyleSheet.create({
     paddingVertical: 15, borderRadius: 14,
   },
   nextBtnDisabled: { opacity: 0.5 },
-  nextBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  nextBtnText: { color: '#1a1818', fontSize: 15, fontWeight: '700' },
 });
 
 // ─── Main Styles ──────────────────────────────────────────────────────────────
