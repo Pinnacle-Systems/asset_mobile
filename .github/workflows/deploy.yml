@@ -1,0 +1,44 @@
+name: Deploy API to Hostinger
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Deploy API source to Hostinger
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-az --stats"
+          SOURCE: "apps/api/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: ${{ secrets.REMOTE_TARGET }}/
+          SCRIPT_BEFORE: |
+            mkdir -p ${{ secrets.REMOTE_TARGET }}
+
+      - name: Restart API
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            set -eu
+
+            . ~/.nvm/nvm.sh
+            nvm install 24
+            nvm use 24
+
+            cd ${{ secrets.REMOTE_TARGET }}
+
+            NODE_ENV=production pm2 reload asset-mobile-api --update-env || NODE_ENV=production pm2 start src/server.js --name asset-mobile-api
