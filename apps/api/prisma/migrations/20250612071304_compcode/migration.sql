@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `userlog` ADD COLUMN `COMPCODE` VARCHAR(191) NULL;

@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `onduty` ADD COLUMN `approvedBy` VARCHAR(191) NULL DEFAULT '',
-    ADD COLUMN `rejectBy` VARCHAR(191) NULL DEFAULT '';

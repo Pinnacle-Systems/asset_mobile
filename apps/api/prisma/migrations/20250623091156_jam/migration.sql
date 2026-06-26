@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `user` MODIFY `approval` VARCHAR(191) NOT NULL DEFAULT 'HOD';
