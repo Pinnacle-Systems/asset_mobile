@@ -1,5 +1,6 @@
 import React from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
+import { theme } from "../theme/index";
 
 export function Screen({ children, style }) {
   return <SafeAreaView style={[styles.container, style]}>{children}</SafeAreaView>;
@@ -8,7 +9,8 @@ export function Screen({ children, style }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    backgroundColor: "#fff",
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.background,
   },
 });
+

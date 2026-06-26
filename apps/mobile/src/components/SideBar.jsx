@@ -14,20 +14,20 @@ import LogoutModal from './Modal/LogoutModal';
 import { handleLogout } from '../utils/Logout';
 import { CustomNavigation, ResetNavigation } from '../config/NavigationRef';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Common_Context } from '../contexts/Common_Context';
-import { BASE_URL, USERS_API } from '../constants/apiUrl';
 import { useSelector } from 'react-redux';
-import LinearGradient from 'react-native-linear-gradient';
-import Feather from 'react-native-vector-icons/Feather';
+import { useTheme } from '../theme/ThemeProvider';
 
 const { width } = Dimensions.get('window');
-const drawerWidth = width * 0.85;
+const drawerWidth = width * 0.78;
 
 const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
-  const Page_list = useContext(Common_Context);
   const [openLogoutModal, setLogoutModal] = useState(false);
   const USER = useSelector((state) => state?.UserDetails);
   const slideAnim = useRef(new Animated.Value(drawerWidth)).current;
+  const { theme } = useTheme();
+  const currentStyles = styles(theme);
 
   const openSidebarRef = useRef(openSidebar);
   useEffect(() => {
@@ -39,17 +39,11 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
       onMoveShouldSetPanResponder: (evt, gestureState) => {
         const { dx, dy, x0 } = gestureState;
         const isOpen = openSidebarRef.current;
-
         if (!isOpen) {
-          if (x0 > width - 40 && dx < -10 && Math.abs(dx) > Math.abs(dy)) {
-            return true;
-          }
+          return x0 > width - 40 && dx < -10 && Math.abs(dx) > Math.abs(dy);
         } else {
-          if (dx > 10 && Math.abs(dx) > Math.abs(dy)) {
-            return true;
-          }
+          return dx > 10 && Math.abs(dx) > Math.abs(dy);
         }
-        return false;
       },
       onPanResponderRelease: (evt, gestureState) => {
         const isOpen = openSidebarRef.current;
@@ -82,286 +76,276 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
     }).start(() => setopenSidebar(false));
   };
 
+  const getInitial = (name) => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
+
   const renderItem = ({ item }) => {
     const isActive = activeRoute === item.path;
     return (
       <TouchableOpacity
         activeOpacity={0.7}
-        style={[
-          styles.drawerItem,
-          isActive && styles.activeItem,
-        ]}
+        style={[currentStyles.menuRow, isActive && currentStyles.menuRowActive]}
         onPress={() => {
           CustomNavigation(item?.path);
           handleCloseDrawer();
         }}
       >
-        <View style={styles.itemRow}>
-          <View style={[
-            styles.iconContainer,
-            isActive && styles.activeIconContainer
-          ]}>
-            {React.cloneElement(item?.icon, {
-              color: isActive ? '#FFF' : '#5E72E4',
-              size: 20,
-            })}
-          </View>
-          <Text style={[
-            styles.drawerText,
-            isActive && styles.activeText
-          ]}>
-            {item.label || item.name}
-          </Text>
-          {isActive && (
-            <View style={styles.activeIndicator} />
-          )}
+        <View style={[currentStyles.menuIconWrap, isActive && currentStyles.menuIconWrapActive]}>
+          {React.cloneElement(item?.icon, {
+            color: isActive ? theme.colors.textOnPrimary : theme.colors.accent,
+            size: 20,
+          })}
         </View>
+        <Text style={[currentStyles.menuLabel, isActive && currentStyles.menuLabelActive]}>
+          {item.label || item.name}
+        </Text>
+        <AntDesign
+          name="right"
+          size={13}
+          color={isActive ? theme.colors.accent : theme.colors.menuChevron}
+        />
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={[StyleSheet.absoluteFillObject, { zIndex: 999, elevation: 999 }]} pointerEvents="box-none" {...panResponder.panHandlers}>
+    <View
+      style={[StyleSheet.absoluteFillObject, { zIndex: 999, elevation: 999 }]}
+      pointerEvents="box-none"
+      {...panResponder.panHandlers}
+    >
       {openSidebar && (
-        <Pressable
-          style={styles.backdrop}
-          onPress={handleCloseDrawer}
-        />
+        <Pressable style={currentStyles.backdrop} onPress={handleCloseDrawer} />
       )}
 
-      <Animated.View style={[styles.drawerContainer, { transform: [{ translateX: slideAnim }] }]}>
-        <LinearGradient
-          colors={['#FFFFFF', '#F7FAFF']}
-          style={styles.gradientBackground}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={handleCloseDrawer}
-            activeOpacity={0.7}
-          >
-            <Feather name="x" size={24} color="#5E72E4" />
+      <Animated.View style={[currentStyles.drawer, { transform: [{ translateX: slideAnim }] }]}>
+
+        {/* ── Dark Header ── */}
+        <View style={currentStyles.header}>
+          {/* Close button */}
+          <TouchableOpacity style={currentStyles.closeBtn} onPress={handleCloseDrawer} activeOpacity={0.7}>
+            <AntDesign name="close" size={16} color="#fff" />
           </TouchableOpacity>
 
-          <View style={styles.header}>
-            <View style={styles.avatarWrapper}>
-              <MaterialCommunityIcons
-                name="account"
-                size={60}
-                color="#5E72E4"
-              />
-              <View style={styles.onlineIndicator} />
-            </View>
-            <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.userName}>{USER?.userName || 'User'}</Text>
-            <Text style={styles.userRole}>{USER?.role || 'Employee'}</Text>
+          {/* Avatar */}
+          <View style={currentStyles.avatarCircle}>
+            <Text style={currentStyles.avatarInitial}>{getInitial(USER?.userName)}</Text>
           </View>
 
-          <View style={styles.divider} />
+          <Text style={currentStyles.welcomeText}>Welcome back</Text>
+          <Text style={currentStyles.userName}>{USER?.userName || 'User'}</Text>
+
+          {/* Role badge */}
+          <View style={currentStyles.roleBadge}>
+            <Text style={currentStyles.roleText}>{USER?.role || 'Employee'}</Text>
+          </View>
+        </View>
+
+        {/* ── White Menu Body ── */}
+        <View style={currentStyles.body}>
+          <Text style={currentStyles.sectionLabel}>MAIN</Text>
 
           <FlatList
             data={tabs}
             renderItem={renderItem}
             keyExtractor={(item) => item?.name}
-            contentContainerStyle={styles.menuContainer}
+            scrollEnabled={false}
             showsVerticalScrollIndicator={false}
           />
+        </View>
 
-          <View style={styles.footer}>
-            <TouchableOpacity
-              onPress={() => setLogoutModal(true)}
-              style={styles.logoutButton}
-              activeOpacity={0.7}
-            >
-              <View style={styles.logoutRow}>
-                <MaterialCommunityIcons
-                  name="logout"
-                  size={20}
-                  color="#FF3D71"
-                />
-                <Text style={styles.logoutText}>Sign Out</Text>
-              </View>
-            </TouchableOpacity>
+        {/* ── Sign Out Footer ── */}
+        <View style={currentStyles.footer}>
+          <View style={currentStyles.footerDivider} />
+          <TouchableOpacity
+            style={currentStyles.signOutRow}
+            onPress={() => setLogoutModal(true)}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons name="logout" size={20} color={theme.colors.danger} />
+            <Text style={currentStyles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
 
-            <LogoutModal
-              isModalVisible={openLogoutModal}
-              confirm={() => {
-                handleLogout(ResetNavigation);
-                setLogoutModal(false);
-                setopenSidebar(false);
-              }}
-              cancel={() => setLogoutModal(false)}
-            />
-          </View>
-        </LinearGradient>
+        <LogoutModal
+          isModalVisible={openLogoutModal}
+          confirm={() => {
+            handleLogout(ResetNavigation);
+            setLogoutModal(false);
+            setopenSidebar(false);
+          }}
+          cancel={() => setLogoutModal(false)}
+        />
       </Animated.View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (theme) => StyleSheet.create({
   backdrop: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
     zIndex: 99,
   },
-  drawerContainer: {
+  drawer: {
     width: drawerWidth,
     height: '100%',
     position: 'absolute',
     right: 0,
     zIndex: 100,
     elevation: 20,
-    shadowColor: '#5E72E4',
-    shadowOffset: { width: -5, height: 0 },
-    shadowOpacity: 0.1,
+    backgroundColor: theme.colors.surface,
+    shadowColor: theme.colors.shadow,
+    shadowOffset: { width: -4, height: 0 },
+    shadowOpacity: 0.15,
     shadowRadius: 20,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
+    overflow: 'hidden',
   },
-  gradientBackground: {
-    flex: 1,
-    paddingTop: 50,
-    paddingHorizontal: 25,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EDF2FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
+  // ── Header ──
   header: {
+    backgroundColor: theme.colors.headerBg,
+    paddingTop: 50,
+    paddingBottom: 28,
     alignItems: 'center',
-    marginBottom: 30,
   },
-  avatarWrapper: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: '#EDF2FF',
+  closeBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: theme.colors.headerFrosted,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
-    position: 'relative',
-    borderWidth: 3,
-    borderColor: '#5E72E4',
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-  },
-  onlineIndicator: {
-    position: 'absolute',
-    bottom: 5,
-    right: 5,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#4CAF50',
+  avatarCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: theme.colors.headerFrosted,
     borderWidth: 2,
-    borderColor: '#FFF',
+    borderColor: theme.colors.headerFrostedBorder,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  avatarInitial: {
+    fontSize: 30,
+    fontWeight: '700',
+    color: theme.colors.headerText,
+    fontFamily: theme.fonts.bold,
   },
   welcomeText: {
-    fontSize: 16,
-    color: '#8F9BB3',
-    marginBottom: 2,
-    fontFamily: 'Roboto-Regular',
+    fontSize: 13,
+    color: theme.colors.headerSubtext,
+    fontFamily: theme.fonts.regular,
+    marginBottom: 3,
   },
   userName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#222B45',
-    marginBottom: 4,
-    fontFamily: 'Roboto-Bold',
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.headerText,
+    fontFamily: theme.fonts.bold,
+    marginBottom: 10,
   },
-  userRole: {
-    fontSize: 14,
-    color: '#5E72E4',
-    fontFamily: 'Roboto-Medium',
+  roleBadge: {
+    backgroundColor: theme.colors.headerFrosted,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.headerRoleBadgeBorder,
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#EDF1F7',
-    marginBottom: 15,
+  roleText: {
+    fontSize: 12,
+    color: theme.colors.headerRoleText,
+    fontFamily: theme.fonts.regular,
   },
-  menuContainer: {
-    paddingVertical: 10,
+
+  // ── Body ──
+  body: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 80,   // Leave room for the absolute-positioned footer
+    backgroundColor: theme.colors.surface,
   },
-  drawerItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    marginVertical: 4,
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: theme.colors.menuLabel,
+    letterSpacing: 1.5,
+    fontFamily: theme.fonts.semiBold,
+    marginBottom: 8,
+    paddingLeft: 4,
   },
-  itemRow: {
+  menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
-    position: 'relative',
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
+    paddingVertical: 13,
+    paddingHorizontal: 12,
     borderRadius: 10,
+    marginVertical: 2,
+    backgroundColor: 'transparent',
+  },
+  menuRowActive: {
+    backgroundColor: theme.colors.accentLight,
+  },
+  menuIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#EDF2FF',
+    backgroundColor: theme.colors.accentLight,
+    marginRight: 12,
   },
-  activeIconContainer: {
-    backgroundColor: '#5E72E4',
+  menuIconWrapActive: {
+    backgroundColor: theme.colors.accent,
   },
-  drawerText: {
-    fontSize: 16,
-    color: '#8F9BB3',
-    fontWeight: '500',
+  menuLabel: {
     flex: 1,
-    fontFamily: 'Roboto-Medium',
+    fontSize: 15,
+    color: theme.colors.menuText,
+    fontFamily: theme.fonts.regular,
   },
-  activeItem: {
-    backgroundColor: '#EDF2FF',
+  menuLabelActive: {
+    color: theme.colors.accent,
+    fontFamily: theme.fonts.semiBold,
   },
-  activeText: {
-    color: '#5E72E4',
-    fontWeight: '600',
-  },
-  activeIndicator: {
-    width: 4,
-    height: 24,
-    backgroundColor: '#5E72E4',
-    borderRadius: 2,
-    position: 'absolute',
-    right: -15,
-  },
+
+  // ── Footer ──
   footer: {
-    marginTop: 'auto',
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderColor: '#EDF1F7',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingBottom: 30,
+    backgroundColor: theme.colors.surface,
   },
-  logoutButton: {
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
+  footerDivider: {
+    height: 1,
+    backgroundColor: theme.colors.divider,
+    marginBottom: 16,
   },
-  logoutRow: {
+  signOutRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  logoutText: {
-    fontSize: 16,
-    color: '#FF3D71',
-    fontWeight: '600',
-    fontFamily: 'Roboto-Medium',
+  signOutText: {
+    fontSize: 15,
+    color: theme.colors.danger,
+    fontFamily: theme.fonts.semiBold,
   },
 });
 

@@ -27,6 +27,7 @@ import {
   useGetDivisionMasterQuery,
 } from '../redux/service/commonMasters';
 import { useGetCompanycodeQuery } from '../redux/service/user';
+import { useTheme } from '../theme/ThemeProvider';
 
 import { getCurrentLocation, requestLocationPermission } from '../utils/CustomLocation';
 import { TOMTOM_API_KEY } from '../constants/apiUrl';
@@ -34,27 +35,32 @@ import { TOMTOM_API_KEY } from '../constants/apiUrl';
 const { width, height } = Dimensions.get('window');
 
 // ─── Color Tokens ─────────────────────────────────────────────────────────────
-const C = {
-  primary: '#0A84FF',
-  primaryDim: 'rgba(10,132,255,0.15)',
-  success: '#30D158',
-  successDim: 'rgba(48,209,88,0.15)',
-  danger: '#FF453A',
-  dangerDim: 'rgba(255,69,58,0.15)',
-  warning: '#FFD60A',
-  warningDim: 'rgba(255,214,10,0.15)',
-  bg: '#0C0C0E',
-  surface: '#1C1C1E',
-  surfaceAlt: '#2C2C2E',
-  border: 'rgba(255,255,255,0.08)',
-  textPri: '#FFFFFF',
-  textSec: 'rgba(255,255,255,0.55)',
-  overlay: 'rgba(0,0,0,0.82)',
-  scanLine: '#0A84FF',
+const getC = (theme) => {
+  const isDark = theme.isDarkMode || theme.mode === 'dark';
+  return {
+    primary: theme.colors.primary,
+    primaryDim: theme.colors.primary + '22',
+    success: theme.colors.success || '#30D158',
+    successDim: (theme.colors.success || '#30D158') + '22',
+    danger: theme.colors.danger || '#EF4444',
+    dangerDim: (theme.colors.danger || '#EF4444') + '22',
+    warning: theme.colors.warning || '#F59E0B',
+    warningDim: (theme.colors.warning || '#F59E0B') + '22',
+    bg: theme.colors.background,
+    surface: theme.colors.surface,
+    surfaceAlt: isDark ? '#2C2C2E' : theme.colors.surfaceLight || '#f1f5f9',
+    border: theme.colors.border,
+    textPri: theme.colors.text,
+    textSec: theme.colors.subtext,
+    overlay: isDark ? 'rgba(0,0,0,0.82)' : 'rgba(0,0,0,0.5)',
+    overlayTextPri: '#FFFFFF',
+    overlayTextSec: 'rgba(255,255,255,0.8)',
+    scanLine: theme.colors.primary,
+  };
 };
 
 // ─── Animated Scan Line ───────────────────────────────────────────────────────
-function ScanLine() {
+function ScanLine({ styles }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
@@ -75,7 +81,7 @@ function ScanLine() {
 }
 
 // ─── Corner Brackets ──────────────────────────────────────────────────────────
-function Corners() {
+function Corners({ styles }) {
   return (
     <>
       <View style={[styles.corner, styles.cornerTL]} />
@@ -87,11 +93,13 @@ function Corners() {
 }
 
 // ─── Detail Row ───────────────────────────────────────────────────────────────
-function DetailRow({ icon, label, value, iconColor = C.primary, borderColor = C.border }) {
+function DetailRow({ icon, label, value, iconColor, borderColor, styles, C }) {
+  const iColor = iconColor || C.primary;
+  const bColor = borderColor || C.border;
   return (
-    <View style={[styles.detailRow, { borderBottomColor: borderColor }]}>
-      <View style={[styles.detailIconWrap, { backgroundColor: iconColor + '22' }]}>
-        <Ionicons name={icon} size={18} color={iconColor} />
+    <View style={[styles.detailRow, { borderBottomColor: bColor }]}>
+      <View style={[styles.detailIconWrap, { backgroundColor: iColor + '22' }]}>
+        <Ionicons name={icon} size={18} color={iColor} />
       </View>
       <View style={styles.detailTexts}>
         <Text style={styles.detailLabel}>{label}</Text>
@@ -102,21 +110,23 @@ function DetailRow({ icon, label, value, iconColor = C.primary, borderColor = C.
 }
 
 // ─── Section Header ───────────────────────────────────────────────────────────
-function SectionHeader({ icon, label, badgeText, badgeColor = C.textSec, iconColor = C.textSec }) {
+function SectionHeader({ icon, label, badgeText, badgeColor, iconColor, sectionStyles, C }) {
+  const bColor = badgeColor || C.textSec;
+  const iColor = iconColor || C.textSec;
   return (
     <View style={sectionStyles.row}>
       <View style={sectionStyles.left}>
-        <Ionicons name={icon} size={13} color={iconColor} />
-        <Text style={[sectionStyles.label, { color: iconColor }]}>{label}</Text>
+        <Ionicons name={icon} size={13} color={iColor} />
+        <Text style={[sectionStyles.label, { color: iColor }]}>{label}</Text>
       </View>
-      <View style={[sectionStyles.badge, { borderColor: badgeColor + '55', backgroundColor: badgeColor + '12' }]}>
-        <Text style={[sectionStyles.badgeText, { color: badgeColor }]}>{badgeText}</Text>
+      <View style={[sectionStyles.badge, { borderColor: bColor + '55', backgroundColor: bColor + '12' }]}>
+        <Text style={[sectionStyles.badgeText, { color: bColor }]}>{badgeText}</Text>
       </View>
     </View>
   );
 }
 
-const sectionStyles = StyleSheet.create({
+const getSectionStyles = () => StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   left: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   label: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.6 },
@@ -125,14 +135,13 @@ const sectionStyles = StyleSheet.create({
 });
 
 // ─── Condition Pills ──────────────────────────────────────────────────────────
-const CONDITIONS = [
+const getConditions = (C) => [
   { key: 'Good', icon: 'checkmark-circle', color: C.success, dim: C.successDim },
   { key: 'Damaged', icon: 'warning', color: C.danger, dim: C.dangerDim },
   { key: 'Under Maintenance', icon: 'construct', color: C.warning, dim: C.warningDim },
 ];
 
-// ─── Pre-Scan Setup Popup ─────────────────────────────────────────────────────
-function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoading, onCancel, onChangeDivision }) {
+function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoading, onCancel, onChangeDivision, popup, C }) {
   const [selRoom, setSelRoom] = useState(null);
   const [selFloor, setSelFloor] = useState(null);
   const [selBuilding, setSelBuilding] = useState(null);
@@ -352,6 +361,13 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AssetAudit() {
+  const { theme } = useTheme();
+  const C = getC(theme);
+  const sectionStyles = getSectionStyles();
+  const CONDITIONS = getConditions(C);
+  const popup = getPopup(C);
+  const styles = getStyles(C);
+
   const navigation = useNavigation();
   const [hasPermission, setHasPermission] = useState(false);
   const [scanned, setScanned] = useState(false);
@@ -627,7 +643,7 @@ export default function AssetAudit() {
       <StatusBar barStyle="light-content" />
 
       {/* ── Pre-scan Setup Popup ── */}
-      <SetupPopup
+      <SetupPopup popup={popup} C={C}
         visible={showSetup}
         buildings={buildingData?.data || []}
         activeDivision={activeDivision}
@@ -683,6 +699,13 @@ export default function AssetAudit() {
           codeScanner={codeScanner}
           audio={false}
           torch={flashOn ? 'on' : 'off'}
+          onError={(error) => {
+            console.log('Camera error:', error);
+            if (error.code === 'system/code-scanner-unavailable') {
+              // Ignore or show a toast message that the module is downloading
+              console.log('Barcode scanner module is downloading. Please wait.');
+            }
+          }}
         />
       )}
 
@@ -704,7 +727,7 @@ export default function AssetAudit() {
                     if (navigation) navigation.goBack();
                   }}
                 >
-                  <Ionicons name="arrow-back" size={20} color={C.textPri} />
+                  <Ionicons name="arrow-back" size={20} color={C.overlayTextPri} />
                 </TouchableOpacity>
                 <View style={styles.topBadge}>
                   <View style={[styles.dot, { backgroundColor: C.success }]} />
@@ -724,14 +747,14 @@ export default function AssetAudit() {
                 ) : null}
 
                 <TouchableOpacity style={styles.iconBtn} onPress={() => setShowSetup(true)}>
-                  <Ionicons name="settings-outline" size={20} color={C.textSec} />
+                  <Ionicons name="settings-outline" size={20} color={C.overlayTextSec} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.iconBtn, flashOn && styles.iconBtnActive]}
                   onPress={() => setFlashOn(f => !f)}
                 >
-                  <Ionicons name={flashOn ? 'flash' : 'flash-off'} size={20} color={flashOn ? C.warning : C.textSec} />
+                  <Ionicons name={flashOn ? 'flash' : 'flash-off'} size={20} color={flashOn ? C.warning : C.overlayTextSec} />
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -753,8 +776,8 @@ export default function AssetAudit() {
             <View style={styles.frameCol}>
               <View style={styles.dimTop} />
               <View style={styles.qrFrame}>
-                <Corners />
-                <ScanLine />
+                <Corners styles={styles} C={C} />
+                <ScanLine styles={styles} />
               </View>
               <View style={styles.dimBottom} />
             </View>
@@ -763,7 +786,7 @@ export default function AssetAudit() {
 
           {/* Hint label */}
           <View style={styles.hintRow}>
-            <Ionicons name="scan-outline" size={16} color={C.textSec} />
+            <Ionicons name="scan-outline" size={16} color={C.overlayTextSec} />
             <Text style={styles.hintText}>
               Point camera at QR code or barcode
             </Text>
@@ -818,7 +841,7 @@ export default function AssetAudit() {
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetScroll}>
 
                 {/* ── SECTION 1: Scanned Asset (Master Records) ── */}
-                <SectionHeader
+                <SectionHeader sectionStyles={sectionStyles} C={C}
                   icon="server-outline"
                   label="Scanned Asset"
                   badgeText="From master records"
@@ -826,21 +849,21 @@ export default function AssetAudit() {
                   iconColor={C.textSec}
                 />
                 <View style={styles.infoCard}>
-                  <DetailRow
+                  <DetailRow styles={styles} C={C}
                     icon="barcode"
                     label="Asset ID"
                     value={assetData?.ABARID}
                     iconColor={C.primary}
                     borderColor={C.border}
                   />
-                  <DetailRow
+                  <DetailRow styles={styles} C={C}
                     icon="cube-outline"
                     label="Asset Name"
                     value={assetData?.SUBGRPNAME}
                     iconColor={C.primary}
                     borderColor={C.border}
                   />
-                  <DetailRow
+                  <DetailRow styles={styles} C={C}
                     icon="pricetag-outline"
                     label="Main Group"
                     value={assetData?.MAINGRPNAME}
@@ -863,7 +886,7 @@ export default function AssetAudit() {
 
                 {/* ── SECTION 2: Current Audit Location (Setup Params) ── */}
                 <View style={{ marginTop: 20 }}>
-                  <SectionHeader
+                  <SectionHeader sectionStyles={sectionStyles} C={C}
                     icon="location-outline"
                     label="Current Audit Location"
                     badgeText="Selected in setup"
@@ -871,28 +894,28 @@ export default function AssetAudit() {
                     iconColor={C.primary}
                   />
                   <View style={[styles.infoCard, styles.auditCard]}>
-                    <DetailRow
+                    <DetailRow styles={styles} C={C}
                       icon="business"
                       label="Building"
                       value={auditParams?.building?.NAME}
                       iconColor={C.primary}
                       borderColor={'rgba(10,132,255,0.15)'}
                     />
-                    <DetailRow
+                    <DetailRow styles={styles} C={C}
                       icon="layers"
                       label="Floor"
                       value={auditParams?.floor?.NAME}
                       iconColor={C.success}
                       borderColor={'rgba(10,132,255,0.15)'}
                     />
-                    <DetailRow
+                    <DetailRow styles={styles} C={C}
                       icon="grid"
                       label="Room"
                       value={auditParams?.room?.NAME}
                       iconColor={C.warning}
                       borderColor={'rgba(10,132,255,0.15)'}
                     />
-                    <DetailRow
+                    <DetailRow styles={styles} C={C}
                       icon="people"
                       label="Division"
                       value={auditParams?.division?.NAME}
@@ -1060,8 +1083,7 @@ export default function AssetAudit() {
   );
 }
 
-// ─── Popup Styles ─────────────────────────────────────────────────────────────
-const popup = StyleSheet.create({
+const getPopup = (C) => StyleSheet.create({
   backdrop: {
     flex: 1, backgroundColor: C.overlay,
     justifyContent: 'flex-end',
@@ -1150,8 +1172,8 @@ const FRAME_BAR_W = 290;
 const FRAME_BAR_H = 130;
 const CORNER = 22;
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#000' },
+const getStyles = (C) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.bg },
 
   permContainer: {
     flex: 1, backgroundColor: C.bg,
@@ -1178,7 +1200,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, gap: 8,
   },
   dot: { width: 7, height: 7, borderRadius: 4 },
-  topBadgeText: { color: C.textPri, fontSize: 14, fontWeight: '600', letterSpacing: 0.3 },
+  topBadgeText: { color: C.overlayTextPri, fontSize: 14, fontWeight: '600', letterSpacing: 0.3 },
   iconBtn: {
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: 'rgba(0,0,0,0.55)',
@@ -1222,7 +1244,7 @@ const styles = StyleSheet.create({
   },
 
   hintRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 },
-  hintText: { color: C.textSec, fontSize: 14, fontWeight: '500' },
+  hintText: { color: C.overlayTextSec, fontSize: 14, fontWeight: '500' },
   bottomBar: { alignItems: 'center', paddingBottom: 80, paddingTop: 8 },
   modeBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 10,

@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE `settings` ADD COLUMN `COMPCODE` VARCHAR(191) NULL,
-    MODIFY `Notification` BOOLEAN NULL,
-    MODIFY `BioMatrics` BOOLEAN NULL;

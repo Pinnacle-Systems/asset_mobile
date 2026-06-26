@@ -8,17 +8,13 @@ import {
     login,
     create,
     get,
-    getOne,
     getUserDet,
     getRolesOnPage,
     createRoleOnPage,
-    getUserDetails,
     UpdateRoleOnPage,
     getCompanyCode,
     getEmployeeIds,
     update_fcm,
-    send_Otp,
-    verify_Otp_and_change_pass,
     getUserRolesOnPage,
     getCreatedRolesOnPage,
     get_Change_Settings,
@@ -28,8 +24,6 @@ const router = Router();
 
 // ─── Auth ──────────────────────────────────────────────────
 router.post('/login', login);                           // Login screen
-router.post('/send_Otp', send_Otp);                     // Forgot password OTP
-router.post('/change_password', verify_Otp_and_change_pass); // Reset password
 
 // ─── User CRUD ─────────────────────────────────────────────
 router.post('/', create);                               // Create user

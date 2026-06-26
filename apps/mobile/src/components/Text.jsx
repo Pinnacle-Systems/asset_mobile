@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Text as RNText } from "react-native";
+import { theme } from "../theme/index";
 
 export function Text({ children, style, ...props }) {
   return (
@@ -11,8 +12,13 @@ export function Text({ children, style, ...props }) {
 
 const styles = StyleSheet.create({
   text: {
-    color: "#111827",
-    fontSize: 16,
+    color: theme.colors.text,
+    fontSize: theme.fontSize.md,
     lineHeight: 24,
+    fontFamily: theme.fonts.regular,   // Segoe UI — applied to all <Text> globally
   },
 });
+
+export default Text;
+
+

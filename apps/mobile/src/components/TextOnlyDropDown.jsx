@@ -1,72 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { useTheme } from '../theme/ThemeProvider';
 
-
-export const TextOnlyDropdown = ({ 
-  selected, 
+export const TextOnlyDropdown = ({
+  selected,
   setSelected,
-  width, 
-  options, 
+  width,
+  options,
   label,
   _label,
   labelstyle,
   auto_open,
-   container,
+  container,
   _value,
   multiple = false,
-  isLoading, 
+  isLoading,
   placeholder,
   disabled = false, // New disabled prop
-  ...props 
+  ...props
 }) => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
 
-
-  const styles = StyleSheet.create({
-  container: {
-    marginVertical: 1,
-    zIndex: 1000,
-    
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 6,
-    color: '#333',
-  },
-  disabledLabel: {
-    color: '#999',
-  },
-  dropdown: {
-    backgroundColor: 'transparent',
-  },
-  disabledDropdown: {
-    // Additional disabled styles if needed
-  },
-  dropDownContainerStyle: {
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
-    borderRadius: 8,
-    marginTop: 2,
-    zIndex: 1000,
-  },
-  disabledDropDownContainer: {
-    backgroundColor: '#f5f5f5',
-  },
-  searchTextInputStyle: {
-    height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-  },
-});
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   useEffect(() => {
-
-   
     const data = (options?.data || [])?.map((item) => ({
       label: item?.[_label || "value"],
       value: item?.[_value || "id"],
@@ -80,17 +40,17 @@ export const TextOnlyDropdown = ({
       setOpen(true);
     }
   };
-  
+
 
   return (
-    <View style={ container  || styles.container}>
-      <TouchableOpacity 
+    <View style={container || styles.container}>
+      <TouchableOpacity
         onPress={handlePress}
         disabled={disabled}
         activeOpacity={disabled ? 1 : 0.2}
       >
         {label && (
-          <Text 
+          <Text
             style={[
               labelstyle || styles.label,
               disabled && styles.disabledLabel // Apply disabled style
@@ -100,7 +60,7 @@ export const TextOnlyDropdown = ({
           </Text>
         )}
       </TouchableOpacity>
-      
+
       <DropDownPicker
         open={open || auto_open}
         value={multiple ? selected || [] : selected}
@@ -109,14 +69,14 @@ export const TextOnlyDropdown = ({
         setValue={setSelected}
         multiple={multiple}
         setItems={setItems}
-         
+
         searchable={!disabled} // Disable search when disabled
         disabled={disabled} // Native dropdown disable
         searchPlaceholder="Search options..."
         placeholder={isLoading ? 'Loading...' : (disabled ? '' : placeholder)}
         dropDownDirection="AUTO"
         style={[
-          styles.dropdown, 
+          styles.dropdown,
           { width, opacity: 0, height: 0 },
           disabled && styles.disabledDropdown
         ]}
@@ -129,7 +89,7 @@ export const TextOnlyDropdown = ({
         zIndex={100}
         maxHeight={"50%"}
         modalContentContainerStyle={{
-          backgroundColor: '#fff',
+          backgroundColor: theme.colors.surface,
           marginHorizontal: 20,
           marginTop: '50%',
           borderRadius: 12,
@@ -144,12 +104,55 @@ export const TextOnlyDropdown = ({
           animationType: 'slide',
           transparent: true,
           presentationStyle: 'overFullScreen',
-          backdropColor: "#bbbfbd"
+          backdropColor: "rgba(0,0,0,0.5)"
+        }}
+        textStyle={{
+          color: theme.colors.text
         }}
         mode={"SIMPLE"}
+        theme={(theme.isDarkMode || theme.mode === 'dark') ? "DARK" : "LIGHT"}
         {...props}
       />
     </View>
   );
 };
 
+const createStyles = (theme) => StyleSheet.create({
+  container: {
+    marginVertical: 1,
+    zIndex: 1000,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+    color: theme.colors.text,
+  },
+  disabledLabel: {
+    color: theme.colors.subtext,
+  },
+  dropdown: {
+    backgroundColor: 'transparent',
+  },
+  disabledDropdown: {
+    // Additional disabled styles if needed
+  },
+  dropDownContainerStyle: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: 8,
+    marginTop: 2,
+    zIndex: 1000,
+  },
+  disabledDropDownContainer: {
+    backgroundColor: theme.colors.background,
+  },
+  searchTextInputStyle: {
+    height: 40,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    color: theme.colors.text,
+  },
+});
