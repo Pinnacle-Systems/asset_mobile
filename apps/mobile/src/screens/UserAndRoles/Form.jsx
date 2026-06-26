@@ -18,7 +18,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 const { width, height } = Dimensions.get('window');
 
 const Form = ({ closeModal, onClose, userDet }) => {
-    const [selectedKey, setSelectedKey] = React.useState(null);
+
     const [username, setUserName] = useState("");
     const UserSelect = useSelector((state) => state?.UserDetails);
     const [loading, setloading] = useState(false);
@@ -103,7 +103,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
         if (selectLevel !== "admin" && selectLevel !== "top" && (!selectedEmply || !username))
             return Alert.alert("⚠ Warning!", !selectedEmply ? "Please Select Your Employee" : "Please Enter Your UserName")
 
-        var company_code = SelectedCompany?.map((data) => {
+        var company_code = (Array.isArray(SelectedCompany) ? SelectedCompany : [])?.map((data) => {
             var companyId = companyCode?.data?.find((cdata) => cdata?.value == data)
             return { companyCode: data, companyid: String(companyId?.COMPID), GCOMP: UserSelect?.GCOMPCODE }
         });
@@ -150,7 +150,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
             setSelectedHR(item?.role?.COMPCODE + "-" + item?.hr)
             setSelectedRole(item.roleId);
             setSelectedLevel(item.level);
-            setSelectedKey(item?.approval)
+
             setSelectedEmply(item?.role?.COMPCODE + "-" + item.Idcard);
             setSelectedHod(item?.role?.COMPCODE + "-" + item.hod);
 
@@ -225,7 +225,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
     const handleUpdate = async () => {
         try {
             setloading(true);
-            const company_code = SelectedCompany?.map((data) => {
+            const company_code = (Array.isArray(SelectedCompany) ? SelectedCompany : [])?.map((data) => {
                 const companyId = companyCode?.data?.find((cdata) => cdata?.value == data);
                 return { companyCode: data, companyid: String(companyId?.COMPID), GCOMP: UserSelect?.GCOMPCODE };
             });

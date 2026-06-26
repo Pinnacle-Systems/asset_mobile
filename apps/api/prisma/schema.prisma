@@ -29,24 +29,16 @@ model User {
   pic                  String?
   email                String?
   otpemail             String?
-  approval             String   @default("HOD")
   password             String?
   Idcard               String?            @unique
   role                 Role?              @relation(fields: [roleId], references: [name], onDelete: SetNull)
   roleId               String?
-  otp                  String?
-  hod                  String?
-  hr                   String?
   level                String             @default("user")
-  verificationOtp      String?
-  expiresAt            DateTime?
-  createdAt            DateTime?          @default(now())
+  createdAt            DateTime         @default(now())
   active               Boolean            @default(true)
-  employeeId           Int?
   isAllParty           Boolean            @default(false)
   isAdmin              Boolean            @default(false)
-  fcm                  String?            @default("")
-   Companies             CompanyCode[]
+  Companies             CompanyCode[]
 
   settings settings[]
 }

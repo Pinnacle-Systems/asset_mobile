@@ -13,7 +13,7 @@ import {
     Platform,
     BackHandler
 } from 'react-native';
-import { useLoginUserMutation, useUpdate_user_fcmMutation } from '../redux/service/user';
+import { useLoginUserMutation } from '../redux/service/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dropdown } from '../components/inputs';
 
@@ -43,7 +43,7 @@ function LoginScreen({ navigation }) {
     const [head, setHead] = useState();
     const [hr, sethr] = useState();
     const [roleid, setrolid] = useState();
-    const [update_fcm] = useUpdate_user_fcmMutation();
+
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const OnSelectCompany = async () => {
@@ -107,7 +107,7 @@ function LoginScreen({ navigation }) {
 
                 if (filterdata?.isAdmin == 1) {
                     await AsyncStorage.setItem('userName', JSON.stringify({
-                        userName: username, Id: Id, hod: head, approval: filterdata?.approval, hr: hr, roleId: roleid, isAdmin: 1
+                        userName: username, Id: Id, hod: head, hr: hr, roleId: roleid, isAdmin: 1
                     }));
                     // Wipe all RTK Query caches before navigating so fresh data loads for this user
                     dispatch(RESET_STORE);

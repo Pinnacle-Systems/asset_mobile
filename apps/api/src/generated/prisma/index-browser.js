@@ -134,22 +134,14 @@ exports.Prisma.UserScalarFieldEnum = {
   pic: 'pic',
   email: 'email',
   otpemail: 'otpemail',
-  approval: 'approval',
   password: 'password',
   Idcard: 'Idcard',
   roleId: 'roleId',
-  otp: 'otp',
-  hod: 'hod',
-  hr: 'hr',
   level: 'level',
-  verificationOtp: 'verificationOtp',
-  expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   active: 'active',
-  employeeId: 'employeeId',
   isAllParty: 'isAllParty',
-  isAdmin: 'isAdmin',
-  fcm: 'fcm'
+  isAdmin: 'isAdmin'
 };
 
 exports.Prisma.CompanyCodeScalarFieldEnum = {
@@ -211,16 +203,10 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   pic: 'pic',
   email: 'email',
   otpemail: 'otpemail',
-  approval: 'approval',
   password: 'password',
   Idcard: 'Idcard',
   roleId: 'roleId',
-  otp: 'otp',
-  hod: 'hod',
-  hr: 'hr',
-  level: 'level',
-  verificationOtp: 'verificationOtp',
-  fcm: 'fcm'
+  level: 'level'
 };
 
 exports.Prisma.CompanyCodeOrderByRelevanceFieldEnum = {

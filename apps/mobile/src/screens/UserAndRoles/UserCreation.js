@@ -22,7 +22,6 @@ export default function UserCreation() {
     const [permissions, setPermissions] = useState({});
     const [selectedRole, setSelectedRole] = useState(null);
     const [roleName, setRoleName] = useState(null);
-    const [copyRole, setCopyRole] = useState(null);
     const [username, setUsername] = useState(null);
     const [edit, setEdit] = useState(false);
     const [CurrentEditingId, setCurrentEditingId] = useState()
@@ -107,19 +106,10 @@ export default function UserCreation() {
     const onNew = () => {
         setPermissions({})
         setRoleName(null)
-        setCopyRole(null)
         setEdit(false)
         setDisabled(false);
     }
 
-    const handleCopyRole = (selectedRoleName) => {
-        setCopyRole(selectedRoleName);
-        const item = get_created_roles?.data?.find(r => r.name === selectedRoleName);
-        if (item && item.RoleOnPage) {
-            setPermissions(transformPermissions(item.RoleOnPage));
-            Toast.show({ type: 'success', text1: `Permissions copied from ${selectedRoleName}` });
-        }
-    };
 
     const validateData = ({ roleName, permissions }) => roleName && Object.keys(permissions).length > 0;
 
@@ -389,21 +379,7 @@ export default function UserCreation() {
                                 />
                             </View>
 
-                            {!edit && (
-                                <View style={[currentStyles.dropdownContainer, { zIndex: 200 }]}>
-                                    <Dropdown
-                                        selected={copyRole}
-                                        label={<Text style={{ color: theme.colors.text }}>Copy Permissions from Existing Role (Optional)</Text>}
-                                        setSelected={handleCopyRole}
-                                        width={"100%"}
-                                        _label={"displayName"}
-                                        _value={"name"}
-                                        options={{ data: (get_created_roles?.data || []).map(r => ({ ...r, displayName: r.name?.split('@')[0] })) }}
-                                        disabled={disabled}
-                                        zIndex={200}
-                                    />
-                                </View>
-                            )}
+
                         </View>
                     </View>
 

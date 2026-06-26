@@ -39,7 +39,7 @@ export async function login(req, res, next) {
 
 // ─── CREATE USER ────────────────────────────────────────────
 export async function create(req, res, next) {
-    const { username, password, hod, email, otpemail, roleId, Idcard, Compcodes, level, ...rest } = req.body;
+    const { username, password, email, otpemail, roleId, Idcard, Compcodes, level, isAdmin } = req.body;
     if (!username || !password) return res.json({ statusCode: 1, message: 'Username and Password are Required' });
 
     try {
@@ -48,7 +48,17 @@ export async function create(req, res, next) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await prisma_Connector.user.create({
-            data: { username, roleId, otpemail, password: hashedPassword, email, Idcard, hod, level, Companies: { create: Compcodes }, ...rest }
+            data: {
+                username,
+                password: hashedPassword,
+                email,
+                otpemail,
+                roleId,
+                Idcard,
+                level,
+                isAdmin: Boolean(isAdmin),
+                Companies: { create: Compcodes ?? [] },
+            }
         });
         return res.json({ statusCode: 0, message: 'User created successfully', data: newUser });
     } catch (error) {
@@ -216,20 +226,7 @@ export async function getEmployeeIds(req, res, next) {
     }
 }
 
-// ─── UPDATE FCM TOKEN ───────────────────────────────────────
-export async function update_fcm(req, res, next) {
-    const { Idcard, fcm } = req.body;
-    try {
-        if (Idcard && fcm) {
-            const result = await prisma_Connector.user.update({ where: { Idcard }, data: { fcm } });
-            return res.json({ statusCode: 0, data: result });
-        }
-        return res.json({ statusCode: 500, data: {}, message: 'Id Not Found' });
-    } catch (err) {
-        logger.error('update_fcm error:', err);
-        return next(err);
-    }
-}
+
 
 
 
