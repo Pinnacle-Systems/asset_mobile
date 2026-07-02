@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { BASE_URL, Notifi, Permission, Role, SUPPLIER } from "../../constants/apiUrl";
+import { BASE_URL, Role } from "../../constants/apiUrl";
 import { SetHeader } from "./HeaderSet";
 
 
@@ -8,33 +8,33 @@ const RoleOnSevices = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: BASE_URL,
 
-         prepareHeaders:async (headers)=>{
+        prepareHeaders: async (headers) => {
             await SetHeader(headers)
-                  return headers
-                }
+            return headers
+        }
     }),
-    tagTypes: ['RoleOnPage','get_all_role'],
+    tagTypes: ['RoleOnPage', 'get_all_role'],
     endpoints: (builder) => ({
-        addRole_master:builder.mutation({
-                    query: (payload) => ({
-                        url: Role+"/create_role_master",
-                        method: "POST",
-                        body: payload,
-                        headers: {
-                            "Content-type": "application/json; charset=UTF-8",
-                        },
-                        
-                    }),
-                    invalidatesTags: ["get_all_role"],
-                }),
-         get_all_role:builder.query({
+        addRole_master: builder.mutation({
+            query: (payload) => ({
+                url: Role + "/create_role_master",
+                method: "POST",
+                body: payload,
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8",
+                },
+
+            }),
+            invalidatesTags: ["get_all_role"],
+        }),
+        get_all_role: builder.query({
             query: (params) => {
                 return {
-                    url:Role+"/get_all_role",
+                    url: Role + "/get_all_role",
                     method: 'GET',
                     headers: {
                         'Content-type': 'application/json; charset=UTF-8',
-                    },params
+                    }, params
                 }
             },
             providesTags: ['get_all_role'],

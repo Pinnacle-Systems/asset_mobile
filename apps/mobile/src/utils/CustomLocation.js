@@ -49,32 +49,3 @@ export async function getCurrentLocation(setLocation) {
 }
 
 
-
-
-export const startWatchingLocation = (setLocation, setwatchid, setError) => {
-  const id = Geolocation.watchPosition(
-    (position) => {
-      setLocation(position);
-      setError(null)
-    },
-    (err) => {
-      setError(err.message);
-    },
-    {
-      enableHighAccuracy: true,
-      distanceFilter: 10, // meters
-      interval: 5000, // milliseconds
-      fastestInterval: 2000 // milliseconds
-    }
-  );
-  setwatchid(id)
-
-};
-
-// Stop watching location
-export const stopWatchingLocation = (watchId) => {
-  if (watchId !== null) {
-    Geolocation.clearWatch(watchId);
-    setWatchId(null);
-  }
-};

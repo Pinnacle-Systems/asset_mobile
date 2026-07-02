@@ -5,120 +5,14 @@ import bcrypt from "bcrypt"
 import formatDateToOracle from "../utils/OracleDateFormat.js";
 
 
-export async function get(req, res, next) {
-    const connection = await getConnection(res)
-    try {
-        const result = await connection.execute(`
-        select * from (select finyr  from GTFINANCIALYEAR order by finyr desc) finyr     
-        where rownum <= 3
-     `)
-        let resp = result.rows.map(po => ({
-            finYear: po[0]
-        }))
-
-        return res.json({ statusCode: 0, data: resp })
-    }
-    catch (err) {
-        logger.error(`[get] Error in endpoint ${req.originalUrl || req.url}:`, err);
-        return next(err);
-    }
-    finally {
-        await connection.close()
-    }
-}
-
-export async function getBuyer(req, res, next) {
-    const connection = await getConnection(res)
-    try {
-        const result = await connection.execute(`
-        SELECT C.COMPCODE,COUNT(*) TOT FROM HREMPLOYMAST A 
-JOIN HREMPLOYDETAILS B ON A.HREMPLOYMASTID = B.HREMPLOYMASTID
-JOIN GTCOMPMAST C ON C.GTCOMPMASTID = A.COMPCODE
-WHERE B.IDACTIVE = 'YES'
-GROUP BY C.COMPCODE
-     `)
-        let resp = result.rows.map(po => ({
-            buyerName: po[0]
-        }))
-
-        return res.json({ statusCode: 0, data: resp })
-    }
-    catch (err) {
-        logger.error(`[getBuyer] Error in endpoint ${req.originalUrl || req.url}:`, err);
-        return next(err);
-    }
-    finally {
-        await connection.close()
-    }
-}
-
-
-export async function getMonthData(req, res, next) {
-    const connection = await getConnection(res)
-    try {
-        const { filterYear, filterBuyer } = req.query;
-        const result = await connection.execute(`
-            SELECT A.PAYPERIOD FROM MONTHLYPAYFRQ A
-              WHERE A.finyr = '${filterYear}' 
-GROUP BY A.PAYPERIOD
-      ORDER BY TO_DATE(A.PAYPERIOD, 'Month YYYY')        
-     `)
-        logger.info(result, 'res');
-        let resp = result.rows.map(po => ({
-            month: po[0]
-        }))
-
-        return res.json({ statusCode: 0, data: resp })
-    }
-    catch (err) {
-        logger.error(`[getMonthData] Error in endpoint ${req.originalUrl || req.url}:`, err);
-        return next(err);
-    }
-    finally {
-        await connection.close()
-    }
-}
-
-export async function getCompCodeData(req, res, next) {
-    const connection = await getConnection(res)
-    try {
-        const { } = req.query;
-        const sql =
-            `
-       SELECT C.COMPCODE,COUNT(*) TOT FROM HREMPLOYMAST A 
-JOIN HREMPLOYDETAILS B ON A.HREMPLOYMASTID = B.HREMPLOYMASTID
-JOIN GTCOMPMAST C ON C.GTCOMPMASTID = A.COMPCODE
-WHERE B.IDACTIVE = 'YES'
-GROUP BY C.COMPCODE`
-        logger.info(sql, '84');
-        const result = await connection.execute(sql)
-        let resp = result.rows.map(po => ({
-            com: po[0]
-        }))
-
-        return res.json({ statusCode: 0, data: resp })
-    }
-    catch (err) {
-        logger.error(`[getCompCodeData] Error in endpoint ${req.originalUrl || req.url}:`, err);
-        return next(err);
-    }
-    finally {
-        await connection.close()
-    }
-}
-
-
-
-
-
 
 export async function getBarcodeDetails(req, res, next) {
     const connection = await getAssetConnection(res)
-   const COMPCODE=String(req?.headers?.compcode).toUpperCase()
+    const COMPCODE = String(req?.headers?.compcode).toUpperCase()
     try {
-        const {BARCODEID} = req.query;
+        const { BARCODEID } = req.query;
 
-   logger.info("DR",BARCODEID)
+        logger.info("DR", BARCODEID)
 
         const sql =
             ` SELECT J.COMPCODE COMPCODE1,A.DOCID DOCID1,A.ASSETID,C.SUBGRPNAME,A.MMADE MACHINEMADE,A.MMODEL MACHINEMODEL,A.REMARKS,D.RNAME RNAME1,A.ABARID,A.*
@@ -132,20 +26,20 @@ LEFT JOIN GTFMASTDET G ON G.GTFMASTDETID=A.FLOORS
 LEFT JOIN GTCOMPMAST J ON J.GTCOMPMASTID =A.COMPCODE
 WHERE  A.ABARID =:BARCODEID
 ORDER BY A.DOCID`
-          const oracleResult = await connection.execute(sql, {BARCODEID});        
-         const transformedResult = oracleResult?.rows?.map(row => {
+        const oracleResult = await connection.execute(sql, { BARCODEID });
+        const transformedResult = oracleResult?.rows?.map(row => {
             const keyValuePair = {};
             // Assuming the first row contains the column names
             oracleResult.metaData.forEach((col, index) => {
-              keyValuePair[col.name] = row[index];
+                keyValuePair[col.name] = row[index];
             });
             return keyValuePair;
-           });
+        });
 
 
-           logger.info("bar"+BARCODEID,transformedResult);
-           
-        return res.json({ statusCode: 0, data:transformedResult })
+        logger.info("bar" + BARCODEID, transformedResult);
+
+        return res.json({ statusCode: 0, data: transformedResult })
     }
     catch (err) {
         logger.error(`[getBarcodeDetails] Error in endpoint ${req.originalUrl || req.url}:`, err);
@@ -161,7 +55,7 @@ ORDER BY A.DOCID`
 // export async function getAuditAssestDetails(req, res, next) {
 //     const connection = await getAssetConnection(res);
 //     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
-    
+
 //     try {
 //         const sql = `
 //           SELECT A.DOCID DOCID1,A.ASSETID,C.SUBGRPNAME,A.MMADE MACHINEMADE,A.MMODEL MACHINEMODEL,A.REMARKS,D.RNAME RNAME1,A.ABARID,A.CONDITION,A.*
@@ -176,7 +70,7 @@ ORDER BY A.DOCID`
 //         `;
 
 //         logger.info("COm",COMPCODE);
-        
+
 
 //         const oracleResult = await connection.execute(sql,{COMPCODE});
 
@@ -190,7 +84,7 @@ ORDER BY A.DOCID`
 //         });
 
 //         logger.info("Barcode query:", "Results:", transformedResult?.length);
-        
+
 //         if (!transformedResult || transformedResult.length === 0) {
 //             return res.json({ 
 //                 statusCode: 0, 
@@ -399,7 +293,7 @@ ORDER BY A.DOCID`
 // //         ELSE                                                             4
 // //     END,
 // //     T.ASSETID;
-    
+
 //     try {
 //         // This query identifies variances: Available, Misplaced, Damaged, or Missing
 //         const sql = `
@@ -824,7 +718,7 @@ export async function getBuildingMaster(req, res, next) {
     const connection = await getAssetConnection(res);
     const COMPCODE = req?.query?.divisionId || '';
 
-logger.info("log",COMPCODE)
+    logger.info("log", COMPCODE)
     try {
         const sql = `
             SELECT 
@@ -864,7 +758,7 @@ logger.info("log",COMPCODE)
 // ─── DIVISION MASTER ───────────────────────────────────────────
 export async function getDivisionMaster(req, res, next) {
     const connection = await getAssetConnection(res);
-   // const COMPCODE = String(req?.headers?.compcode || '').toUpperCase();
+    // const COMPCODE = String(req?.headers?.compcode || '').toUpperCase();
 
     try {
         const sql = `
@@ -1112,7 +1006,7 @@ ORDER BY
         `;
 
         logger.info('Executing SQL with params:', { COMPCODE1: COMPCODE, COMPCODE2: COMPCODE });
-        
+
         const oracleResult = await connection.execute(sql, {
             COMPCODE1: COMPCODE,
             COMPCODE2: COMPCODE
@@ -1159,10 +1053,10 @@ ORDER BY
 export async function SaveBarcodeDetails(req, res, next) {
     const connection = await getAssetConnection(res);
     const COMPCODE = String(req?.headers?.compcode).toUpperCase();
-    
+
     try {
         const {
-            DOCID, ASSETID, SUBGRP, MMADE, MMODEL, 
+            DOCID, ASSETID, SUBGRP, MMADE, MMODEL,
             REMARKS, ROOM, MAINGRP, BUILDING, FLOORS, ABARID, DIVISION, LOC, CONDITION, AUDIT_DATE
         } = req?.body;
 
@@ -1183,9 +1077,9 @@ export async function SaveBarcodeDetails(req, res, next) {
         const scanCount = checkResult.rows[0][0];
 
         if (scanCount > 0) {
-            return res.json({ 
-                statusCode: 0, 
-                message: 'This barcode has already been scanned today. Only one scan per day is allowed.' 
+            return res.json({
+                statusCode: 0,
+                message: 'This barcode has already been scanned today. Only one scan per day is allowed.'
             });
         }
 
@@ -1203,34 +1097,34 @@ export async function SaveBarcodeDetails(req, res, next) {
         `;
 
         const oracleResult = await connection.execute(insertSql, {
-            COMPCODE: COMPCODE, 
-            DOCID, 
-            ASSETID, 
-            SUBGRP, 
-            MMADE, 
-            MMODEL, 
-            REMARKS, 
-            ROOM, 
-            MAINGRP, 
-            BUILDING, 
-            FLOORS, 
-            ABARID, 
-            DIVISION, 
+            COMPCODE: COMPCODE,
+            DOCID,
+            ASSETID,
+            SUBGRP,
+            MMADE,
+            MMODEL,
+            REMARKS,
+            ROOM,
+            MAINGRP,
+            BUILDING,
+            FLOORS,
+            ABARID,
+            DIVISION,
             LOC,
             CONDITION
         });
 
         if (oracleResult?.rowsAffected > 0) {
-            return res.json({ 
-                statusCode: 1, 
+            return res.json({
+                statusCode: 1,
                 message: 'Barcode scanned successfully',
-                data: oracleResult 
+                data: oracleResult
             });
         } else {
-            return res.json({ 
-                statusCode: 0, 
+            return res.json({
+                statusCode: 0,
                 message: 'Failed to save barcode details',
-                data: {} 
+                data: {}
             });
         }
     }
@@ -1245,134 +1139,81 @@ export async function SaveBarcodeDetails(req, res, next) {
 }
 
 
-
-
-export async function chat(req, res, next) {
-    const COMPCODE=String(req?.headers?.compcode).toUpperCase()
-    const chat_data=req?.body
-    
-
-   var chat_=await prisma_Connector?.chat?.create({
-        data:{...chat_data,COMPCODE}
-    })
-
-    if(chat_?.id){
-        res?.json({status:1,data:chat_})
-    }else{
-         res?.json({status:0,data:{}})
-    }
-
-    
-
-
-
-
-}
-
-
-
-
-export async function get_chat(req, res, next) {
-    const COMPCODE=String(req?.headers?.compcode).toUpperCase()
-    const DEPARTMENT=req?.query?.DEPARTMENT
-    
-
-   var chat_=await prisma_Connector?.chat?.findMany({
-    where:{
-        COMPCODE,groupId:DEPARTMENT
-    },
-    include:{userdata:true}
-   })
-
-    if(chat_){
-        res?.json({status:1,data:chat_})
-    }else{
-         res?.json({status:0,data:{}})
-    }
-
-    
-
-
-
-
-}
-
-  
 export async function delete_Common_Data(req, res, next) {
-    const COMPCODE=String(req?.headers?.compcode).toUpperCase()
-    const onlywhere=req?.body?.onlywhere
-    const where=req?.body?.where
-    const table=req?.body?.table
-        try {
-            const result=await  prisma_Connector?.[table]?.delete({where:onlywhere ?{...where} : {COMPCODE,...where}})
-            res.json({status:1,data:result}) 
-        }
-        catch (err) {
-          res.json({status:0,data:{}}) 
-           logger.info(err);
-           
-        }
+    const COMPCODE = String(req?.headers?.compcode).toUpperCase()
+    const onlywhere = req?.body?.onlywhere
+    const where = req?.body?.where
+    const table = req?.body?.table
+    try {
+        const result = await prisma_Connector?.[table]?.delete({ where: onlywhere ? { ...where } : { COMPCODE, ...where } })
+        res.json({ status: 1, data: result })
+    }
+    catch (err) {
+        res.json({ status: 0, data: {} })
+        logger.info(err);
+
+    }
 }
 
 
 export async function Update_Common_Data_prisma(req, res, next) {
-    const COMPCODE=String(req?.headers?.compcode).toUpperCase()
-    const where=req?.body?.where
-    const onlywhere=req?.body?.onlywhere
-    const table=req?.body?.table
-    const data=req?.body?.data
-    const Comp_data=req?.body?.data?.Compcodes
-    const user_updation=req?.body?.data?.user_updation
-    
+    const COMPCODE = String(req?.headers?.compcode).toUpperCase()
+    const where = req?.body?.where
+    const onlywhere = req?.body?.onlywhere
+    const table = req?.body?.table
+    const data = req?.body?.data
+    const Comp_data = req?.body?.data?.Compcodes
+    const user_updation = req?.body?.data?.user_updation
 
-      if(data?.password){
+
+    if (data?.password) {
 
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(data?.password, saltRounds);
-        data.password=hashedPassword
+        data.password = hashedPassword
 
-        }
+    }
 
 
-        if(Comp_data &&  user_updation){
- 
-         const delete_succesued= await  prisma_Connector?.companyCode?.deleteMany({where:{Idcard:data?.Idcard,GCOMP:COMPCODE}})
-           if(delete_succesued?.count>0 || delete_succesued?.count==0){
-              try {
-             const {GCOMP,user_updation,Compcodes,...reset}=data
-              const result=await  prisma_Connector?.[table]?.update({data:{...reset,Companies:{create:Comp_data}},where:onlywhere ? {...where} : {COMPCODE,...where}})
-              res.json({status:1,data:result}) 
-               
+    if (Comp_data && user_updation) {
+
+        const delete_succesued = await prisma_Connector?.companyCode?.deleteMany({ where: { Idcard: data?.Idcard, GCOMP: COMPCODE } })
+        if (delete_succesued?.count > 0 || delete_succesued?.count == 0) {
+            try {
+                const { GCOMP, user_updation, Compcodes, ...reset } = data
+                const result = await prisma_Connector?.[table]?.update({ data: { ...reset, Companies: { create: Comp_data } }, where: onlywhere ? { ...where } : { COMPCODE, ...where } })
+                res.json({ status: 1, data: result })
+
             }
 
 
             catch (err) {
-          res.json({status:0,data:{}}) 
-           logger.info(err);
-           
+                res.json({ status: 0, data: {} })
+                logger.info(err);
+
             }
 
         }
 
 
 
-        }else{
+    } else {
 
-       
+
 
         try {
-            const result=await  prisma_Connector?.[table]?.update({data,where:onlywhere ? {...where} : {COMPCODE,...where}})
+            const result = await prisma_Connector?.[table]?.update({ data, where: onlywhere ? { ...where } : { COMPCODE, ...where } })
 
-            res.json({status:1,data:result}) 
+            res.json({ status: 1, data: result })
         }
 
 
         catch (err) {
-          res.json({status:0,data:{}}) 
-           logger.info(err);
-           
+            res.json({ status: 0, data: {} })
+            logger.info(err);
+
         }
 
-         }
+    }
 }
 

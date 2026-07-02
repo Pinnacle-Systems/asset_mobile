@@ -1,16 +1,12 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import dueDaysReducer from './Slices/dueDaysSlice';
-import tableData from "./Slices/insuranceDataSlice";
 import { commonMast, UsersApi } from './service';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
 // Action dispatched on every new login to wipe all RTK Query caches
 export const RESET_STORE = { type: 'RESET_STORE' };
-import UserDetails from "./Slices/UserDetails";
-import inpuHandler from "./Slices/inputsHandler";
+import slices from "./Slices/UserDetails";
 import { createLogger } from 'redux-logger';
 import RoleOnSevices from "./service/RoleOn";
-import slices from "./Slices/UserDetails";
 
 // Define logger BEFORE using it in configureStore
 const logger = createLogger({
@@ -33,11 +29,7 @@ const appReducer = combineReducers({
   [commonMast.reducerPath]: commonMast.reducer,
   [UsersApi.reducerPath]: UsersApi.reducer,
   [RoleOnSevices.reducerPath]: RoleOnSevices.reducer,
-  dueDays: dueDaysReducer,
-  tableData: tableData,
   UserDetails: slices.UserDetails,
-  Input: inpuHandler,
-  options: slices.Options,
 });
 
 // Root reducer: on RESET_STORE pass undefined as state so every

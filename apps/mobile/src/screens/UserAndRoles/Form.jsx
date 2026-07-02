@@ -9,13 +9,11 @@ import { useSelector } from "react-redux";
 import { Checkbox } from "react-native-paper";
 import { useGet_all_roleQuery } from "../../redux/service/RoleOn";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import CheckboxLevelGroup from "./LeaveGroup";
+import Checklevelgroup from "./Checklevelgroup";
 import { useDelete_CommonMutation, useUpdate_CommonMutation } from '../../redux/service/commonMasters';
 import ProgressPopup from "../../components/PopupLoading";
-import CheckboxGroup from "../../components/GroupCheckBox";
 import { useTheme } from '../../theme/ThemeProvider';
 
-const { width, height } = Dimensions.get('window');
 
 const Form = ({ closeModal, onClose, userDet }) => {
 
@@ -335,7 +333,7 @@ const Form = ({ closeModal, onClose, userDet }) => {
                 <View style={currentStyles.section}>
                     <Text style={currentStyles.sectionTitle}>User Role</Text>
 
-                    <CheckboxLevelGroup
+                    <Checklevelgroup
                         selected={selectLevel}
                         setSelected={setSelectedLevel}
                         style={currentStyles.levelGroup}

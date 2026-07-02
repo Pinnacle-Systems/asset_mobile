@@ -7,8 +7,7 @@ import { logger } from "../utils/logger.js";
 import bcrypt from 'bcrypt';
 import { getConnection } from '../constants/db.connection.js';
 import { prisma_Connector } from '../../index.js';
-import Random_Otp from '../utils/Random_Otp.js';
-import { sendMail } from '../utils/Mailer.js';
+
 
 // ─── Helper: transform Oracle rows to key-value objects ─────
 function transformRows(result) {

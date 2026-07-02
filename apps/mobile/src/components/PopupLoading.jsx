@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { ProgressBar, useTheme } from 'react-native-paper';

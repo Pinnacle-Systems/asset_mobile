@@ -1,12 +1,9 @@
-import React from 'react';
-import { View, Text } from 'react-native';
 
 import { HomeScreen } from '../screens/HomeScreen.jsx';
 import AssetAudit from '../screens/AssetAudit.jsx';
 import Splash from '../screens/Splash.jsx';
 import LoginScreen from '../screens/Login.jsx';
 import AuditReport from '../screens/AuditReport.jsx';
-
 import UserAndRoles from '../screens/UserAndRoles/index.jsx';
 import ReportMaster from '../screens/ReportMaster.jsx';
 

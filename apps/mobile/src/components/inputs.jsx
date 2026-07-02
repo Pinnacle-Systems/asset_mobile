@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  Dimensions,
   useWindowDimensions,
-  Alert
+
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useTheme } from '../theme/ThemeProvider';

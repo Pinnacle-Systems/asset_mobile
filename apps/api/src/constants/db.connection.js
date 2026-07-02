@@ -18,16 +18,16 @@ if (process.env.ORACLE_CLIENT_PATH) {
 
 // ─── Payroll / User Oracle DB ────────────────────────────────
 const dbConfig = {
-    user:          process.env.ORACLE_USER          || 'PSSPAYROLL',
-    password:      process.env.ORACLE_PASSWORD       || 'PSSPAYROLL_OCT2024',
-    connectString: process.env.ORACLE_CONNECT_STRING || '103.125.155.220:1555/AN01P',
+    user:          process.env.ORACLE_USER   ,
+    password:      process.env.ORACLE_PASSWORD   ,
+    connectString: process.env.ORACLE_CONNECT_STRING ,
 };
 
 // ─── Asset Oracle DB ─────────────────────────────────────────
 const dbASSET_Config = {
-    user:          process.env.ORACLE_ASSET_USER          || 'PSSAGFASSET',
-    password:      process.env.ORACLE_ASSET_PASSWORD       || 'PSSAGFASSETMAR23',
-    connectString: process.env.ORACLE_ASSET_CONNECT_STRING || '103.125.155.219:1555/AN01P',
+    user:          process.env.ORACLE_ASSET_USER ,
+    password:      process.env.ORACLE_ASSET_PASSWORD,
+    connectString: process.env.ORACLE_ASSET_CONNECT_STRING,
 };
 
 // ─── Connection helpers ──────────────────────────────────────
