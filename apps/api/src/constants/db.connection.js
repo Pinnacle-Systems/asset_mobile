@@ -5,12 +5,13 @@
 
 import 'dotenv/config';
 import oracledb from 'oracledb';
+import { env } from '../config/env.js';
 
 // Use Thick mode only if ORACLE_CLIENT_PATH is set in .env
 // (Required for older Oracle DB servers. Remove if using Thin mode.)
-if (process.env.ORACLE_CLIENT_PATH) {
+if (env.ORACLE_CLIENT_PATH) {
     try {
-        oracledb.initOracleClient({ libDir: process.env.ORACLE_CLIENT_PATH });
+        oracledb.initOracleClient({ libDir: env.ORACLE_CLIENT_PATH });
     } catch (e) {
         // Already initialized or Thin mode in use — safe to ignore
     }
@@ -18,16 +19,16 @@ if (process.env.ORACLE_CLIENT_PATH) {
 
 // ─── Payroll / User Oracle DB ────────────────────────────────
 const dbConfig = {
-    user:          process.env.ORACLE_USER          || 'PSSPAYROLL',
-    password:      process.env.ORACLE_PASSWORD       || 'PSSPAYROLL_OCT2024',
-    connectString: process.env.ORACLE_CONNECT_STRING || '103.125.155.220:1555/AN01P',
+    user: env.ORACLE_PAYROLL_USER,
+    password: env.ORACLE_PAYROLL_PASSWORD,
+    connectString: env.ORACLE_PAYROLL_CONNECT_STRING,
 };
 
 // ─── Asset Oracle DB ─────────────────────────────────────────
 const dbASSET_Config = {
-    user:          process.env.ORACLE_ASSET_USER          || 'PSSAGFASSET',
-    password:      process.env.ORACLE_ASSET_PASSWORD       || 'PSSAGFASSETMAR23',
-    connectString: process.env.ORACLE_ASSET_CONNECT_STRING || '103.125.155.219:1555/AN01P',
+    user: env.ORACLE_ASSET_USER,
+    password: env.ORACLE_ASSET_PASSWORD,
+    connectString: env.ORACLE_ASSET_CONNECT_STRING,
 };
 
 // ─── Connection helpers ──────────────────────────────────────

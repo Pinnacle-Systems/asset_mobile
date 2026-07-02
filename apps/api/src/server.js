@@ -27,15 +27,15 @@ async function checkAllDBConnections() {
     console.log('\x1b[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m');
 
     // Oracle Thick mode init (if path set)
-    if (process.env.ORACLE_CLIENT_PATH) {
+    if (env.ORACLE_CLIENT_PATH) {
         try {
-            oracledb.initOracleClient({ libDir: process.env.ORACLE_CLIENT_PATH });
-            console.log(`\x1b[33m  Oracle Thick mode: ${process.env.ORACLE_CLIENT_PATH}\x1b[0m`);
+            oracledb.initOracleClient({ libDir: env.ORACLE_CLIENT_PATH });
+            console.log(`\x1b[33m  Oracle Thick mode: ${env.ORACLE_CLIENT_PATH}\x1b[0m`);
         } catch (e) {
             // NJS-077 = already initialized (safe to ignore on hot-reload)
             if (!e.message?.includes('NJS-077')) {
                 console.error(`\x1b[31m  ✘ Oracle Thick mode init FAILED: ${e.message}\x1b[0m`);
-                console.error(`  Check that ORACLE_CLIENT_PATH is correct: ${process.env.ORACLE_CLIENT_PATH}`);
+                console.error(`  Check that ORACLE_CLIENT_PATH is correct: ${env.ORACLE_CLIENT_PATH}`);
             }
         }
     } else {
@@ -44,14 +44,14 @@ async function checkAllDBConnections() {
     }
 
     const payrollConfig = {
-        user: process.env.ORACLE_USER || 'PSSPAYROLL',
-        password: process.env.ORACLE_PASSWORD || 'PSSPAYROLL_OCT2024',
-        connectString: process.env.ORACLE_CONNECT_STRING || '103.125.155.220:1555/AN01P',
+        user: env.ORACLE_PAYROLL_USER,
+        password: env.ORACLE_PAYROLL_PASSWORD,
+        connectString: env.ORACLE_PAYROLL_CONNECT_STRING,
     };
     const assetConfig = {
-        user: process.env.ORACLE_ASSET_USER || 'PSSAGFASSET',
-        password: process.env.ORACLE_ASSET_PASSWORD || 'PSSAGFASSETMAR23',
-        connectString: process.env.ORACLE_ASSET_CONNECT_STRING || '103.125.155.219:1555/AN01P',
+        user: env.ORACLE_ASSET_USER,
+        password: env.ORACLE_ASSET_PASSWORD,
+        connectString: env.ORACLE_ASSET_CONNECT_STRING,
     };
 
     await Promise.all([
