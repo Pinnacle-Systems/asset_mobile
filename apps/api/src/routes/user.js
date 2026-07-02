@@ -14,7 +14,7 @@ import {
     UpdateRoleOnPage,
     getCompanyCode,
     getEmployeeIds,
-    update_fcm,
+
     getUserRolesOnPage,
     getCreatedRolesOnPage,
     get_Change_Settings,
@@ -41,8 +41,7 @@ router.post('/UpdateRoleOnPage', UpdateRoleOnPage);    // Update role-page assig
 router.get('/getCompanyCode', getCompanyCode);          // Company codes (Navbar, Form)
 router.get('/getEmployeeIds', getEmployeeIds);          // Employee IDs (Form)
 
-// ─── Settings & FCM ────────────────────────────────────────
-router.post('/update_fcm', update_fcm);                 // Update FCM token (Login)
+// ─── Settings ─────────────────────────────────────────────
 router.get('/get_Change_Settings', get_Change_Settings); // Get settings (Splash)
 
 export default router;

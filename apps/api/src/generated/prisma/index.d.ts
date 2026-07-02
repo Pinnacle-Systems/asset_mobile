@@ -2334,12 +2334,10 @@ export namespace Prisma {
 
   export type UserAvgAggregateOutputType = {
     id: number | null
-    employeeId: number | null
   }
 
   export type UserSumAggregateOutputType = {
     id: number | null
-    employeeId: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -2348,22 +2346,14 @@ export namespace Prisma {
     pic: string | null
     email: string | null
     otpemail: string | null
-    approval: string | null
     password: string | null
     Idcard: string | null
     roleId: string | null
-    otp: string | null
-    hod: string | null
-    hr: string | null
     level: string | null
-    verificationOtp: string | null
-    expiresAt: Date | null
     createdAt: Date | null
     active: boolean | null
-    employeeId: number | null
     isAllParty: boolean | null
     isAdmin: boolean | null
-    fcm: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -2372,22 +2362,14 @@ export namespace Prisma {
     pic: string | null
     email: string | null
     otpemail: string | null
-    approval: string | null
     password: string | null
     Idcard: string | null
     roleId: string | null
-    otp: string | null
-    hod: string | null
-    hr: string | null
     level: string | null
-    verificationOtp: string | null
-    expiresAt: Date | null
     createdAt: Date | null
     active: boolean | null
-    employeeId: number | null
     isAllParty: boolean | null
     isAdmin: boolean | null
-    fcm: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -2396,34 +2378,24 @@ export namespace Prisma {
     pic: number
     email: number
     otpemail: number
-    approval: number
     password: number
     Idcard: number
     roleId: number
-    otp: number
-    hod: number
-    hr: number
     level: number
-    verificationOtp: number
-    expiresAt: number
     createdAt: number
     active: number
-    employeeId: number
     isAllParty: number
     isAdmin: number
-    fcm: number
     _all: number
   }
 
 
   export type UserAvgAggregateInputType = {
     id?: true
-    employeeId?: true
   }
 
   export type UserSumAggregateInputType = {
     id?: true
-    employeeId?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -2432,22 +2404,14 @@ export namespace Prisma {
     pic?: true
     email?: true
     otpemail?: true
-    approval?: true
     password?: true
     Idcard?: true
     roleId?: true
-    otp?: true
-    hod?: true
-    hr?: true
     level?: true
-    verificationOtp?: true
-    expiresAt?: true
     createdAt?: true
     active?: true
-    employeeId?: true
     isAllParty?: true
     isAdmin?: true
-    fcm?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -2456,22 +2420,14 @@ export namespace Prisma {
     pic?: true
     email?: true
     otpemail?: true
-    approval?: true
     password?: true
     Idcard?: true
     roleId?: true
-    otp?: true
-    hod?: true
-    hr?: true
     level?: true
-    verificationOtp?: true
-    expiresAt?: true
     createdAt?: true
     active?: true
-    employeeId?: true
     isAllParty?: true
     isAdmin?: true
-    fcm?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -2480,22 +2436,14 @@ export namespace Prisma {
     pic?: true
     email?: true
     otpemail?: true
-    approval?: true
     password?: true
     Idcard?: true
     roleId?: true
-    otp?: true
-    hod?: true
-    hr?: true
     level?: true
-    verificationOtp?: true
-    expiresAt?: true
     createdAt?: true
     active?: true
-    employeeId?: true
     isAllParty?: true
     isAdmin?: true
-    fcm?: true
     _all?: true
   }
 
@@ -2591,22 +2539,14 @@ export namespace Prisma {
     pic: string | null
     email: string | null
     otpemail: string | null
-    approval: string
     password: string | null
     Idcard: string | null
     roleId: string | null
-    otp: string | null
-    hod: string | null
-    hr: string | null
     level: string
-    verificationOtp: string | null
-    expiresAt: Date | null
-    createdAt: Date | null
+    createdAt: Date
     active: boolean
-    employeeId: number | null
     isAllParty: boolean
     isAdmin: boolean
-    fcm: string | null
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -2634,22 +2574,14 @@ export namespace Prisma {
     pic?: boolean
     email?: boolean
     otpemail?: boolean
-    approval?: boolean
     password?: boolean
     Idcard?: boolean
     roleId?: boolean
-    otp?: boolean
-    hod?: boolean
-    hr?: boolean
     level?: boolean
-    verificationOtp?: boolean
-    expiresAt?: boolean
     createdAt?: boolean
     active?: boolean
-    employeeId?: boolean
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: boolean
     role?: boolean | User$roleArgs<ExtArgs>
     Companies?: boolean | User$CompaniesArgs<ExtArgs>
     settings?: boolean | User$settingsArgs<ExtArgs>
@@ -2664,25 +2596,17 @@ export namespace Prisma {
     pic?: boolean
     email?: boolean
     otpemail?: boolean
-    approval?: boolean
     password?: boolean
     Idcard?: boolean
     roleId?: boolean
-    otp?: boolean
-    hod?: boolean
-    hr?: boolean
     level?: boolean
-    verificationOtp?: boolean
-    expiresAt?: boolean
     createdAt?: boolean
     active?: boolean
-    employeeId?: boolean
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "pic" | "email" | "otpemail" | "approval" | "password" | "Idcard" | "roleId" | "otp" | "hod" | "hr" | "level" | "verificationOtp" | "expiresAt" | "createdAt" | "active" | "employeeId" | "isAllParty" | "isAdmin" | "fcm", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "pic" | "email" | "otpemail" | "password" | "Idcard" | "roleId" | "level" | "createdAt" | "active" | "isAllParty" | "isAdmin", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     role?: boolean | User$roleArgs<ExtArgs>
     Companies?: boolean | User$CompaniesArgs<ExtArgs>
@@ -2703,22 +2627,14 @@ export namespace Prisma {
       pic: string | null
       email: string | null
       otpemail: string | null
-      approval: string
       password: string | null
       Idcard: string | null
       roleId: string | null
-      otp: string | null
-      hod: string | null
-      hr: string | null
       level: string
-      verificationOtp: string | null
-      expiresAt: Date | null
-      createdAt: Date | null
+      createdAt: Date
       active: boolean
-      employeeId: number | null
       isAllParty: boolean
       isAdmin: boolean
-      fcm: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -3096,22 +3012,14 @@ export namespace Prisma {
     readonly pic: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly otpemail: FieldRef<"User", 'String'>
-    readonly approval: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly Idcard: FieldRef<"User", 'String'>
     readonly roleId: FieldRef<"User", 'String'>
-    readonly otp: FieldRef<"User", 'String'>
-    readonly hod: FieldRef<"User", 'String'>
-    readonly hr: FieldRef<"User", 'String'>
     readonly level: FieldRef<"User", 'String'>
-    readonly verificationOtp: FieldRef<"User", 'String'>
-    readonly expiresAt: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly active: FieldRef<"User", 'Boolean'>
-    readonly employeeId: FieldRef<"User", 'Int'>
     readonly isAllParty: FieldRef<"User", 'Boolean'>
     readonly isAdmin: FieldRef<"User", 'Boolean'>
-    readonly fcm: FieldRef<"User", 'String'>
   }
     
 
@@ -7536,22 +7444,14 @@ export namespace Prisma {
     pic: 'pic',
     email: 'email',
     otpemail: 'otpemail',
-    approval: 'approval',
     password: 'password',
     Idcard: 'Idcard',
     roleId: 'roleId',
-    otp: 'otp',
-    hod: 'hod',
-    hr: 'hr',
     level: 'level',
-    verificationOtp: 'verificationOtp',
-    expiresAt: 'expiresAt',
     createdAt: 'createdAt',
     active: 'active',
-    employeeId: 'employeeId',
     isAllParty: 'isAllParty',
-    isAdmin: 'isAdmin',
-    fcm: 'fcm'
+    isAdmin: 'isAdmin'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -7637,16 +7537,10 @@ export namespace Prisma {
     pic: 'pic',
     email: 'email',
     otpemail: 'otpemail',
-    approval: 'approval',
     password: 'password',
     Idcard: 'Idcard',
     roleId: 'roleId',
-    otp: 'otp',
-    hod: 'hod',
-    hr: 'hr',
-    level: 'level',
-    verificationOtp: 'verificationOtp',
-    fcm: 'fcm'
+    level: 'level'
   };
 
   export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
@@ -7801,22 +7695,14 @@ export namespace Prisma {
     pic?: StringNullableFilter<"User"> | string | null
     email?: StringNullableFilter<"User"> | string | null
     otpemail?: StringNullableFilter<"User"> | string | null
-    approval?: StringFilter<"User"> | string
     password?: StringNullableFilter<"User"> | string | null
     Idcard?: StringNullableFilter<"User"> | string | null
     roleId?: StringNullableFilter<"User"> | string | null
-    otp?: StringNullableFilter<"User"> | string | null
-    hod?: StringNullableFilter<"User"> | string | null
-    hr?: StringNullableFilter<"User"> | string | null
     level?: StringFilter<"User"> | string
-    verificationOtp?: StringNullableFilter<"User"> | string | null
-    expiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
-    createdAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
     active?: BoolFilter<"User"> | boolean
-    employeeId?: IntNullableFilter<"User"> | number | null
     isAllParty?: BoolFilter<"User"> | boolean
     isAdmin?: BoolFilter<"User"> | boolean
-    fcm?: StringNullableFilter<"User"> | string | null
     role?: XOR<RoleNullableScalarRelationFilter, RoleWhereInput> | null
     Companies?: CompanyCodeListRelationFilter
     settings?: SettingsListRelationFilter
@@ -7828,22 +7714,14 @@ export namespace Prisma {
     pic?: SortOrderInput | SortOrder
     email?: SortOrderInput | SortOrder
     otpemail?: SortOrderInput | SortOrder
-    approval?: SortOrder
     password?: SortOrderInput | SortOrder
     Idcard?: SortOrderInput | SortOrder
     roleId?: SortOrderInput | SortOrder
-    otp?: SortOrderInput | SortOrder
-    hod?: SortOrderInput | SortOrder
-    hr?: SortOrderInput | SortOrder
     level?: SortOrder
-    verificationOtp?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
-    createdAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
     active?: SortOrder
-    employeeId?: SortOrderInput | SortOrder
     isAllParty?: SortOrder
     isAdmin?: SortOrder
-    fcm?: SortOrderInput | SortOrder
     role?: RoleOrderByWithRelationInput
     Companies?: CompanyCodeOrderByRelationAggregateInput
     settings?: settingsOrderByRelationAggregateInput
@@ -7860,21 +7738,13 @@ export namespace Prisma {
     pic?: StringNullableFilter<"User"> | string | null
     email?: StringNullableFilter<"User"> | string | null
     otpemail?: StringNullableFilter<"User"> | string | null
-    approval?: StringFilter<"User"> | string
     password?: StringNullableFilter<"User"> | string | null
     roleId?: StringNullableFilter<"User"> | string | null
-    otp?: StringNullableFilter<"User"> | string | null
-    hod?: StringNullableFilter<"User"> | string | null
-    hr?: StringNullableFilter<"User"> | string | null
     level?: StringFilter<"User"> | string
-    verificationOtp?: StringNullableFilter<"User"> | string | null
-    expiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
-    createdAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
     active?: BoolFilter<"User"> | boolean
-    employeeId?: IntNullableFilter<"User"> | number | null
     isAllParty?: BoolFilter<"User"> | boolean
     isAdmin?: BoolFilter<"User"> | boolean
-    fcm?: StringNullableFilter<"User"> | string | null
     role?: XOR<RoleNullableScalarRelationFilter, RoleWhereInput> | null
     Companies?: CompanyCodeListRelationFilter
     settings?: SettingsListRelationFilter
@@ -7886,22 +7756,14 @@ export namespace Prisma {
     pic?: SortOrderInput | SortOrder
     email?: SortOrderInput | SortOrder
     otpemail?: SortOrderInput | SortOrder
-    approval?: SortOrder
     password?: SortOrderInput | SortOrder
     Idcard?: SortOrderInput | SortOrder
     roleId?: SortOrderInput | SortOrder
-    otp?: SortOrderInput | SortOrder
-    hod?: SortOrderInput | SortOrder
-    hr?: SortOrderInput | SortOrder
     level?: SortOrder
-    verificationOtp?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
-    createdAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
     active?: SortOrder
-    employeeId?: SortOrderInput | SortOrder
     isAllParty?: SortOrder
     isAdmin?: SortOrder
-    fcm?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -7918,22 +7780,14 @@ export namespace Prisma {
     pic?: StringNullableWithAggregatesFilter<"User"> | string | null
     email?: StringNullableWithAggregatesFilter<"User"> | string | null
     otpemail?: StringNullableWithAggregatesFilter<"User"> | string | null
-    approval?: StringWithAggregatesFilter<"User"> | string
     password?: StringNullableWithAggregatesFilter<"User"> | string | null
     Idcard?: StringNullableWithAggregatesFilter<"User"> | string | null
     roleId?: StringNullableWithAggregatesFilter<"User"> | string | null
-    otp?: StringNullableWithAggregatesFilter<"User"> | string | null
-    hod?: StringNullableWithAggregatesFilter<"User"> | string | null
-    hr?: StringNullableWithAggregatesFilter<"User"> | string | null
     level?: StringWithAggregatesFilter<"User"> | string
-    verificationOtp?: StringNullableWithAggregatesFilter<"User"> | string | null
-    expiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
-    createdAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     active?: BoolWithAggregatesFilter<"User"> | boolean
-    employeeId?: IntNullableWithAggregatesFilter<"User"> | number | null
     isAllParty?: BoolWithAggregatesFilter<"User"> | boolean
     isAdmin?: BoolWithAggregatesFilter<"User"> | boolean
-    fcm?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type CompanyCodeWhereInput = {
@@ -8260,21 +8114,13 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     role?: RoleCreateNestedOneWithoutUserInput
     Companies?: CompanyCodeCreateNestedManyWithoutUserInput
     settings?: settingsCreateNestedManyWithoutUserInput
@@ -8286,22 +8132,14 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
     roleId?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     Companies?: CompanyCodeUncheckedCreateNestedManyWithoutUserInput
     settings?: settingsUncheckedCreateNestedManyWithoutUserInput
   }
@@ -8311,21 +8149,13 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     role?: RoleUpdateOneWithoutUserNestedInput
     Companies?: CompanyCodeUpdateManyWithoutUserNestedInput
     settings?: settingsUpdateManyWithoutUserNestedInput
@@ -8337,22 +8167,14 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     Companies?: CompanyCodeUncheckedUpdateManyWithoutUserNestedInput
     settings?: settingsUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -8363,22 +8185,14 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
     roleId?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -8386,21 +8200,13 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -8409,22 +8215,14 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CompanyCodeCreateInput = {
@@ -8848,31 +8646,20 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type RoleNullableScalarRelationFilter = {
@@ -8912,27 +8699,18 @@ export namespace Prisma {
     pic?: SortOrder
     email?: SortOrder
     otpemail?: SortOrder
-    approval?: SortOrder
     password?: SortOrder
     Idcard?: SortOrder
     roleId?: SortOrder
-    otp?: SortOrder
-    hod?: SortOrder
-    hr?: SortOrder
     level?: SortOrder
-    verificationOtp?: SortOrder
-    expiresAt?: SortOrder
     createdAt?: SortOrder
     active?: SortOrder
-    employeeId?: SortOrder
     isAllParty?: SortOrder
     isAdmin?: SortOrder
-    fcm?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
     id?: SortOrder
-    employeeId?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -8941,22 +8719,14 @@ export namespace Prisma {
     pic?: SortOrder
     email?: SortOrder
     otpemail?: SortOrder
-    approval?: SortOrder
     password?: SortOrder
     Idcard?: SortOrder
     roleId?: SortOrder
-    otp?: SortOrder
-    hod?: SortOrder
-    hr?: SortOrder
     level?: SortOrder
-    verificationOtp?: SortOrder
-    expiresAt?: SortOrder
     createdAt?: SortOrder
     active?: SortOrder
-    employeeId?: SortOrder
     isAllParty?: SortOrder
     isAdmin?: SortOrder
-    fcm?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -8965,41 +8735,32 @@ export namespace Prisma {
     pic?: SortOrder
     email?: SortOrder
     otpemail?: SortOrder
-    approval?: SortOrder
     password?: SortOrder
     Idcard?: SortOrder
     roleId?: SortOrder
-    otp?: SortOrder
-    hod?: SortOrder
-    hr?: SortOrder
     level?: SortOrder
-    verificationOtp?: SortOrder
-    expiresAt?: SortOrder
     createdAt?: SortOrder
     active?: SortOrder
-    employeeId?: SortOrder
     isAllParty?: SortOrder
     isAdmin?: SortOrder
-    fcm?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
     id?: SortOrder
-    employeeId?: SortOrder
   }
 
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -9008,22 +8769,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type CompanyCodeOrderByRelevanceInput = {
@@ -9122,6 +8867,17 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type RoleScalarRelationFilter = {
     is?: RoleWhereInput
     isNot?: RoleWhereInput
@@ -9179,15 +8935,20 @@ export namespace Prisma {
     roleId?: SortOrder
   }
 
-  export type DateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type UserLogOrderByRelevanceInput = {
@@ -9235,20 +8996,6 @@ export namespace Prisma {
 
   export type UserLogSumOrderByAggregateInput = {
     id?: SortOrder
-  }
-
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type UserCreateNestedOneWithoutSettingsInput = {
@@ -9319,20 +9066,12 @@ export namespace Prisma {
     connect?: settingsWhereUniqueInput | settingsWhereUniqueInput[]
   }
 
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
   }
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type RoleUpdateOneWithoutUserNestedInput = {
@@ -9505,16 +9244,20 @@ export namespace Prisma {
     connect?: RoleWhereUniqueInput
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type RoleUpdateOneRequiredWithoutRoleOnPageNestedInput = {
     create?: XOR<RoleCreateWithoutRoleOnPageInput, RoleUncheckedCreateWithoutRoleOnPageInput>
     connectOrCreate?: RoleCreateOrConnectWithoutRoleOnPageInput
     upsert?: RoleUpsertWithoutRoleOnPageInput
     connect?: RoleWhereUniqueInput
     update?: XOR<XOR<RoleUpdateToOneWithWhereWithoutRoleOnPageInput, RoleUpdateWithoutRoleOnPageInput>, RoleUncheckedUpdateWithoutRoleOnPageInput>
-  }
-
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -9645,15 +9388,15 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type NestedBoolFilter<$PrismaModel = never> = {
@@ -9661,18 +9404,18 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -9710,51 +9453,18 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedDateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
-  }
-
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
   export type UserCreateWithoutSettingsInput = {
     username: string
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     role?: RoleCreateNestedOneWithoutUserInput
     Companies?: CompanyCodeCreateNestedManyWithoutUserInput
   }
@@ -9765,22 +9475,14 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
     roleId?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     Companies?: CompanyCodeUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -9805,21 +9507,13 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     role?: RoleUpdateOneWithoutUserNestedInput
     Companies?: CompanyCodeUpdateManyWithoutUserNestedInput
   }
@@ -9830,22 +9524,14 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     Companies?: CompanyCodeUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -10004,21 +9690,13 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     role?: RoleCreateNestedOneWithoutUserInput
     settings?: settingsCreateNestedManyWithoutUserInput
   }
@@ -10029,22 +9707,14 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
     roleId?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     settings?: settingsUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -10069,21 +9739,13 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     role?: RoleUpdateOneWithoutUserNestedInput
     settings?: settingsUpdateManyWithoutUserNestedInput
   }
@@ -10094,22 +9756,14 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
     roleId?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     settings?: settingsUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -10118,21 +9772,13 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     Companies?: CompanyCodeCreateNestedManyWithoutUserInput
     settings?: settingsCreateNestedManyWithoutUserInput
   }
@@ -10143,21 +9789,13 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
     Companies?: CompanyCodeUncheckedCreateNestedManyWithoutUserInput
     settings?: settingsUncheckedCreateNestedManyWithoutUserInput
   }
@@ -10228,22 +9866,14 @@ export namespace Prisma {
     pic?: StringNullableFilter<"User"> | string | null
     email?: StringNullableFilter<"User"> | string | null
     otpemail?: StringNullableFilter<"User"> | string | null
-    approval?: StringFilter<"User"> | string
     password?: StringNullableFilter<"User"> | string | null
     Idcard?: StringNullableFilter<"User"> | string | null
     roleId?: StringNullableFilter<"User"> | string | null
-    otp?: StringNullableFilter<"User"> | string | null
-    hod?: StringNullableFilter<"User"> | string | null
-    hr?: StringNullableFilter<"User"> | string | null
     level?: StringFilter<"User"> | string
-    verificationOtp?: StringNullableFilter<"User"> | string | null
-    expiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
-    createdAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
     active?: BoolFilter<"User"> | boolean
-    employeeId?: IntNullableFilter<"User"> | number | null
     isAllParty?: BoolFilter<"User"> | boolean
     isAdmin?: BoolFilter<"User"> | boolean
-    fcm?: StringNullableFilter<"User"> | string | null
   }
 
   export type RoleOnPageUpsertWithWhereUniqueWithoutRoleInput = {
@@ -10387,21 +10017,13 @@ export namespace Prisma {
     pic?: string | null
     email?: string | null
     otpemail?: string | null
-    approval?: string
     password?: string | null
     Idcard?: string | null
-    otp?: string | null
-    hod?: string | null
-    hr?: string | null
     level?: string
-    verificationOtp?: string | null
-    expiresAt?: Date | string | null
-    createdAt?: Date | string | null
+    createdAt?: Date | string
     active?: boolean
-    employeeId?: number | null
     isAllParty?: boolean
     isAdmin?: boolean
-    fcm?: string | null
   }
 
   export type RoleOnPageCreateManyRoleInput = {
@@ -10420,21 +10042,13 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     Companies?: CompanyCodeUpdateManyWithoutUserNestedInput
     settings?: settingsUpdateManyWithoutUserNestedInput
   }
@@ -10445,21 +10059,13 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
     Companies?: CompanyCodeUncheckedUpdateManyWithoutUserNestedInput
     settings?: settingsUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -10470,21 +10076,13 @@ export namespace Prisma {
     pic?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     otpemail?: NullableStringFieldUpdateOperationsInput | string | null
-    approval?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
     Idcard?: NullableStringFieldUpdateOperationsInput | string | null
-    otp?: NullableStringFieldUpdateOperationsInput | string | null
-    hod?: NullableStringFieldUpdateOperationsInput | string | null
-    hr?: NullableStringFieldUpdateOperationsInput | string | null
     level?: StringFieldUpdateOperationsInput | string
-    verificationOtp?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     active?: BoolFieldUpdateOperationsInput | boolean
-    employeeId?: NullableIntFieldUpdateOperationsInput | number | null
     isAllParty?: BoolFieldUpdateOperationsInput | boolean
     isAdmin?: BoolFieldUpdateOperationsInput | boolean
-    fcm?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RoleOnPageUpdateWithoutRoleInput = {

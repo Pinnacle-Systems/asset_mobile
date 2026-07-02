@@ -6,6 +6,9 @@ build
 *.log
 .DS_Store
 .env
+.env.*
+!.env.example
+!apps/**/.env.example
 android/app/build
 android/build
 apps/mobile/android/.gradle
@@ -18,3 +21,4 @@ ios/Pods
 *.jks
 *.apk
 *.aab
+.pnpm-store

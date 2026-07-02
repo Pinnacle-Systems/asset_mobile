@@ -6,12 +6,12 @@ const UsersApi = createApi({
     reducerPath: "loginUser",
     baseQuery: fetchBaseQuery({
         baseUrl: BASE_URL,
-        prepareHeaders:async (headers)=>{
-        await SetHeader(headers)
-          return headers
+        prepareHeaders: async (headers) => {
+            await SetHeader(headers)
+            return headers
         }
     }),
-    tagTypes: ["Users","UsersDetails","get_Change_Settings","Login","/getUserBasicDetails","UsersDes","UsersRole","createRoleOnPage","UpdateRoleonPage","UsersCreate","ImageUpload","getUserImage","token_fcm_hod","get_refresh_token","token_fcm","Otp","/change_password","get_Hod_Details","LoginLogs"],
+    tagTypes: ["Users", "UsersDetails", "get_Change_Settings", "Login", "/getUserBasicDetails", "UsersDes", "UsersRole", "createRoleOnPage", "UpdateRoleonPage", "UsersCreate", "ImageUpload", "getUserImage", "token_fcm_hod", "get_refresh_token", "token_fcm", "Otp", "/change_password", "get_Hod_Details", "LoginLogs"],
     endpoints: (builder) => ({
 
 
@@ -39,7 +39,7 @@ const UsersApi = createApi({
                 };
             },
             providesTags: ["Users"],
-        }),getUsersDetails: builder.query({
+        }), getUsersDetails: builder.query({
             query: () => {
                 return {
                     url: UserDetails,
@@ -65,12 +65,12 @@ const UsersApi = createApi({
                 };
             },
             providesTags: ["Users"],
-        }),getUserBasicDetails:builder.query({
-            query: ({Idcard,ismul}) => {
+        }), getUserBasicDetails: builder.query({
+            query: ({ Idcard, ismul }) => {
                 return {
                     url: `${USERS_API}/getUserBasicDetails`,
                     method: "GET",
-                    params:{Idcard,ismul},
+                    params: { Idcard, ismul },
                     headers: {
                         "Content-type": "application/json; charset=UTF-8",
                     },
@@ -94,7 +94,7 @@ const UsersApi = createApi({
             providesTags: ["UsersDes"],
         }),
         getRolesOnPage: builder.query({
-            query: ( params ) => {
+            query: (params) => {
 
                 return {
                     url: `${USERS_API}/getRolesOnPage`,
@@ -106,8 +106,8 @@ const UsersApi = createApi({
                 };
             },
             providesTags: ["UsersRole"],
-        }),getUserRolesOnPage:builder.query({
-            query: ( params ) => {
+        }), getUserRolesOnPage: builder.query({
+            query: (params) => {
 
                 return {
                     url: `${USERS_API}/getUserRolesOnPage`,
@@ -119,8 +119,8 @@ const UsersApi = createApi({
                 };
             },
             providesTags: ["UsersRole"],
-        }),getCreatedRolesOnPage:builder.query({
-            query: ( params ) => {
+        }), getCreatedRolesOnPage: builder.query({
+            query: (params) => {
 
                 return {
                     url: `${USERS_API}/getCreatedRolesOnPage`,
@@ -145,17 +145,17 @@ const UsersApi = createApi({
             invalidatesTags: ["createRoleOnPage"],
         }),
         UpdateRoleOnPage:
-        builder.mutation({
-            query: (payload) => ({
-                url: USERS_API + "/UpdateRoleOnPage",
-                method: "POST",
-                body: payload,
-                headers: {
-                    "Content-type": "application/json; charset=UTF-8",
-                },
+            builder.mutation({
+                query: (payload) => ({
+                    url: USERS_API + "/UpdateRoleOnPage",
+                    method: "POST",
+                    body: payload,
+                    headers: {
+                        "Content-type": "application/json; charset=UTF-8",
+                    },
+                }),
+                invalidatesTags: ["UpdateRoleonPage"],
             }),
-            invalidatesTags: ["UpdateRoleonPage"],
-        }),
 
         createUser: builder.mutation({
             query: (payload) => ({
@@ -166,59 +166,49 @@ const UsersApi = createApi({
                     "Content-type": "application/json; charset=UTF-8",
                 },
             }),
-            invalidatesTags: ["UsersCreate","UsersDetails"],
+            invalidatesTags: ["UsersCreate", "UsersDetails"],
         }),
-        update_user_fcm: builder.mutation({
-            query: (payload) => ({
-                url: USERS_API+"/update_fcm",
-                method: "POST",
-                body: payload,
-                headers: {
-                    "Content-type": "application/json; charset=UTF-8",
-                },
-            }),
-            invalidatesTags: ["UsersCreate"],
-        }),
+
         UploadImage: builder.mutation({
             query: (payload) => ({
-                url: USERS_API+"/upload",
+                url: USERS_API + "/upload",
                 method: "POST",
                 body: payload,
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
-                
+
             }),
             invalidatesTags: ["ImageUpload"],
-        }),getUserImage:builder.query({
+        }), getUserImage: builder.query({
             query: (ID) => {
 
                 return {
                     url: `${USERS_API}/getUserImage/${ID}`,
                     method: "GET",
-                       
+
                 };
             },
             providesTags: ["getUserImage"],
-        }),get_hod_token:builder.query({
-            query: ({params}) => {
+        }), get_hod_token: builder.query({
+            query: ({ params }) => {
 
                 return {
                     url: `${USERS_API}/get_hod_token`,
                     method: "GET",
                     params
-                       
+
                 };
             },
             providesTags: ["token_fcm_hod"],
-        }),get_refresh_token:builder.query({
+        }), get_refresh_token: builder.query({
             query: (params) => {
 
                 return {
                     url: `${USERS_API}/get_refresh_token`,
                     method: "GET",
                     params
-                       
+
                 };
             },
             providesTags: ["get_refresh_token"],
@@ -249,75 +239,75 @@ const UsersApi = createApi({
                 };
             },
             providesTags: ["UsersRole"],
-        }),get_fcm_token:builder.query({
-            query: ({params}) => {
+        }), get_fcm_token: builder.query({
+            query: ({ params }) => {
                 return {
                     url: `${USERS_API}/get_fcm_token`,
                     method: "GET",
                     params
-                       
+
                 };
             },
             providesTags: ["token_fcm"],
         }),
-        send_Otp:builder.mutation({
+        send_Otp: builder.mutation({
             query: (payload) => ({
-                url: USERS_API+"/send_Otp",
+                url: USERS_API + "/send_Otp",
                 method: "POST",
                 body: payload,
                 headers: {
                     "Content-type": "application/json; charset=UTF-8",
                 },
-                
+
             }),
             invalidatesTags: ["Otp"],
-        }),change_password:builder.mutation({
+        }), change_password: builder.mutation({
             query: (payload) => ({
-                url: USERS_API+"/change_password",
+                url: USERS_API + "/change_password",
                 method: "POST",
                 body: payload,
                 headers: {
                     "Content-type": "application/json; charset=UTF-8",
                 },
-                
+
             }),
             invalidatesTags: ["/change_password"],
         }),
-        Change_Settings:builder.mutation({
+        Change_Settings: builder.mutation({
             query: (payload) => ({
-                url: USERS_API+"/Change_Settings",
+                url: USERS_API + "/Change_Settings",
                 method: "POST",
                 body: payload,
                 headers: {
                     "Content-type": "application/json; charset=UTF-8",
                 },
-                
+
             }),
             invalidatesTags: ["get_Change_Settings"],
         }),
-          get_Change_Settings:builder.query({
-            query: ({params}) => {
+        get_Change_Settings: builder.query({
+            query: ({ params }) => {
                 return {
                     url: `${USERS_API}/get_Change_Settings`,
                     method: "GET",
                     params
-                       
+
                 };
             },
             providesTags: ["get_Change_Settings"],
-        }),get_Hod_Details:builder.query({
-            query: ({params}) => {
+        }), get_Hod_Details: builder.query({
+            query: ({ params }) => {
                 return {
                     url: `${USERS_API}/get_Hod_Details`,
                     method: "GET",
                     params
-                       
+
                 };
             },
             providesTags: ["get_Hod_Details"],
         }),
-        getLoginLogs:builder.query({
-            query: ( params ) => {
+        getLoginLogs: builder.query({
+            query: (params) => {
 
                 return {
                     url: `${USERS_API}/LoginLogs`,
@@ -352,7 +342,7 @@ export const {
     useGetUserImageQuery,
     useGetCompanycodeQuery,
     useGetEmployeeidsQuery,
-    useUpdate_user_fcmMutation,
+
     useGet_hod_tokenQuery,
     useGet_refresh_tokenQuery,
     useGet_fcm_tokenQuery,

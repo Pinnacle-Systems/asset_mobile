@@ -2,9 +2,9 @@ import { createErrorResponse } from "@repo/contracts";
 import { isAppError } from "@repo/errors";
 import { createLogger } from "@repo/logger";
 
-import { isProduction } from "../config/env.js";
+import { env, isProduction } from "../config/env.js";
 
-const logger = createLogger({ service: "api", environment: process.env.NODE_ENV || "development" });
+const logger = createLogger({ service: "api", environment: env.NODE_ENV });
 
 export default function errorMiddleware(err, req, res, next) {
   void next;
