@@ -13,7 +13,7 @@
 
 */
 -- AlterTable
-ALTER TABLE `user` DROP COLUMN `approval`,
+ALTER TABLE `User` DROP COLUMN `approval`,
     DROP COLUMN `employeeId`,
     DROP COLUMN `expiresAt`,
     DROP COLUMN `fcm`,
