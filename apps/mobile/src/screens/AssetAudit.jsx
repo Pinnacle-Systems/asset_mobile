@@ -13,6 +13,7 @@ import {
   Animated,
   StatusBar,
   TextInput,
+  BackHandler,
 } from "react-native";
 import { Camera, useCameraDevice, useCameraPermission, useCodeScanner } from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -31,6 +32,8 @@ import { useTheme } from '../theme/ThemeProvider';
 
 import { getCurrentLocation, requestLocationPermission } from '../utils/CustomLocation';
 import { TOMTOM_API_KEY } from '../constants/apiUrl';
+import { handleLogout } from '../utils/Logout';
+import { ResetNavigation } from '../config/NavigationRef';
 
 const { width, height } = Dimensions.get('window');
 
@@ -395,6 +398,30 @@ export default function AssetAudit() {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
+  const handleBackPress = () => {
+    Alert.alert(
+      "Exit Audit",
+      "Are you sure you want to close this screen? Any unsaved progress will be lost.",
+      [
+        { text: "No", style: "cancel", onPress: () => {} },
+        { 
+          text: "Logout / Close", 
+          style: "destructive", 
+          onPress: () => {
+            handleLogout(ResetNavigation);
+          }
+        }
+      ],
+      { cancelable: true }
+    );
+    return true; // prevent default hardware back behavior
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    return () => BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+  }, [navigation]);
+
   const { data: divisionData, isLoading: divisionLoading } = useGetDivisionMasterQuery();
   const { data: companyMaster } = useGetCompanycodeQuery({});
 
@@ -515,7 +542,8 @@ export default function AssetAudit() {
       const mockData = await BarcodeRefetch({ BARCODEID: assetId }).unwrap();
       const bardata = mockData?.data;
       if (bardata && bardata.length > 0) {
-        setAssetData(bardata[0]);
+        // Attach the source flag onto the row so the UI knows where data came from
+        setAssetData({ ...bardata[0], _source: mockData?.source || 'master' });
         setShowDetails(true);
       } else {
         Alert.alert('Not Found', 'Asset with this barcode not found in master records.');
@@ -589,16 +617,23 @@ export default function AssetAudit() {
     }
   }
 
-  const SaveScanner = async () => {
+  const SaveScanner = async (logoutAfterSave = false) => {
     try {
       setLoading(true);
       const {
-        DOCID, ASSETID, SUBGRP, MMADE, MMODEL,
-        REMARKS, MAINGRP, ABARID, AUDIT_DATE,
+        DOCID, DOCID1,                          // history source aliases DOCID → DOCID1
+        ASSETID, SUBGRP, MMADE, MMODEL,
+        MACHINEMADE, MACHINEMODEL,              // history source aliases MMADE → MACHINEMADE
+        REMARKS, MAINGRP, ABARID,
       } = assetData || {};
 
+      const resolvedDOCID = DOCID ?? DOCID1;    // master has DOCID via A.*, history has DOCID1
+      const resolvedMMade = MMADE ?? MACHINEMADE;
+      const resolvedMModel = MMODEL ?? MACHINEMODEL;
+
       const _data = await addBarcode({
-        DOCID, ASSETID, SUBGRP, MMADE, MMODEL, REMARKS, MAINGRP, ABARID, AUDIT_DATE,
+        DOCID: resolvedDOCID,
+        ASSETID, SUBGRP, MMADE: resolvedMMade, MMODEL: resolvedMModel, REMARKS, MAINGRP, ABARID,
         ROOM: auditParams?.room?.ID,
         BUILDING: auditParams?.building?.ID,
         FLOORS: auditParams?.floor?.ID,
@@ -609,7 +644,11 @@ export default function AssetAudit() {
 
       if (_data?.statusCode === 1 && _data?.data?.rowsAffected == 1) {
         Alert.alert('Success', 'Asset data saved successfully!');
-        resetScanner();
+        if (logoutAfterSave) {
+          handleLogout(ResetNavigation);
+        } else {
+          resetScanner();
+        }
       } else if (_data?.statusCode == 0) {
         Alert.alert('Warning', _data?.message || 'Failed to save asset data.');
       }
@@ -626,11 +665,32 @@ export default function AssetAudit() {
     setShowSetup(false);
   };
 
+  const handleModalBackPress = () => {
+    Alert.alert(
+      "Unsaved Scan",
+      "You have an unsaved scan. What would you like to do?",
+      [
+        { text: "No", style: "cancel", onPress: () => {} },
+        { 
+          text: "Save & Logout", 
+          onPress: () => {
+            SaveScanner(true);
+          }
+        }
+      ],
+      { cancelable: true }
+    );
+  };
+
   // ── Validation Helpers ────────────────────────────────────────────────────
+  // Column names differ between source:'master' (GTAD A.*) and source:'history' (ASSETAUDIT joins)
+  // master  → building: BNAME, floor: FNAME, room: RNAME1
+  // history → building: BNAME1, floor: FNAME1, room: RNAME1
+  const _pick = (...keys) => { for (const k of keys) { if (assetData?.[k]) return assetData[k]; } return null; };
   const registeredLocation = [
-    assetData?.BUILDINGNAME,
-    assetData?.FLOORNAME,
-    assetData?.RNAME1,
+    _pick('BNAME1', 'BNAME'),   // building name
+    _pick('FNAME1', 'FNAME'),   // floor name
+    _pick('RNAME1'),            // room name (same in both)
   ].filter(Boolean).join('  ›  ');
 
   const locationMismatch =
@@ -650,9 +710,7 @@ export default function AssetAudit() {
         masterLoading={masterLoading}
         onConfirm={handleSetupConfirm}
         onCancel={() => {
-          if (navigation) {
-            navigation.goBack();
-          }
+          handleBackPress();
         }}
         onChangeDivision={() => setShowDivisionModal(true)}
       />
@@ -662,7 +720,7 @@ export default function AssetAudit() {
         <SafeAreaView style={styles.permContainer}>
           <TouchableOpacity
             style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
-            onPress={() => navigation && navigation.goBack()}
+            onPress={handleBackPress}
           >
             <Ionicons name="arrow-back" size={28} color={C.textPri} />
           </TouchableOpacity>
@@ -681,7 +739,7 @@ export default function AssetAudit() {
         <SafeAreaView style={styles.permContainer}>
           <TouchableOpacity
             style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
-            onPress={() => navigation && navigation.goBack()}
+            onPress={handleBackPress}
           >
             <Ionicons name="arrow-back" size={28} color={C.textPri} />
           </TouchableOpacity>
@@ -723,9 +781,7 @@ export default function AssetAudit() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <TouchableOpacity
                   style={styles.iconBtn}
-                  onPress={() => {
-                    if (navigation) navigation.goBack();
-                  }}
+                  onPress={handleBackPress}
                 >
                   <Ionicons name="arrow-back" size={20} color={C.overlayTextPri} />
                 </TouchableOpacity>
@@ -811,7 +867,7 @@ export default function AssetAudit() {
         visible={showDetails}
         transparent
         animationType="none"
-        onRequestClose={() => { setShowDetails(false); setScanned(false); }}
+        onRequestClose={handleModalBackPress}
       >
         <Animated.View style={[styles.modalBg, { opacity: fadeAnim }]}>
           <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
@@ -840,13 +896,13 @@ export default function AssetAudit() {
             ) : assetData ? (
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetScroll}>
 
-                {/* ── SECTION 1: Scanned Asset (Master Records) ── */}
+                {/* ── SECTION 1: Scanned Asset (Master or History) ── */}
                 <SectionHeader sectionStyles={sectionStyles} C={C}
-                  icon="server-outline"
+                  icon={assetData?._source === 'history' ? 'time-outline' : 'server-outline'}
                   label="Scanned Asset"
-                  badgeText="From master records"
-                  badgeColor={C.textSec}
-                  iconColor={C.textSec}
+                  badgeText={assetData?._source === 'history' ? 'From last scan history' : 'From master records'}
+                  badgeColor={assetData?._source === 'history' ? C.warning : C.textSec}
+                  iconColor={assetData?._source === 'history' ? C.warning : C.textSec}
                 />
                 <View style={styles.infoCard}>
                   <DetailRow styles={styles} C={C}
@@ -876,7 +932,7 @@ export default function AssetAudit() {
                       <Ionicons name="pin-outline" size={18} color={C.textSec} />
                     </View>
                     <View style={styles.detailTexts}>
-                      <Text style={styles.detailLabel}>Registered Location</Text>
+                      <Text style={styles.detailLabel}>Available Location</Text>
                       <Text style={[styles.detailValue, { fontSize: 13, lineHeight: 20, color: C.textSec }]}>
                         {registeredLocation || '—'}
                       </Text>
