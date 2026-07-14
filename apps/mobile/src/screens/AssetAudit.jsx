@@ -683,20 +683,19 @@ export default function AssetAudit() {
   };
 
   // ── Validation Helpers ────────────────────────────────────────────────────
-  // Column names differ between source:'master' (GTAD A.*) and source:'history' (ASSETAUDIT joins)
-  // master  → building: BNAME, floor: FNAME, room: RNAME1
-  // history → building: BNAME1, floor: FNAME1, room: RNAME1
   const _pick = (...keys) => { for (const k of keys) { if (assetData?.[k]) return assetData[k]; } return null; };
-  const registeredLocation = [
-    _pick('BNAME1', 'BNAME'),   // building name
-    _pick('FNAME1', 'FNAME'),   // floor name
-    _pick('RNAME1'),            // room name (same in both)
-  ].filter(Boolean).join('  ›  ');
+  
+  const regBuilding = _pick('BNAME1', 'BNAME');
+  const regFloor = _pick('FNAME1', 'FNAME');
+  const regRoom = _pick('RNAME1');
 
-  const locationMismatch =
-    assetData?.RNAME1 &&
-    auditParams?.room?.NAME &&
-    assetData.RNAME1 !== auditParams.room.NAME;
+  const registeredLocation = [regBuilding, regFloor, regRoom].filter(Boolean).join('  ›  ');
+
+  const isBuildingMismatch = regBuilding && auditParams?.building?.NAME && regBuilding !== auditParams.building.NAME;
+  const isFloorMismatch = regFloor && auditParams?.floor?.NAME && regFloor !== auditParams.floor.NAME;
+  const isRoomMismatch = regRoom && auditParams?.room?.NAME && regRoom !== auditParams.room.NAME;
+
+  const locationMismatch = isBuildingMismatch || isFloorMismatch || isRoomMismatch;
 
   return (
     <View style={styles.root}>
@@ -1003,9 +1002,11 @@ export default function AssetAudit() {
                       <Text style={styles.mismatchTitle}>Location Mismatch</Text>
                       <Text style={styles.mismatchText}>
                         This asset is registered in{' '}
-                        <Text style={{ fontWeight: '700', color: C.textPri }}>{assetData?.RNAME1}</Text>
+                        <Text style={{ fontWeight: '700', color: C.textPri }}>{registeredLocation || 'an unknown location'}</Text>
                         {' '}but is being audited in{' '}
-                        <Text style={{ fontWeight: '700', color: C.primary }}>{auditParams?.room?.NAME}</Text>.
+                        <Text style={{ fontWeight: '700', color: C.primary }}>
+                          {[auditParams?.building?.NAME, auditParams?.floor?.NAME, auditParams?.room?.NAME].filter(Boolean).join('  ›  ')}
+                        </Text>.
                       </Text>
                     </View>
                   </View>
