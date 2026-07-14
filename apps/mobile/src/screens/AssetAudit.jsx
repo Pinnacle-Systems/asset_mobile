@@ -383,6 +383,7 @@ export default function AssetAudit() {
   const [showDetails, setShowDetails] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
   const [condition, setCondition] = useState('Good');
+  const [remarks, setRemarks] = useState('');
   const [showSetup, setShowSetup] = useState(true);
   const [auditParams, setAuditParams] = useState(null);
   const [companyCode, setCompanyCode] = useState('');
@@ -544,6 +545,7 @@ export default function AssetAudit() {
       if (bardata && bardata.length > 0) {
         // Attach the source flag onto the row so the UI knows where data came from
         setAssetData({ ...bardata[0], _source: mockData?.source || 'master' });
+        setRemarks(bardata[0]?.REMARKS || '');
         setShowDetails(true);
       } else {
         Alert.alert('Not Found', 'Asset with this barcode not found in master records.');
@@ -572,6 +574,7 @@ export default function AssetAudit() {
     setShowDetails(false);
     setCameraActive(true);
     setCondition('Good');
+    setRemarks('');
   };
 
   async function fetchAddress() {
@@ -624,7 +627,7 @@ export default function AssetAudit() {
         DOCID, DOCID1,                          // history source aliases DOCID → DOCID1
         ASSETID, SUBGRP, MMADE, MMODEL,
         MACHINEMADE, MACHINEMODEL,              // history source aliases MMADE → MACHINEMADE
-        REMARKS, MAINGRP, ABARID,
+        MAINGRP, ABARID,
       } = assetData || {};
 
       const resolvedDOCID = DOCID ?? DOCID1;    // master has DOCID via A.*, history has DOCID1
@@ -633,7 +636,7 @@ export default function AssetAudit() {
 
       const _data = await addBarcode({
         DOCID: resolvedDOCID,
-        ASSETID, SUBGRP, MMADE: resolvedMMade, MMODEL: resolvedMModel, REMARKS, MAINGRP, ABARID,
+        ASSETID, SUBGRP, MMADE: resolvedMMade, MMODEL: resolvedMModel, REMARKS: remarks || '', MAINGRP, ABARID,
         ROOM: auditParams?.room?.ID,
         BUILDING: auditParams?.building?.ID,
         FLOORS: auditParams?.floor?.ID,
@@ -1030,6 +1033,20 @@ export default function AssetAudit() {
                   ))}
                 </View>
 
+                {/* ── Remarks Input ── */}
+                <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Remarks (Optional)</Text>
+                <View style={styles.remarksInputWrap}>
+                  <TextInput
+                    style={styles.remarksInput}
+                    placeholder="Enter any remarks or notes..."
+                    placeholderTextColor={C.textSec}
+                    value={remarks}
+                    onChangeText={setRemarks}
+                    multiline
+                    maxLength={200}
+                  />
+                </View>
+
                 {/* ── Actions ── */}
                 <View style={styles.actionRow}>
                   <TouchableOpacity style={styles.secondaryBtn} onPress={resetScanner}>
@@ -1400,7 +1417,23 @@ const getStyles = (C) => StyleSheet.create({
   },
   condChipText: { fontSize: 12, fontWeight: '600', color: C.textSec },
 
-  actionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  remarksInputWrap: {
+    backgroundColor: C.surfaceAlt,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  remarksInput: {
+    color: C.textPri,
+    fontSize: 15,
+    minHeight: 60,
+    textAlignVertical: 'top',
+    padding: 0,
+  },
+
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 16 },
   secondaryBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingVertical: 15, borderRadius: 14,
