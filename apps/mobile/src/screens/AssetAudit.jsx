@@ -405,7 +405,7 @@ export default function AssetAudit() {
       [
         { text: "No", style: "cancel", onPress: () => {} },
         { 
-          text: "Logout / Close", 
+          text: "Logout", 
           style: "destructive", 
           onPress: () => {
             handleLogout(ResetNavigation);
@@ -644,7 +644,7 @@ export default function AssetAudit() {
 
       if (_data?.statusCode === 1 && _data?.data?.rowsAffected == 1) {
         Alert.alert('Success', 'Asset data saved successfully!');
-        if (logoutAfterSave) {
+        if (logoutAfterSave === true) {
           handleLogout(ResetNavigation);
         } else {
           resetScanner();
