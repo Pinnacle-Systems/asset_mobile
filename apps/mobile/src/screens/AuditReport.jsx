@@ -14,13 +14,12 @@ import {
   useGetAuditAssestDetailsQuery,
   useGetAuditVarianceReportQuery,
 } from '../redux/service/commonMasters';
-import XLSX from 'xlsx';
+import XLSX from 'xlsx-js-style';
 import Orientation from 'react-native-orientation-locker';
 import Share from 'react-native-share';
 import FS from 'react-native-fs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { setOptions } from '../redux/Slices/UserDetails';
 import { useDispatch } from 'react-redux';
@@ -377,319 +376,298 @@ const get_vf = (C) => StyleSheet.create({
   },
 });
 
-// ─── Date Filter Component ─────────────────────────────────────────────────
-function DateFilterModal({ visible, onClose, onApply, initialDate }) {
+// ─── Simple Calendar Date Picker ─────────────────────────────────
+function CustomDatePicker({ visible, onClose, onConfirm, value, title }) {
   const { theme } = useTheme();
   const C = React.useMemo(() => getC(theme), [theme]);
-  const df = React.useMemo(() => get_df(C), [C]);
-  const [startDate, setStartDate] = useState(initialDate?.start || null);
-  const [endDate, setEndDate] = useState(initialDate?.end || null);
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
-  const [quickSelect, setQuickSelect] = useState('');
 
-  const handleQuickSelect = (option) => {
-    const today = new Date();
-    let start = new Date();
-    let end = new Date();
+  const now = value || new Date();
+  const [viewYear,  setViewYear]  = useState(now.getFullYear());
+  const [viewMonth, setViewMonth] = useState(now.getMonth());
+  const [selected,  setSelected]  = useState(now);
 
-    switch (option) {
-      case 'today':
-        start = moment().startOf('day').toDate();
-        end = moment().endOf('day').toDate();
-        break;
-      case 'yesterday':
-        start = moment().subtract(1, 'days').startOf('day').toDate();
-        end = moment().subtract(1, 'days').endOf('day').toDate();
-        break;
-      case 'thisWeek':
-        start = moment().startOf('week').toDate();
-        end = moment().endOf('day').toDate();
-        break;
-      case 'lastWeek':
-        start = moment().subtract(1, 'weeks').startOf('week').toDate();
-        end = moment().subtract(1, 'weeks').endOf('week').toDate();
-        break;
-      case 'thisMonth':
-        start = moment().startOf('month').toDate();
-        end = moment().endOf('day').toDate();
-        break;
-      case 'lastMonth':
-        start = moment().subtract(1, 'months').startOf('month').toDate();
-        end = moment().subtract(1, 'months').endOf('month').toDate();
-        break;
-    }
+  useEffect(() => {
+    const d = value || new Date();
+    setViewYear(d.getFullYear());
+    setViewMonth(d.getMonth());
+    setSelected(d);
+  }, [value, visible]);
 
-    setStartDate(start);
-    setEndDate(end);
-    setQuickSelect(option);
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
   };
 
-  const handleApply = () => {
-    onApply({ start: startDate, end: endDate });
+  // Build calendar grid
+  const firstDay    = new Date(viewYear, viewMonth, 1).getDay();
+  const totalDays   = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= totalDays; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const isSelected = (d) =>
+    d &&
+    selected &&
+    selected.getDate() === d &&
+    selected.getMonth() === viewMonth &&
+    selected.getFullYear() === viewYear;
+
+  const isToday = (d) => {
+    const t = new Date();
+    return d && t.getDate() === d && t.getMonth() === viewMonth && t.getFullYear() === viewYear;
+  };
+
+  const handleDay = (d) => {
+    if (d) setSelected(new Date(viewYear, viewMonth, d));
+  };
+
+  const handleConfirm = () => {
+    onConfirm(selected);
     onClose();
   };
 
-  const handleClear = () => {
-    setStartDate(null);
-    setEndDate(null);
-    setQuickSelect('');
-  };
+  const CELL = 38;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={df.overlay}>
-        <View style={df.sheet}>
-          <View style={df.handle} />
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ backgroundColor: C.surface, borderRadius: 20, width: 320, overflow: 'hidden' }}>
 
-          <View style={df.header}>
-            <Text style={df.title}>Filter by Date</Text>
-            <TouchableOpacity onPress={onClose} style={df.closeBtn}>
-              <Icon name="close" size={20} color={C.textSec} />
+          {/* Title bar */}
+          <View style={{ backgroundColor: C.accent, paddingHorizontal: 20, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>{title}</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Icon name="close" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={df.content}>
-            {/* Quick Select */}
-            <Text style={df.sectionTitle}>QUICK SELECT</Text>
-            <View style={df.quickGrid}>
-              {[
-                ['today', 'Today'],
-                ['yesterday', 'Yesterday'],
-                ['thisWeek', 'This Week'],
-                ['lastWeek', 'Last Week'],
-                ['thisMonth', 'This Month'],
-                ['lastMonth', 'Last Month'],
-              ].map(([key, label]) => (
-                <TouchableOpacity
-                  key={key}
-                  style={[df.quickBtn, quickSelect === key && df.quickBtnActive]}
-                  onPress={() => handleQuickSelect(key)}
-                >
-                  <Text style={[df.quickBtnText, quickSelect === key && df.quickBtnTextActive]}>
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+          {/* Selected date display */}
+          <View style={{ backgroundColor: C.accentGlow, paddingVertical: 10, alignItems: 'center' }}>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: C.accent }}>
+              {selected ? `${selected.getDate()} ${MONTHS[selected.getMonth()]} ${selected.getFullYear()}` : 'Pick a date'}
+            </Text>
+          </View>
 
-            {/* Custom Range */}
-            <Text style={df.sectionTitle}>CUSTOM RANGE</Text>
-
-            <TouchableOpacity
-              style={df.dateField}
-              onPress={() => setShowStartPicker(true)}
-            >
-              <Text style={df.dateLabel}>From</Text>
-              <Text style={df.dateValue}>
-                {startDate ? moment(startDate).format('DD MMM YYYY') : 'Select date'}
-              </Text>
-              <Icon name="calendar-today" size={18} color={C.accent} />
+          {/* Month navigation */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 }}>
+            <TouchableOpacity onPress={prevMonth} style={{ padding: 6 }}>
+              <Icon name="chevron-left" size={24} color={C.accent} />
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={df.dateField}
-              onPress={() => setShowEndPicker(true)}
-            >
-              <Text style={df.dateLabel}>To</Text>
-              <Text style={df.dateValue}>
-                {endDate ? moment(endDate).format('DD MMM YYYY') : 'Select date'}
-              </Text>
-              <Icon name="calendar-today" size={18} color={C.accent} />
+            <Text style={{ fontSize: 15, fontWeight: '700', color: C.textPri }}>
+              {MONTHS[viewMonth]} {viewYear}
+            </Text>
+            <TouchableOpacity onPress={nextMonth} style={{ padding: 6 }}>
+              <Icon name="chevron-right" size={24} color={C.accent} />
             </TouchableOpacity>
+          </View>
 
-            {showStartPicker && (
-              <DateTimePicker
-                value={startDate || new Date()}
-                mode="date"
-                onChange={(_, date) => {
-                  setShowStartPicker(false);
-                  if (date) setStartDate(date);
-                }}
-              />
-            )}
-
-            {showEndPicker && (
-              <DateTimePicker
-                value={endDate || new Date()}
-                mode="date"
-                onChange={(_, date) => {
-                  setShowEndPicker(false);
-                  if (date) setEndDate(date);
-                }}
-              />
-            )}
-
-            {/* Active Filter Display */}
-            {(startDate || endDate) && (
-              <View style={df.activeFilter}>
-                <Icon name="filter-list" size={16} color={C.accent} />
-                <Text style={df.activeFilterText}>
-                  {startDate && moment(startDate).format('DD MMM')}
-                  {startDate && endDate && ' — '}
-                  {endDate && moment(endDate).format('DD MMM YYYY')}
-                </Text>
+          {/* Day-of-week headers */}
+          <View style={{ flexDirection: 'row', paddingHorizontal: 8 }}>
+            {DAYS.map(d => (
+              <View key={d} style={{ width: CELL, alignItems: 'center', marginBottom: 4 }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: C.textMuted }}>{d}</Text>
               </View>
-            )}
-          </ScrollView>
+            ))}
+          </View>
 
-          <View style={df.footer}>
-            <TouchableOpacity style={df.clearBtn} onPress={handleClear}>
-              <Text style={df.clearBtnText}>Clear</Text>
+          {/* Calendar grid */}
+          <View style={{ paddingHorizontal: 8, paddingBottom: 8 }}>
+            {Array.from({ length: cells.length / 7 }, (_, row) => (
+              <View key={row} style={{ flexDirection: 'row' }}>
+                {cells.slice(row * 7, row * 7 + 7).map((d, col) => {
+                  const sel = isSelected(d);
+                  const tod = isToday(d);
+                  return (
+                    <TouchableOpacity
+                      key={col}
+                      onPress={() => handleDay(d)}
+                      disabled={!d}
+                      style={{
+                        width: CELL, height: CELL,
+                        borderRadius: CELL / 2,
+                        backgroundColor: sel ? C.accent : tod ? C.accentGlow : 'transparent',
+                        alignItems: 'center', justifyContent: 'center',
+                        marginVertical: 1,
+                      }}
+                    >
+                      {d ? (
+                        <Text style={{
+                          fontSize: 13,
+                          fontWeight: sel || tod ? '700' : '400',
+                          color: sel ? '#fff' : tod ? C.accent : C.textPri,
+                        }}>{d}</Text>
+                      ) : null}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+
+          {/* Buttons */}
+          <View style={{ flexDirection: 'row', gap: 10, padding: 14, borderTopWidth: 1, borderTopColor: C.border }}>
+            <TouchableOpacity
+              style={{ flex: 1, padding: 12, borderRadius: 12, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, alignItems: 'center' }}
+              onPress={onClose}
+            >
+              <Text style={{ color: C.textSec, fontWeight: '600' }}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={df.applyBtn} onPress={handleApply}>
-              <Text style={df.applyBtnText}>Apply Filter</Text>
+            <TouchableOpacity
+              style={{ flex: 2, padding: 12, borderRadius: 12, backgroundColor: C.accent, alignItems: 'center' }}
+              onPress={handleConfirm}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>OK</Text>
             </TouchableOpacity>
           </View>
+
         </View>
       </View>
     </Modal>
   );
 }
 
+// ─── Date Filter Component ─────────────────────────────────────────────
+function DateFilterModal({ visible, onClose, onApply, initialDate }) {
+  const { theme } = useTheme();
+  const C = React.useMemo(() => getC(theme), [theme]);
+  const df = React.useMemo(() => get_df(C), [C]);
+  const [startDate, setStartDate] = useState(initialDate?.start || null);
+  const [endDate,   setEndDate]   = useState(initialDate?.end   || null);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker,   setShowEndPicker]   = useState(false);
+  const [quickSelect, setQuickSelect] = useState('');
+
+  const handleQuickSelect = (option) => {
+    let start = new Date(), end = new Date();
+    switch (option) {
+      case 'today':     start = moment().startOf('day').toDate(); end = moment().endOf('day').toDate(); break;
+      case 'yesterday': start = moment().subtract(1,'days').startOf('day').toDate(); end = moment().subtract(1,'days').endOf('day').toDate(); break;
+      case 'thisWeek':  start = moment().startOf('week').toDate(); end = moment().endOf('day').toDate(); break;
+      case 'lastWeek':  start = moment().subtract(1,'weeks').startOf('week').toDate(); end = moment().subtract(1,'weeks').endOf('week').toDate(); break;
+      case 'thisMonth': start = moment().startOf('month').toDate(); end = moment().endOf('day').toDate(); break;
+      case 'lastMonth': start = moment().subtract(1,'months').startOf('month').toDate(); end = moment().subtract(1,'months').endOf('month').toDate(); break;
+    }
+    setStartDate(start); setEndDate(end); setQuickSelect(option);
+  };
+
+  const handleApply = () => { onApply({ start: startDate, end: endDate }); onClose(); };
+  const handleClear = () => { setStartDate(null); setEndDate(null); setQuickSelect(''); };
+
+  return (
+    <>
+      <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+        <View style={df.overlay}>
+          <View style={df.sheet}>
+            <View style={df.handle} />
+            <View style={df.header}>
+              <Text style={df.title}>Filter by Date</Text>
+              <TouchableOpacity onPress={onClose} style={df.closeBtn}>
+                <Icon name="close" size={20} color={C.textSec} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={df.content}>
+              <Text style={df.sectionTitle}>QUICK SELECT</Text>
+              <View style={df.quickGrid}>
+                {[['today','Today'],['yesterday','Yesterday'],['thisWeek','This Week'],
+                  ['lastWeek','Last Week'],['thisMonth','This Month'],['lastMonth','Last Month']
+                ].map(([key, label]) => (
+                  <TouchableOpacity key={key} style={[df.quickBtn, quickSelect === key && df.quickBtnActive]} onPress={() => handleQuickSelect(key)}>
+                    <Text style={[df.quickBtnText, quickSelect === key && df.quickBtnTextActive]}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={df.sectionTitle}>CUSTOM RANGE</Text>
+
+              <TouchableOpacity style={df.dateField} onPress={() => setShowStartPicker(true)}>
+                <Text style={df.dateLabel}>From</Text>
+                <Text style={df.dateValue}>{startDate ? moment(startDate).format('DD MMM YYYY') : 'Select date'}</Text>
+                <Icon name="calendar-today" size={18} color={C.accent} />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={df.dateField} onPress={() => setShowEndPicker(true)}>
+                <Text style={df.dateLabel}>To</Text>
+                <Text style={df.dateValue}>{endDate ? moment(endDate).format('DD MMM YYYY') : 'Select date'}</Text>
+                <Icon name="calendar-today" size={18} color={C.accent} />
+              </TouchableOpacity>
+
+              {(startDate || endDate) && (
+                <View style={df.activeFilter}>
+                  <Icon name="filter-list" size={16} color={C.accent} />
+                  <Text style={df.activeFilterText}>
+                    {startDate && moment(startDate).format('DD MMM')}
+                    {startDate && endDate && ' — '}
+                    {endDate && moment(endDate).format('DD MMM YYYY')}
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={df.footer}>
+              <TouchableOpacity style={df.clearBtn} onPress={handleClear}>
+                <Text style={df.clearBtnText}>Clear</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={df.applyBtn} onPress={handleApply}>
+                <Text style={df.applyBtnText}>Apply Filter</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Pure-JS date pickers — no native module needed */}
+      <CustomDatePicker
+        visible={showStartPicker}
+        title="Select From Date"
+        value={startDate}
+        onClose={() => setShowStartPicker(false)}
+        onConfirm={(date) => { setStartDate(date); setShowStartPicker(false); }}
+      />
+      <CustomDatePicker
+        visible={showEndPicker}
+        title="Select To Date"
+        value={endDate}
+        onClose={() => setShowEndPicker(false)}
+        onConfirm={(date) => { setEndDate(date); setShowEndPicker(false); }}
+      />
+    </>
+  );
+}
+
 const get_df = (C) => StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: C.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '80%',
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: C.borderBright,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginTop: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: C.textPri,
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  content: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: C.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  quickGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
-  },
-  quickBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: C.bg,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  quickBtnActive: {
-    backgroundColor: C.accent,
-    borderColor: C.accent,
-  },
-  quickBtnText: {
-    fontSize: 12,
-    color: C.textSec,
-    fontWeight: '500',
-  },
-  quickBtnTextActive: {
-    color: '#fff',
-  },
-  dateField: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: C.bg,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  dateLabel: {
-    fontSize: 13,
-    color: C.textSec,
-    width: 50,
-  },
-  dateValue: {
-    flex: 1,
-    fontSize: 13,
-    color: C.textPri,
-    fontWeight: '500',
-  },
-  activeFilter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: C.accentGlow,
-    borderRadius: 10,
-    padding: 12,
-    marginTop: 16,
-  },
-  activeFilterText: {
-    fontSize: 12,
-    color: C.accent,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: 12,
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-  },
-  clearBtn: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: C.bg,
-    borderWidth: 1,
-    borderColor: C.border,
-    alignItems: 'center',
-  },
-  clearBtnText: {
-    color: C.textSec,
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  applyBtn: {
-    flex: 2,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: C.accent,
-    alignItems: 'center',
-  },
-  applyBtnText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%' },
+  handle: { width: 40, height: 4, backgroundColor: C.borderBright, borderRadius: 2, alignSelf: 'center', marginTop: 12 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: C.border },
+  title: { fontSize: 18, fontWeight: '700', color: C.textPri },
+  closeBtn: { padding: 4 },
+  content: { padding: 20 },
+  sectionTitle: { fontSize: 11, fontWeight: '700', color: C.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12, marginTop: 8 },
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  quickBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border },
+  quickBtnActive: { backgroundColor: C.accent, borderColor: C.accent },
+  quickBtnText: { fontSize: 12, color: C.textSec, fontWeight: '500' },
+  quickBtnTextActive: { color: '#fff' },
+  dateField: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.bg, borderRadius: 12, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: C.border },
+  dateLabel: { fontSize: 13, color: C.textSec, width: 50 },
+  dateValue: { flex: 1, fontSize: 13, color: C.textPri, fontWeight: '500' },
+  activeFilter: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: C.accentGlow, borderRadius: 10, padding: 12, marginTop: 16 },
+  activeFilterText: { fontSize: 12, color: C.accent, fontWeight: '600' },
+  footer: { flexDirection: 'row', gap: 12, padding: 20, borderTopWidth: 1, borderTopColor: C.border },
+  clearBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, alignItems: 'center' },
+  clearBtnText: { color: C.textSec, fontWeight: '600', fontSize: 14 },
+  applyBtn: { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.accent, alignItems: 'center' },
+  applyBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
 });
 
 // ─── Diff Pill ─────────────────────────────────────────────────────────────
@@ -1688,32 +1666,132 @@ export default function AuditReport() {
         return;
       }
 
-      const rows = displayData.map(i => ({
-        'Asset ID': i.assetId,
-        'Barcode': i.abarid,
-        'Name': i.subGroup,
-        'Machine': `${i.mmade} ${i.mmodel}`,
-        'Division': i.division,
-        'Scanned Room': i.scannedRoom,
-        'Scanned Building': i.scannedBuilding,
-        'Scanned Floor': i.scannedFloor,
-        'Prev Room': i.prevRoom,
-        'Prev Building': i.prevBuilding,
-        'Prev Condition': i.prevCondition,
-        'Expected Room': i.expectedRoom,
-        'Condition': i.condition,
-        'Status': i.status,
-        'Room Changed': i.roomChanged,
-        'Building Changed': i.buildingChanged,
-        'Floor Changed': i.floorChanged,
-        'Condition Changed': i.conditionChanged,
-        'Change Summary': i.changeSummary,
-        'Audit Date': i.auditDate,
-        'Prev Audit Date': i.prevAuditDate || 'N/A',
-        'Remarks': i.remarks,
-      }));
+      let exportData = displayData;
+      let rows;
 
-      const ws = XLSX.utils.json_to_sheet(rows);
+      if (mode === 'variance') {
+        // For Variance tab: only export rows that have variance (any change)
+        exportData = displayData.filter(i => i.hasAnyChange);
+
+        if (!exportData.length) {
+          Alert.alert('No Variance Data', 'No variance records found to export.');
+          return;
+        }
+
+        rows = exportData.map(i => ({
+          'Asset ID': i.assetId,
+          'Barcode': i.abarid,
+          'Name': i.subGroup,
+          'Machine': `${i.mmade} ${i.mmodel}`,
+          'Division': i.division,
+          'Scanned Room': i.scannedRoom,
+          'Scanned Building': i.scannedBuilding,
+          'Scanned Floor': i.scannedFloor,
+          'Prev Room': i.prevRoom,
+          'Prev Building': i.prevBuilding,
+          'Prev Condition': i.prevCondition,
+
+          'Condition': i.condition,
+          'Status': i.status,
+          'Room Changed': i.roomChanged,
+          'Building Changed': i.buildingChanged,
+          'Floor Changed': i.floorChanged,
+          'Condition Changed': i.conditionChanged,
+          'Change Summary': i.changeSummary,
+          'Audit Date': i.auditDate,
+          'Prev Audit Date': i.prevAuditDate || 'N/A',
+          'Remarks': i.remarks,
+        }));
+      } else {
+        // For Scanned tab: export only scanned details (no prev/change columns)
+        rows = exportData.map(i => ({
+          'Asset ID': i.assetId,
+          'Barcode': i.abarid,
+          'Name': i.subGroup,
+          'Machine': `${i.mmade} ${i.mmodel}`,
+          'Division': i.division,
+          'Status': i.status,
+          'Scanned Room': i.scannedRoom,
+          'Scanned Building': i.scannedBuilding,
+          'Scanned Floor': i.scannedFloor,
+          'Condition': i.condition,
+          'Audit Date': i.auditDate,
+          'Remarks': i.remarks,
+        }));
+      }
+
+      let headerKeys = [];
+      if (mode === 'variance') {
+        headerKeys = [
+          'Asset ID', 'Barcode', 'Name', 'Machine', 'Division',
+          'Scanned Room', 'Scanned Building', 'Scanned Floor',
+          'Prev Room', 'Prev Building', 'Prev Condition',
+          'Condition', 'Status', 'Room Changed', 'Building Changed',
+          'Floor Changed', 'Condition Changed', 'Change Summary',
+          'Audit Date', 'Prev Audit Date', 'Remarks'
+        ];
+      } else {
+        headerKeys = [
+          'Asset ID', 'Barcode', 'Name', 'Machine', 'Division', 'Status',
+          'Scanned Room', 'Scanned Building', 'Scanned Floor',
+          'Condition', 'Audit Date', 'Remarks'
+        ];
+      }
+
+      const ws = XLSX.utils.json_to_sheet(rows, { header: headerKeys });
+      
+      // Auto-size columns for better alignment and readability
+      if (rows.length > 0) {
+        const keys = Object.keys(rows[0]);
+        const colWidths = keys.map(key => {
+          // find max length between header and cell contents
+          const maxContentLength = Math.max(
+            key.length,
+            ...rows.map(row => row[key] ? String(row[key]).length : 0)
+          );
+          // Add some padding, limit max width to 50 characters
+          return { wch: Math.min(Math.max(maxContentLength + 2, 10), 50) };
+        });
+        ws['!cols'] = colWidths;
+
+        // Apply styles (colors, alignment, borders)
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+          for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            if (!ws[cellAddress]) continue;
+
+            const isHeader = R === 0;
+
+            ws[cellAddress].s = {
+              font: {
+                bold: isHeader,
+                color: isHeader ? { rgb: "FFFFFF" } : { rgb: "333333" },
+                sz: 11
+              },
+              fill: isHeader ? { fgColor: { rgb: "4F81BD" } } : undefined, // Blue header
+              alignment: {
+                vertical: 'center',
+                horizontal: isHeader ? 'center' : 'left',
+                wrapText: true
+              },
+              border: {
+                top: { style: 'thin', color: { rgb: "CCCCCC" } },
+                bottom: { style: 'thin', color: { rgb: "CCCCCC" } },
+                left: { style: 'thin', color: { rgb: "CCCCCC" } },
+                right: { style: 'thin', color: { rgb: "CCCCCC" } }
+              }
+            };
+          }
+        }
+
+        // Set row heights for padding effect
+        ws['!rows'] = [{ hpt: 30 }]; // Header row taller
+        for (let i = 1; i <= rows.length; i++) {
+          ws['!rows'].push({ hpt: 24 }); // Data rows padded
+        }
+      }
+
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Audit Report');
       const out = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });

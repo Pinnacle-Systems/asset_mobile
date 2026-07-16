@@ -17,6 +17,7 @@ function parseDbUrl(url) {
         password: u.password,
         database: u.pathname.slice(1),
         connectionLimit: 5,
+        allowPublicKeyRetrieval: true,
     };
 }
 
