@@ -222,7 +222,7 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
                 {activeDivision && (
                   <TouchableOpacity onPress={onChangeDivision} style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: C.warning + '22', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, marginTop: 6 }}>
                     <Ionicons name="business" size={10} color={C.warning} style={{ marginRight: 4 }} />
-                    <Text style={{ fontSize: 12, color: C.warning, fontWeight: '600', maxWidth: 290 }} numberOfLines={1}>
+                    <Text style={{ fontSize: 12, color: C.warning, fontWeight: '600', maxWidth: 320 }} numberOfLines={3}>
                       {activeDivision.NAME}
                     </Text>
                   </TouchableOpacity>
@@ -248,14 +248,14 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, marginTop: 16, flexWrap: 'wrap', gap: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.primary + '18', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
                 <Ionicons name="business" size={12} color={C.primary} style={{ marginRight: 4 }} />
-                <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selBuilding?.NAME}</Text>
+                <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600', maxWidth: 200 }} numberOfLines={3}>{selBuilding?.NAME}</Text>
               </View>
               {step > 1 && (
                 <>
                   <Ionicons name="chevron-forward" size={12} color={C.textSec} />
                   <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.success + '18', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
                     <Ionicons name="layers" size={12} color={C.success} style={{ marginRight: 4 }} />
-                    <Text style={{ fontSize: 13, color: C.success, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selFloor?.NAME}</Text>
+                    <Text style={{ fontSize: 13, color: C.success, fontWeight: '600', maxWidth: 200 }} numberOfLines={3}>{selFloor?.NAME}</Text>
                   </View>
                 </>
               )}
@@ -798,7 +798,7 @@ export default function AssetAudit() {
                     onPress={() => setShowDivisionModal(true)}
                   >
                     <Ionicons name="business" size={12} color={C.warning} />
-                    <Text style={[styles.topBadgeText, { maxWidth: 150 }]} numberOfLines={1}>
+                    <Text style={[styles.topBadgeText, { maxWidth: 250 }]} numberOfLines={3}>
                       {auditParams?.division?.NAME || companyName}
                     </Text>
                   </TouchableOpacity>
@@ -822,7 +822,7 @@ export default function AssetAudit() {
           {auditParams && (
             <View style={styles.paramsBanner}>
               <Ionicons name="location" size={13} color={C.primary} />
-              <Text style={styles.paramsBannerText} numberOfLines={1}>
+              <Text style={styles.paramsBannerText} numberOfLines={3}>
                 {auditParams.building?.NAME}  ›  {auditParams.floor?.NAME}  ›  {auditParams.room?.NAME}
               </Text>
             </View>

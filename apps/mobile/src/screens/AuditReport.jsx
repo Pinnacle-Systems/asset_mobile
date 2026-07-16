@@ -676,21 +676,21 @@ function DiffPill({ from, to, changed }) {
   const C = React.useMemo(() => getC(theme), [theme]);
   const dp = React.useMemo(() => get_dp(C), [C]);
   if (!changed || changed === 'No' || changed === 'N/A') {
-    return <Text style={dp.same} numberOfLines={1}>{to || '—'}</Text>;
+    return <Text style={dp.same} numberOfLines={3}>{to || '—'}</Text>;
   }
   if (changed === 'New') {
     return (
       <View style={dp.newWrap}>
         <Icon name="fiber-new" size={10} color={C.accent} />
-        <Text style={dp.newText} numberOfLines={1}>{to || '—'}</Text>
+        <Text style={dp.newText} numberOfLines={3}>{to || '—'}</Text>
       </View>
     );
   }
   return (
     <View style={dp.wrap}>
-      <Text style={dp.from} numberOfLines={1}>{from || '—'}</Text>
+      <Text style={dp.from} numberOfLines={3}>{from || '—'}</Text>
       <Icon name="arrow-forward" size={9} color={C.textSec} />
-      <Text style={dp.to} numberOfLines={1}>{to || '—'}</Text>
+      <Text style={dp.to} numberOfLines={3}>{to || '—'}</Text>
     </View>
   );
 }
@@ -750,7 +750,7 @@ function StatCard({ label, value, icon, color, active, onPress }) {
           <Icon name={icon} size={16} color={active ? '#fff' : color} />
         </View>
         <Text style={[sc.val, { color: active ? '#fff' : color }]}>{value}</Text>
-        <Text style={[sc.lbl, { color: active ? 'rgba(255,255,255,0.8)' : C.textSec }]} numberOfLines={1}>
+        <Text style={[sc.lbl, { color: active ? 'rgba(255,255,255,0.8)' : C.textSec }]} numberOfLines={3}>
           {label}
         </Text>
       </TouchableOpacity>
@@ -780,7 +780,7 @@ function CardItem({ item, mode }) {
         {/* Row 1: Identity + Status */}
         <View style={ci.row1}>
           <View style={ci.id}>
-            <Text style={ci.assetId} numberOfLines={1}>{item.assetId}</Text>
+            <Text style={ci.assetId} numberOfLines={3}>{item.assetId}</Text>
             <Text style={ci.abarid}>{item.abarid}</Text>
           </View>
           <View style={ci.right}>
@@ -794,8 +794,8 @@ function CardItem({ item, mode }) {
 
         {/* Row 2: Subgroup + machine */}
         <View style={ci.row2}>
-          <Text style={ci.subgrp} numberOfLines={1}>{item.subGroup}</Text>
-          <Text style={ci.machine} numberOfLines={1}>{item.mmade} · {item.mmodel}</Text>
+          <Text style={ci.subgrp} numberOfLines={3}>{item.subGroup}</Text>
+          <Text style={ci.machine} numberOfLines={3}>{item.mmade} · {item.mmodel}</Text>
         </View>
 
         {/* Row 3: Diff strip */}
@@ -854,7 +854,7 @@ function CardItem({ item, mode }) {
               <View key={lbl} style={ci.gridItem}>
                 <Text style={ci.gridLbl}>{lbl}</Text>
                 {chg ? <DiffPill from={prev} to={cur} changed={chg} /> :
-                  <Text style={ci.gridVal} numberOfLines={1}>{cur}</Text>}
+                  <Text style={ci.gridVal} numberOfLines={3}>{cur}</Text>}
               </View>
             ))}
           </View>
@@ -1066,11 +1066,11 @@ function TableRow({ item, mode, even }) {
   return (
     <View style={[tr.row, even && tr.even, item.hasAnyChange && tr.changed]}>
       <View style={tr.c1}>
-        <Text style={tr.assetId} numberOfLines={1}>{item.assetId}</Text>
-        <Text style={tr.abarid} numberOfLines={1}>{item.abarid}</Text>
+        <Text style={tr.assetId} numberOfLines={3}>{item.assetId}</Text>
+        <Text style={tr.abarid} numberOfLines={3}>{item.abarid}</Text>
       </View>
-      <Text style={[tr.cell, tr.c2]} numberOfLines={2}>{item.subGroup}</Text>
-      <Text style={[tr.cell, tr.c3]} numberOfLines={1}>{item.mmade} {item.mmodel}</Text>
+      <Text style={[tr.cell, tr.c2]} numberOfLines={3}>{item.subGroup}</Text>
+      <Text style={[tr.cell, tr.c3]} numberOfLines={3}>{item.mmade} {item.mmodel}</Text>
       <View style={tr.c4}>
         <DiffPill from={item.prevRoom} to={item.scannedRoom} changed={item.roomChanged} />
       </View>
@@ -1082,8 +1082,8 @@ function TableRow({ item, mode, even }) {
       </View>
       {mode === 'variance' && (
         <View style={tr.c7}>
-          <Text style={tr.exp} numberOfLines={1}>{item.expectedRoom}</Text>
-          <Text style={[tr.scn, item.expectedRoom !== item.scannedRoom && { color: C.damaged }]} numberOfLines={1}>
+          <Text style={tr.exp} numberOfLines={3}>{item.expectedRoom}</Text>
+          <Text style={[tr.scn, item.expectedRoom !== item.scannedRoom && { color: C.damaged }]} numberOfLines={3}>
             {item.scannedRoom}
           </Text>
         </View>
@@ -1091,7 +1091,7 @@ function TableRow({ item, mode, even }) {
       <View style={tr.c8}>
         <StatusBadge status={item.status} small />
       </View>
-      <Text style={[tr.cell, tr.c9]} numberOfLines={1}>{item.auditDate}</Text>
+      <Text style={[tr.cell, tr.c9]} numberOfLines={3}>{item.auditDate}</Text>
     </View>
   );
 }
@@ -2017,7 +2017,7 @@ export default function AuditReport() {
                     </View>
                     <StatusBadge status={item.status} small />
                   </View>
-                  <Text style={s.compactName} numberOfLines={1}>
+                  <Text style={s.compactName} numberOfLines={3}>
                     {item.subGroup}
                   </Text>
                   <View style={s.compactRow}>
@@ -2034,7 +2034,7 @@ export default function AuditReport() {
                     />
                   </View>
                   {item.changeSummary !== 'N/A' && item.changeSummary !== 'No Change' && (
-                    <Text style={s.compactSummary} numberOfLines={1}>
+                    <Text style={s.compactSummary} numberOfLines={3}>
                       {item.changeSummary}
                     </Text>
                   )}
