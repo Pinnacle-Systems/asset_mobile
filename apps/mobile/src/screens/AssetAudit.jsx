@@ -400,16 +400,21 @@ export default function AssetAudit() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const handleBackPress = () => {
+    if (!showSetup) {
+      setShowSetup(true);
+      return true; // prevent default hardware back behavior
+    }
+
     Alert.alert(
       "Exit Audit",
-      "Are you sure you want to close this screen? Any unsaved progress will be lost.",
+      "Are you sure you want to close this screen?",
       [
         { text: "No", style: "cancel", onPress: () => {} },
         { 
-          text: "Logout", 
+          text: "Yes", 
           style: "destructive", 
           onPress: () => {
-            handleLogout(ResetNavigation);
+            navigation?.goBack();
           }
         }
       ],
@@ -421,7 +426,7 @@ export default function AssetAudit() {
   useEffect(() => {
     BackHandler.addEventListener("hardwareBackPress", handleBackPress);
     return () => BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
-  }, [navigation]);
+  }, [navigation, showSetup]);
 
   const { data: divisionData, isLoading: divisionLoading } = useGetDivisionMasterQuery();
   const { data: companyMaster } = useGetCompanycodeQuery({});
@@ -669,20 +674,23 @@ export default function AssetAudit() {
   };
 
   const handleModalBackPress = () => {
-    Alert.alert(
+
+        Alert.alert(
       "Unsaved Scan",
       "You have an unsaved scan. What would you like to do?",
       [
         { text: "No", style: "cancel", onPress: () => {} },
         { 
-          text: "Save & Logout", 
+          text: "Back to Scan", 
           onPress: () => {
-            SaveScanner(true);
+             setShowDetails(false);
+             setScanned(false);
           }
         }
       ],
       { cancelable: true }
     );
+    
   };
 
   // ── Validation Helpers ────────────────────────────────────────────────────
