@@ -221,6 +221,9 @@ importers:
       '@react-native-community/cli-platform-android':
         specifier: 13.6.9
         version: 13.6.9
+      '@react-native/babel-preset':
+        specifier: 0.74.87
+        version: 0.74.87(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))
       '@react-native/codegen':
         specifier: 0.74.87
         version: 0.74.87(@babel/preset-env@7.29.7(@babel/core@7.29.7))

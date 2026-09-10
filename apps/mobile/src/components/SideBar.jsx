@@ -25,6 +25,7 @@ const drawerWidth = width * 0.78;
 const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
   const [openLogoutModal, setLogoutModal] = useState(false);
   const USER = useSelector((state) => state?.UserDetails);
+  const visibleTabs = tabs.filter((tab) => tab?.visible !== false);
   const slideAnim = useRef(new Animated.Value(drawerWidth)).current;
   const { theme } = useTheme();
   const currentStyles = styles(theme);
@@ -148,7 +149,7 @@ const CustomDrawer = ({ tabs, activeRoute, openSidebar, setopenSidebar }) => {
           <Text style={currentStyles.sectionLabel}>MAIN</Text>
 
           <FlatList
-            data={tabs}
+            data={visibleTabs}
             renderItem={renderItem}
             keyExtractor={(item) => item?.name}
             scrollEnabled={false}

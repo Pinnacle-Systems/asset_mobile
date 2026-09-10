@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@react-native-community/cli-platform-android": "13.6.9",
+    "@react-native/babel-preset": "0.74.87",
     "@react-native/codegen": "0.74.87",
     "@react-native/gradle-plugin": "0.74.87",
     "@react-native/metro-config": "0.74.87",
