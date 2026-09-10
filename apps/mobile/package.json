@@ -46,7 +46,8 @@
     "react-native-vision-camera": "^4.7.3",
     "react-redux": "^9.3.0",
     "redux-logger": "^3.0.6",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@react-native-community/cli-platform-android": "13.6.9",

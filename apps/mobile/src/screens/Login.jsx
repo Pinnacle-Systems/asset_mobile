@@ -265,7 +265,10 @@ function LoginScreen({ navigation }) {
                 )}
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>@ 2025 Pinnacle Systems All right reserved</Text>
+                    <View style={styles.footerContent}>
+                        <Text style={styles.versionText}>Version 1.0</Text>
+                        <Text style={styles.footerText}>@ 2025 Pinnacle Systems All right reserved</Text>
+                    </View>
                     {/* <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                         <Text style={styles.footerLink}>Sign up</Text>
                     </TouchableOpacity> */}
@@ -462,12 +465,21 @@ const styles = StyleSheet.create({
         },
     },
     footer: {
-        flexDirection: 'row',
+        alignItems: 'center',
         marginTop: 20,
+    },
+    footerContent: {
+        alignItems: 'center',
+    },
+    versionText: {
+        color: '#94a3b8',
+        fontSize: 12,
+        marginBottom: 4,
+        fontFamily: theme.fonts.regular,
+        textAlign: "center"
     },
     footerText: {
         color: '#a0aec0',
-        marginRight: 5,
         fontFamily: theme.fonts.regular,
         width: 210,
         textAlign: "center"

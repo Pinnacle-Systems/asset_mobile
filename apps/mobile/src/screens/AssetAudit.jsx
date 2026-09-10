@@ -13,6 +13,7 @@ import {
   Animated,
   StatusBar,
   TextInput,
+  BackHandler,
 } from "react-native";
 import { Camera, useCameraDevice, useCameraPermission, useCodeScanner } from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -31,6 +32,8 @@ import { useTheme } from '../theme/ThemeProvider';
 
 import { getCurrentLocation, requestLocationPermission } from '../utils/CustomLocation';
 import { TOMTOM_API_KEY } from '../constants/apiUrl';
+import { handleLogout } from '../utils/Logout';
+import { ResetNavigation } from '../config/NavigationRef';
 
 const { width, height } = Dimensions.get('window');
 
@@ -219,7 +222,7 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
                 {activeDivision && (
                   <TouchableOpacity onPress={onChangeDivision} style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: C.warning + '22', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, marginTop: 6 }}>
                     <Ionicons name="business" size={10} color={C.warning} style={{ marginRight: 4 }} />
-                    <Text style={{ fontSize: 12, color: C.warning, fontWeight: '600', maxWidth: 290 }} numberOfLines={1}>
+                    <Text style={{ fontSize: 12, color: C.warning, fontWeight: '600', maxWidth: 320 }} numberOfLines={3}>
                       {activeDivision.NAME}
                     </Text>
                   </TouchableOpacity>
@@ -245,14 +248,14 @@ function SetupPopup({ visible, buildings, activeDivision, onConfirm, masterLoadi
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, marginTop: 16, flexWrap: 'wrap', gap: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.primary + '18', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
                 <Ionicons name="business" size={12} color={C.primary} style={{ marginRight: 4 }} />
-                <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selBuilding?.NAME}</Text>
+                <Text style={{ fontSize: 13, color: C.primary, fontWeight: '600', maxWidth: 200 }} numberOfLines={3}>{selBuilding?.NAME}</Text>
               </View>
               {step > 1 && (
                 <>
                   <Ionicons name="chevron-forward" size={12} color={C.textSec} />
                   <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: C.success + '18', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
                     <Ionicons name="layers" size={12} color={C.success} style={{ marginRight: 4 }} />
-                    <Text style={{ fontSize: 13, color: C.success, fontWeight: '600', maxWidth: 120 }} numberOfLines={1}>{selFloor?.NAME}</Text>
+                    <Text style={{ fontSize: 13, color: C.success, fontWeight: '600', maxWidth: 200 }} numberOfLines={3}>{selFloor?.NAME}</Text>
                   </View>
                 </>
               )}
@@ -380,6 +383,7 @@ export default function AssetAudit() {
   const [showDetails, setShowDetails] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
   const [condition, setCondition] = useState('Good');
+  const [remarks, setRemarks] = useState('');
   const [showSetup, setShowSetup] = useState(true);
   const [auditParams, setAuditParams] = useState(null);
   const [companyCode, setCompanyCode] = useState('');
@@ -394,6 +398,35 @@ export default function AssetAudit() {
   const camera = useRef(null);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const handleBackPress = () => {
+    if (!showSetup) {
+      setShowSetup(true);
+      return true; // prevent default hardware back behavior
+    }
+
+    Alert.alert(
+      "Exit Audit",
+      "Are you sure you want to close this screen?",
+      [
+        { text: "No", style: "cancel", onPress: () => {} },
+        { 
+          text: "Yes", 
+          style: "destructive", 
+          onPress: () => {
+            navigation?.goBack();
+          }
+        }
+      ],
+      { cancelable: true }
+    );
+    return true; // prevent default hardware back behavior
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    return () => BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+  }, [navigation, showSetup]);
 
   const { data: divisionData, isLoading: divisionLoading } = useGetDivisionMasterQuery();
   const { data: companyMaster } = useGetCompanycodeQuery({});
@@ -515,7 +548,9 @@ export default function AssetAudit() {
       const mockData = await BarcodeRefetch({ BARCODEID: assetId }).unwrap();
       const bardata = mockData?.data;
       if (bardata && bardata.length > 0) {
-        setAssetData(bardata[0]);
+        // Attach the source flag onto the row so the UI knows where data came from
+        setAssetData({ ...bardata[0], _source: mockData?.source || 'master' });
+        setRemarks(bardata[0]?.REMARKS || '');
         setShowDetails(true);
       } else {
         Alert.alert('Not Found', 'Asset with this barcode not found in master records.');
@@ -544,6 +579,7 @@ export default function AssetAudit() {
     setShowDetails(false);
     setCameraActive(true);
     setCondition('Good');
+    setRemarks('');
   };
 
   async function fetchAddress() {
@@ -589,16 +625,23 @@ export default function AssetAudit() {
     }
   }
 
-  const SaveScanner = async () => {
+  const SaveScanner = async (logoutAfterSave = false) => {
     try {
       setLoading(true);
       const {
-        DOCID, ASSETID, SUBGRP, MMADE, MMODEL,
-        REMARKS, MAINGRP, ABARID, AUDIT_DATE,
+        DOCID, DOCID1,                          // history source aliases DOCID → DOCID1
+        ASSETID, SUBGRP, MMADE, MMODEL,
+        MACHINEMADE, MACHINEMODEL,              // history source aliases MMADE → MACHINEMADE
+        MAINGRP, ABARID,
       } = assetData || {};
 
+      const resolvedDOCID = DOCID ?? DOCID1;    // master has DOCID via A.*, history has DOCID1
+      const resolvedMMade = MMADE ?? MACHINEMADE;
+      const resolvedMModel = MMODEL ?? MACHINEMODEL;
+
       const _data = await addBarcode({
-        DOCID, ASSETID, SUBGRP, MMADE, MMODEL, REMARKS, MAINGRP, ABARID, AUDIT_DATE,
+        DOCID: resolvedDOCID,
+        ASSETID, SUBGRP, MMADE: resolvedMMade, MMODEL: resolvedMModel, REMARKS: remarks || '', MAINGRP, ABARID,
         ROOM: auditParams?.room?.ID,
         BUILDING: auditParams?.building?.ID,
         FLOORS: auditParams?.floor?.ID,
@@ -609,7 +652,11 @@ export default function AssetAudit() {
 
       if (_data?.statusCode === 1 && _data?.data?.rowsAffected == 1) {
         Alert.alert('Success', 'Asset data saved successfully!');
-        resetScanner();
+        if (logoutAfterSave === true) {
+          handleLogout(ResetNavigation);
+        } else {
+          resetScanner();
+        }
       } else if (_data?.statusCode == 0) {
         Alert.alert('Warning', _data?.message || 'Failed to save asset data.');
       }
@@ -626,17 +673,40 @@ export default function AssetAudit() {
     setShowSetup(false);
   };
 
-  // ── Validation Helpers ────────────────────────────────────────────────────
-  const registeredLocation = [
-    assetData?.BUILDINGNAME,
-    assetData?.FLOORNAME,
-    assetData?.RNAME1,
-  ].filter(Boolean).join('  ›  ');
+  const handleModalBackPress = () => {
 
-  const locationMismatch =
-    assetData?.RNAME1 &&
-    auditParams?.room?.NAME &&
-    assetData.RNAME1 !== auditParams.room.NAME;
+        Alert.alert(
+      "Unsaved Scan",
+      "You have an unsaved scan. What would you like to do?",
+      [
+        { text: "No", style: "cancel", onPress: () => {} },
+        { 
+          text: "Back to Scan", 
+          onPress: () => {
+             setShowDetails(false);
+             setScanned(false);
+          }
+        }
+      ],
+      { cancelable: true }
+    );
+    
+  };
+
+  // ── Validation Helpers ────────────────────────────────────────────────────
+  const _pick = (...keys) => { for (const k of keys) { if (assetData?.[k]) return assetData[k]; } return null; };
+  
+  const regBuilding = _pick('BNAME1', 'BNAME');
+  const regFloor = _pick('FNAME1', 'FNAME');
+  const regRoom = _pick('RNAME1');
+
+  const registeredLocation = [regBuilding, regFloor, regRoom].filter(Boolean).join('  ›  ');
+
+  const isBuildingMismatch = regBuilding && auditParams?.building?.NAME && regBuilding !== auditParams.building.NAME;
+  const isFloorMismatch = regFloor && auditParams?.floor?.NAME && regFloor !== auditParams.floor.NAME;
+  const isRoomMismatch = regRoom && auditParams?.room?.NAME && regRoom !== auditParams.room.NAME;
+
+  const locationMismatch = isBuildingMismatch || isFloorMismatch || isRoomMismatch;
 
   return (
     <View style={styles.root}>
@@ -650,9 +720,7 @@ export default function AssetAudit() {
         masterLoading={masterLoading}
         onConfirm={handleSetupConfirm}
         onCancel={() => {
-          if (navigation) {
-            navigation.goBack();
-          }
+          handleBackPress();
         }}
         onChangeDivision={() => setShowDivisionModal(true)}
       />
@@ -662,7 +730,7 @@ export default function AssetAudit() {
         <SafeAreaView style={styles.permContainer}>
           <TouchableOpacity
             style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
-            onPress={() => navigation && navigation.goBack()}
+            onPress={handleBackPress}
           >
             <Ionicons name="arrow-back" size={28} color={C.textPri} />
           </TouchableOpacity>
@@ -681,7 +749,7 @@ export default function AssetAudit() {
         <SafeAreaView style={styles.permContainer}>
           <TouchableOpacity
             style={{ position: 'absolute', top: 50, left: 20, zIndex: 10, padding: 10 }}
-            onPress={() => navigation && navigation.goBack()}
+            onPress={handleBackPress}
           >
             <Ionicons name="arrow-back" size={28} color={C.textPri} />
           </TouchableOpacity>
@@ -723,9 +791,7 @@ export default function AssetAudit() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <TouchableOpacity
                   style={styles.iconBtn}
-                  onPress={() => {
-                    if (navigation) navigation.goBack();
-                  }}
+                  onPress={handleBackPress}
                 >
                   <Ionicons name="arrow-back" size={20} color={C.overlayTextPri} />
                 </TouchableOpacity>
@@ -740,7 +806,7 @@ export default function AssetAudit() {
                     onPress={() => setShowDivisionModal(true)}
                   >
                     <Ionicons name="business" size={12} color={C.warning} />
-                    <Text style={[styles.topBadgeText, { maxWidth: 150 }]} numberOfLines={1}>
+                    <Text style={[styles.topBadgeText, { maxWidth: 250 }]} numberOfLines={3}>
                       {auditParams?.division?.NAME || companyName}
                     </Text>
                   </TouchableOpacity>
@@ -764,7 +830,7 @@ export default function AssetAudit() {
           {auditParams && (
             <View style={styles.paramsBanner}>
               <Ionicons name="location" size={13} color={C.primary} />
-              <Text style={styles.paramsBannerText} numberOfLines={1}>
+              <Text style={styles.paramsBannerText} numberOfLines={3}>
                 {auditParams.building?.NAME}  ›  {auditParams.floor?.NAME}  ›  {auditParams.room?.NAME}
               </Text>
             </View>
@@ -811,7 +877,7 @@ export default function AssetAudit() {
         visible={showDetails}
         transparent
         animationType="none"
-        onRequestClose={() => { setShowDetails(false); setScanned(false); }}
+        onRequestClose={handleModalBackPress}
       >
         <Animated.View style={[styles.modalBg, { opacity: fadeAnim }]}>
           <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
@@ -840,13 +906,13 @@ export default function AssetAudit() {
             ) : assetData ? (
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetScroll}>
 
-                {/* ── SECTION 1: Scanned Asset (Master Records) ── */}
+                {/* ── SECTION 1: Scanned Asset (Master or History) ── */}
                 <SectionHeader sectionStyles={sectionStyles} C={C}
-                  icon="server-outline"
+                  icon={assetData?._source === 'history' ? 'time-outline' : 'server-outline'}
                   label="Scanned Asset"
-                  badgeText="From master records"
-                  badgeColor={C.textSec}
-                  iconColor={C.textSec}
+                  badgeText={assetData?._source === 'history' ? 'From last scan history' : 'From master records'}
+                  badgeColor={assetData?._source === 'history' ? C.warning : C.textSec}
+                  iconColor={assetData?._source === 'history' ? C.warning : C.textSec}
                 />
                 <View style={styles.infoCard}>
                   <DetailRow styles={styles} C={C}
@@ -876,7 +942,7 @@ export default function AssetAudit() {
                       <Ionicons name="pin-outline" size={18} color={C.textSec} />
                     </View>
                     <View style={styles.detailTexts}>
-                      <Text style={styles.detailLabel}>Registered Location</Text>
+                      <Text style={styles.detailLabel}>Available Location</Text>
                       <Text style={[styles.detailValue, { fontSize: 13, lineHeight: 20, color: C.textSec }]}>
                         {registeredLocation || '—'}
                       </Text>
@@ -947,9 +1013,11 @@ export default function AssetAudit() {
                       <Text style={styles.mismatchTitle}>Location Mismatch</Text>
                       <Text style={styles.mismatchText}>
                         This asset is registered in{' '}
-                        <Text style={{ fontWeight: '700', color: C.textPri }}>{assetData?.RNAME1}</Text>
+                        <Text style={{ fontWeight: '700', color: C.textPri }}>{registeredLocation || 'an unknown location'}</Text>
                         {' '}but is being audited in{' '}
-                        <Text style={{ fontWeight: '700', color: C.primary }}>{auditParams?.room?.NAME}</Text>.
+                        <Text style={{ fontWeight: '700', color: C.primary }}>
+                          {[auditParams?.building?.NAME, auditParams?.floor?.NAME, auditParams?.room?.NAME].filter(Boolean).join('  ›  ')}
+                        </Text>.
                       </Text>
                     </View>
                   </View>
@@ -971,6 +1039,20 @@ export default function AssetAudit() {
                       <Text style={[styles.condChipText, condition === key && { color }]}>{key}</Text>
                     </TouchableOpacity>
                   ))}
+                </View>
+
+                {/* ── Remarks Input ── */}
+                <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Remarks (Optional)</Text>
+                <View style={styles.remarksInputWrap}>
+                  <TextInput
+                    style={styles.remarksInput}
+                    placeholder="Enter any remarks or notes..."
+                    placeholderTextColor={C.textSec}
+                    value={remarks}
+                    onChangeText={setRemarks}
+                    multiline
+                    maxLength={200}
+                  />
                 </View>
 
                 {/* ── Actions ── */}
@@ -1343,7 +1425,23 @@ const getStyles = (C) => StyleSheet.create({
   },
   condChipText: { fontSize: 12, fontWeight: '600', color: C.textSec },
 
-  actionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  remarksInputWrap: {
+    backgroundColor: C.surfaceAlt,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  remarksInput: {
+    color: C.textPri,
+    fontSize: 15,
+    minHeight: 60,
+    textAlignVertical: 'top',
+    padding: 0,
+  },
+
+  actionRow: { flexDirection: 'row', gap: 12, marginTop: 16 },
   secondaryBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingVertical: 15, borderRadius: 14,
